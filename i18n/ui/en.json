@@ -1,0 +1,61 @@
+{
+  "skip": "Skip to content",
+  "money": "€{n}",
+  "range": "{a}–{b}",
+  "distance.m": "{n} m",
+  "distance.km": "{n} km",
+
+  "platform.name": "visit.ee",
+  "platform.home": "visit.ee home",
+  "platform.tagline": "Estonia, region by region",
+  "platform.title": "Find the corner of Estonia you'll want to come back to.",
+  "platform.intro": "Forests, lakes, saunas and small places run by the people who live there. A map of the regions is on its way; until then, start with the places below.",
+  "platform.meta_description": "visit.ee brings together small places to stay across Estonia, each with its own site, in several languages.",
+  "platform.places": "Places on visit.ee",
+  "platform.host.title": "Host your place on visit.ee",
+  "platform.host.body": "Your own site under visit.ee, in every language we support, with your bookings and events.",
+  "platform.map": "Map of the visit.ee regions, coming soon",
+
+  "breadcrumb": "Breadcrumb",
+  "region.south-estonia": "South Estonia",
+  "town.rouge": "Rõuge",
+
+  "lang.label": "Language",
+  "lang.current": "Language: {name}",
+  "menu.open": "Menu",
+  "menu.close": "Close menu",
+
+  "book.check": "Check availability",
+  "book.ask": "Ask about dates",
+  "book.heading": "Book",
+  "book.body.booking": "See free dates and book on Booking.com, or write to us for groups and longer stays.",
+  "book.body.email": "Write or call with your dates and how many of you are coming.",
+
+  "season.label": "See it in each season",
+  "season.spring": "Spring",
+  "season.summer": "Summer",
+  "season.autumn": "Autumn",
+  "season.winter": "Winter",
+
+  "stay.sleeps": "Sleeps {n}",
+  "stay.from": "From {price}",
+  "stay.price_on_request": "Price on request",
+  "stay.prices": "Prices per night",
+  "stay.children": "Children aged 4–12 stay for less.",
+  "stay.discount": "Stay {n} nights or more and ask us about a discount.",
+  "stay.units": "The houses",
+  "stay.amenities": "What's there",
+  "stay.photos": "Photos",
+  "stay.photos_to_come": "Photos to come",
+  "stay.other": "Other places to stay",
+
+  "map.slot": "visit.ee map, coming soon",
+
+  "footer.find": "Find us",
+  "footer.directions": "Directions",
+  "footer.contact": "Contact",
+  "footer.speak": "We speak {languages}",
+  "footer.part_of": "Part of visit.ee",
+
+  "preview.note": "Preview build: this site isn't public yet."
+}

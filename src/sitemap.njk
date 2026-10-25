@@ -1,0 +1,16 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+{%- for page in visit.pages %}
+<url>
+<loc>{{ page.canonical }}</loc>
+{%- for a in page.alternates %}
+<xhtml:link rel="alternate" hreflang="{{ a.lang }}" href="{{ page.absolute(a.url) }}"/>
+{%- endfor %}
+<xhtml:link rel="alternate" hreflang="x-default" href="{{ page.absolute(page.xDefault) }}"/>
+</url>
+{%- endfor %}
+</urlset>

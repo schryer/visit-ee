@@ -1,0 +1,11 @@
+{
+  "comment": "Languages visit.ee can be built in. The source language has no URL prefix; every other language lives under /<prefix>/. A language is built only when enabled, and it then needs every UI string the source has (i18n/ui/<code>.json). A site is built in a language only when its own strings are complete in it.",
+  "source": "et",
+  "languages": [
+    { "code": "et", "prefix": "", "name": "Eesti", "locale": "et_EE", "enabled": true },
+    { "code": "en", "prefix": "en", "name": "English", "locale": "en_GB", "enabled": true },
+    { "code": "fi", "prefix": "fi", "name": "Suomi", "locale": "fi_FI", "enabled": false },
+    { "code": "de", "prefix": "de", "name": "Deutsch", "locale": "de_DE", "enabled": false },
+    { "code": "uk", "prefix": "uk", "name": "Українська", "locale": "uk_UA", "enabled": false }
+  ]
+}

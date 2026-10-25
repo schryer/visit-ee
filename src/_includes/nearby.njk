@@ -1,0 +1,14 @@
+<section class="wrap section" id="nearby" aria-labelledby="nearby-title">
+<h2 id="nearby-title">{{ p.t("nearby.title") }}</h2>
+<div class="nearby">
+{#- The shared visit.ee map component mounts here once it exists. -#}
+<div class="map-slot" data-visit-map data-site="{{ p.site.id }}" data-lat="{{ p.site.geo.lat }}" data-lng="{{ p.site.geo.lng }}" data-lang="{{ p.lang }}">
+<span>{{ p.t("map.slot") }}</span>
+</div>
+<ul class="nearby__list">
+{%- for place in p.site.nearby %}
+<li><span>{{ p.t("nearby." + place.id) }}</span><span>{{ p.distance(place.distance_m) }}</span></li>
+{%- endfor %}
+</ul>
+</div>
+</section>

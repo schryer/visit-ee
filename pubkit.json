@@ -1,0 +1,11 @@
+{
+  "kind": "service",
+  "bin": "visit-ee",
+  "ci": {
+    "with": {
+      "setup": "make venv node",
+      "test": "make functional",
+      "shellcheck": "with-secrets bin/visit-ee"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{%- if p.site.booking_url -%}
+<a class="button button--book" href="{{ p.site.booking_url }}" rel="noopener">{{ p.t("book.check") }}</a>
+{%- else -%}
+<a class="button button--book" href="mailto:{{ p.site.email }}?subject={{ p.t('site.name') | urlencode }}">{{ p.t("book.ask") }}</a>
+{%- endif -%}

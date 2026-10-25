@@ -1,0 +1,13 @@
+<footer class="site-footer">
+<div class="wrap site-footer__inner">
+<div class="site-footer__brand"><span class="platform-mark">visit.ee</span><span>{{ p.t("platform.tagline") }}</span></div>
+<div class="site-footer__langs">
+<span class="site-footer__head">{{ p.t("lang.label") }}</span>
+<ul>
+{%- for a in p.alternates %}
+<li><a href="{{ a.url }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}"{% if a.lang == p.lang %} aria-current="true"{% endif %}>{{ a.name }}</a></li>
+{%- endfor %}
+</ul>
+</div>
+</div>
+</footer>

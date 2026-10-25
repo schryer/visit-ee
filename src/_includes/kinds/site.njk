@@ -1,0 +1,88 @@
+{% include "hero.njk" %}
+
+<section class="wrap intro">
+<div class="intro__text">
+<h2>{{ p.t("intro.title") }}</h2>
+<p>{{ p.t("intro.p1") }}</p>
+<p>{{ p.t("intro.p2") }}</p>
+</div>
+<dl class="facts">
+{%- for f in p.site.facts %}
+<div class="fact">
+<dt>{% if f.value %}{{ f.value }}{% elif f.distance_m %}{{ p.distance(f.distance_m) }}{% else %}{{ p.t("facts." + f.id + ".value") }}{% endif %}</dt>
+<dd>{{ p.t("facts." + f.id + ".label") }}</dd>
+</div>
+{%- endfor %}
+</dl>
+</section>
+
+<section class="wrap section" id="stay" aria-labelledby="stay-title">
+<h2 id="stay-title">{{ p.t("stay.title") }}</h2>
+<p class="section__note">{{ p.t("stay.note") }}</p>
+{%- asyncEach group in ["village", "campsite"] %}
+<h3 class="eyebrow">{{ p.t("stay.group." + group) }}</h3>
+<div class="cards">
+{%- asyncEach stay in p.site.stays %}{% if stay.group == group %}
+<a class="card stay-card" href="{{ p.stayUrl(stay.id) }}">
+{%- if stay.photo %}
+{% picture p.site, stay.photo, p.t("stay." + stay.id + ".photo_alt"), "(min-width: 75rem) 370px, (min-width: 40rem) 50vw, 100vw", { widths: [400, 800], class: "card__img" } %}
+{%- else %}
+<div class="card__img card__img--empty">{{ p.t("stay.photos_to_come") }}</div>
+{%- endif %}
+<div class="card__body">
+<h4 class="card__title">{{ p.t("stay." + stay.id + ".title") }}</h4>
+<p>{{ p.t("stay." + stay.id + ".summary") }}</p>
+<p class="card__meta">{{ p.t("stay." + stay.id + ".meta") }}</p>
+<p class="card__foot">
+<span>{% if stay.from_eur %}{{ p.t("stay.from", { price: p.money(stay.from_eur) }) }}{% else %}{{ p.t("stay.price_on_request") }}{% endif %}</span>
+<span class="card__link">{{ p.t("stay." + stay.id + ".link") }}</span>
+</p>
+</div>
+</a>
+{%- endif %}{% endeach %}
+</div>
+{%- endeach %}
+</section>
+
+<section class="band" id="extras" aria-labelledby="extras-title">
+<div class="wrap section">
+<h2 id="extras-title">{{ p.t("extras.title") }}</h2>
+<div class="cards cards--small">
+{%- for x in p.site.extras %}
+<div class="extra extra--{{ x.accent }}">
+<h3>{{ p.t("extras." + x.id + ".title") }}</h3>
+<p>{{ p.t("extras." + x.id + ".body") }}</p>
+{%- if x.prices %}
+<dl class="price-list">
+{%- for price in x.prices %}
+<div><dt>{{ p.t("extras." + x.id + ".price." + price.id) }}</dt><dd>{{ p.money(price.eur) }}</dd></div>
+{%- endfor %}
+</dl>
+{%- endif %}
+{%- if x.id == "class_trips" %}
+<a href="{{ p.groupsUrl }}">{{ p.t("groups.title") }}</a>
+{%- endif %}
+</div>
+{%- endfor %}
+</div>
+</div>
+</section>
+
+<section class="wrap section" id="air" aria-labelledby="air-title">
+<h2 id="air-title">{{ p.t("air.title") }}</h2>
+<p class="section__note">{{ p.t("air.note") }}</p>
+<div class="cards cards--small">
+{%- for f in p.site.flights %}
+<figure class="flight">
+<video controls muted playsinline preload="none" poster="{{ p.media(f.poster) }}">
+{%- for src in f.sources %}
+<source src="{{ p.media(src.src) }}" type="{{ src.type }}">
+{%- endfor %}
+</video>
+<figcaption>{{ p.t("flight." + f.id) }}</figcaption>
+</figure>
+{%- endfor %}
+</div>
+</section>
+
+{% include "nearby.njk" %}

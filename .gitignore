@@ -1,0 +1,7 @@
+node_modules/
+_site/
+.venv/
+.pubkit/
+.cache/
+__pycache__/
+.pytest_cache/
