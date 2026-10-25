@@ -4,7 +4,6 @@
   "range": "{a}–{b}",
   "distance.m": "{n} m",
   "distance.km": "{n} km",
-
   "platform.name": "visit.ee",
   "platform.home": "visit.ee avaleht",
   "platform.tagline": "Eesti, piirkond haaval",
@@ -15,28 +14,25 @@
   "platform.host.title": "Too oma koht visit.ee-sse",
   "platform.host.body": "Oma leht visit.ee all, kõigis meie keeltes, koos broneeringute ja sündmustega.",
   "platform.map": "visit.ee piirkondade kaart, tulekul",
-
   "breadcrumb": "Asukoht",
   "region.south-estonia": "Lõuna-Eesti",
   "town.rouge": "Rõuge",
-
+  "slug.region.south-estonia": "louna-eesti",
+  "slug.town.rouge": "rouge",
   "lang.label": "Keel",
   "lang.current": "Keel: {name}",
   "menu.open": "Menüü",
   "menu.close": "Sulge menüü",
-
   "book.check": "Vaata vabu aegu",
   "book.ask": "Küsi vabu aegu",
   "book.heading": "Broneeri",
   "book.body.booking": "Vaata vabu kuupäevi ja broneeri Booking.com-is või kirjuta meile, kui tulete grupiga või kauemaks.",
   "book.body.email": "Kirjuta või helista ja anna teada kuupäevad ning mitu inimest tuleb.",
-
   "season.label": "Vaata aastaaegade kaupa",
   "season.spring": "Kevad",
   "season.summer": "Suvi",
   "season.autumn": "Sügis",
   "season.winter": "Talv",
-
   "stay.sleeps": "{n} kohta",
   "stay.from": "alates {price}",
   "stay.price_on_request": "Hind kokkuleppel",
@@ -48,14 +44,11 @@
   "stay.photos": "Fotod",
   "stay.photos_to_come": "Fotod tulekul",
   "stay.other": "Teised majutusvõimalused",
-
   "map.slot": "visit.ee kaart, tulekul",
-
   "footer.find": "Leia meid",
   "footer.directions": "Teejuhised",
   "footer.contact": "Kontakt",
   "footer.speak": "Räägime {languages} keelt",
   "footer.part_of": "visit.ee osa",
-
   "preview.note": "Arendusversioon: see leht ei ole veel avalik."
 }

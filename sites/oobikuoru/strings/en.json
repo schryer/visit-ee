@@ -4,35 +4,31 @@
   "site.short_name": "Nightingale Valley",
   "site.place_line": "Rõuge · Võru County · South Estonia",
   "site.logo_alt": "Ööbikuoru Puhkekeskus, Rõuge, Võrumaa",
+  "slug": "oobikuoru",
   "meta.title": "Nightingale Valley Holiday Centre: stay in Rõuge, South Estonia",
   "meta.description": "Holiday houses, camping cabins and lakeside camping on the edge of Rõuge's Nightingale Valley. Views over the valley and lakes, a farm sauna by a waterfall, and seven lakes around.",
-
   "nav.stay": "Places to stay",
   "nav.extras": "Sauna & boats",
   "nav.groups": "Groups & class trips",
   "nav.nearby": "Around Rõuge",
   "nav.contact": "Contact",
-
   "hero.summer.line": "Long evenings on the meadow, and three lakes to swim in within a short walk.",
   "hero.summer.alt": "The campsite meadow in summer, with cabins along the tree line",
   "hero.autumn.line": "Golden birches, red cabin roofs and Rõuge church across the meadow.",
-
   "intro.title": "Welcome to Rõuge's Nightingale Valley",
   "intro.p1": "We're on the edge of the Ööbikuorg valley in Rõuge, Võru County, with a wide view over the countryside and the lakes. Come for a quiet family holiday, or bring friends or a larger group.",
   "intro.p2": "The centre has two parts: a holiday village of five houses, each with a different level of comfort, and a campsite with camping cabins and private camping by the lake.",
-
   "facts.lakes.label": "lakes around Rõuge",
   "facts.nearest_lake.label": "to Liinjärv, the nearest lake",
   "facts.deepest.value": "Deepest",
   "facts.deepest.label": "lake in Estonia: Rõuge Suurjärv",
   "facts.tower.label": "to the Pesapuu viewing tower",
-
   "stay.title": "Places to stay",
   "stay.note": "Prices are per night. Children aged 4–12 stay for less, and longer stays get a discount.",
   "stay.group.village": "Holiday village",
   "stay.group.campsite": "Campsite",
-
   "stay.large-houses.title": "Large holiday houses",
+  "stay.large-houses.slug": "large-houses",
   "stay.large-houses.summary": "Two houses with a kitchen and a terrace looking over the valley to the evening sun.",
   "stay.large-houses.meta": "6–8 people · 2 bedrooms · shower and WC",
   "stay.large-houses.link": "See the houses",
@@ -52,8 +48,8 @@
   "stay.large-houses.price.room2": "One room, 2 people",
   "stay.large-houses.price.room3": "One room, 3 people",
   "stay.large-houses.price.room4": "One room, 4 people",
-
   "stay.family-house.title": "Family house",
+  "stay.family-house.slug": "family-house",
   "stay.family-house.summary": "A bedroom, a living room with a sofa bed, a kitchen, and its own seating area and grill outside.",
   "stay.family-house.meta": "Up to 6 people · shower and WC",
   "stay.family-house.link": "See the house",
@@ -61,8 +57,8 @@
   "stay.family-house.photo_alt": "The family house, a yellow cottage with a porch",
   "stay.family-house.gallery.1": "The family house, a yellow cottage with a porch",
   "stay.family-house.price.night": "Per night, depending on the number of people",
-
   "stay.small-houses.title": "Small holiday houses",
+  "stay.small-houses.slug": "small-houses",
   "stay.small-houses.summary": "The Yellow and the Red house: two bedrooms each, with a seating area and grill outside.",
   "stay.small-houses.meta": "6–8 people · shower and WC · no kitchen",
   "stay.small-houses.link": "See the houses",
@@ -77,8 +73,8 @@
   "stay.small-houses.price.person1": "1 person in a room",
   "stay.small-houses.price.person2": "2 people in a room",
   "stay.small-houses.price.person3": "3 people in a room",
-
   "stay.camping-cabins.title": "Camping cabins",
+  "stay.camping-cabins.slug": "camping-cabins",
   "stay.camping-cabins.summary": "Five heated cabins, each with a balcony. Showers, WCs and a summer kitchen are in a building close by.",
   "stay.camping-cabins.meta": "Up to 4 people · no bathroom inside",
   "stay.camping-cabins.link": "See the cabins",
@@ -92,14 +88,13 @@
   "stay.camping-cabins.price.person3": "3 people",
   "stay.camping-cabins.price.person4": "4 people",
   "stay.camping-cabins.price.linen": "Bed linen hire",
-
   "stay.lakeside-camping.title": "Private camping by the lake",
+  "stay.lakeside-camping.slug": "lakeside-camping",
   "stay.lakeside-camping.summary": "Your own tent on a quiet pitch at the lakeside.",
   "stay.lakeside-camping.meta": "Use of the campsite's summer kitchen and showers",
   "stay.lakeside-camping.link": "See the pitch",
   "stay.lakeside-camping.body": "A pitch by the lake, away from other guests. The campsite's summer kitchen, showers, WCs and campfire sites are yours to use.",
   "stay.lakeside-camping.photo_alt": "The lakeside pitch",
-
   "amenity.kitchen": "Kitchen with everything you need",
   "amenity.terrace": "Terrace with a view of the valley",
   "amenity.shower_wc": "Shower and WC",
@@ -112,7 +107,6 @@
   "amenity.shared_facilities": "Showers and WCs next door",
   "amenity.summer_kitchen": "Summer kitchen",
   "amenity.campfire": "Campfire sites and a shelter",
-
   "extras.title": "More to do here",
   "extras.sauna.title": "Farm sauna by the waterfall",
   "extras.sauna.body": "A renovated sauna over 80 years old, heated by an old locomotive stove. Cool off under the waterfall, or in the lake 100 m away.",
@@ -126,14 +120,12 @@
   "extras.gatherings.body": "Company summer days, family reunions and graduation parties, with room on the campsite for outdoor seminars and games.",
   "extras.class_trips.title": "Class trips",
   "extras.class_trips.body": "A good base for school trips in South Estonia, from €15 per pupil. We can arrange meals too.",
-
   "air.title": "From the air",
   "air.note": "Short drone flights over the camp and the valley, autumn 2026.",
   "flight.camp": "The camp and Rõuge church",
   "flight.tower_to_camp": "From the tower to the camp",
   "flight.tower": "Pesapuu viewing tower",
   "flight.villa": "Ööbikuoru villa",
-
   "nearby.title": "Around Rõuge",
   "nearby.hydro_museum": "Hydro workshop museum",
   "nearby.valley_bridge": "Nightingale Valley and its bridge",
@@ -147,8 +139,8 @@
   "nearby.paganamaa": "Paganamaa nature trail and tower",
   "nearby.karula": "Karula National Park",
   "nearby.taevaskoda": "Taevaskoda sandstone cliffs",
-
   "groups.title": "Groups & class trips",
+  "groups.slug": "groups-and-class-trips",
   "groups.intro": "Looking for somewhere to stay with a class or a group in South Estonia? There are museums, sights and things for pupils to do close by.",
   "groups.cabins.title": "Staying in the camping cabins",
   "groups.cabins.body": "The camping cabins are the favourite for class trips. There are five cabins for four, each with a wide bed, a two-person bunk, heating and a small terrace. Close by are the summer kitchen, WCs, showers, campfire sites and a shelter for 20. We can arrange meals if you'd rather not cook.",

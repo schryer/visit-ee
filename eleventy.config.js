@@ -45,14 +45,15 @@ function writeFonts() {
   fs.writeFileSync(path.join(dir, "fonts.css"), css.join("\n\n") + "\n");
 }
 
-// Each site's language-neutral files (logos, videos) go out under the
-// site's path. Photos go through the picture shortcode instead.
+// Each site's language-neutral files (logos, videos) go out under
+// /media/<site id>/, the same for every language. Photos go through the
+// picture shortcode instead.
 function copySiteMedia(content) {
   for (const site of content.sites) {
     for (const sub of ["logo", "video"]) {
       const from = path.join(site.dir, "media", sub);
       if (!fs.existsSync(from)) continue;
-      fs.cpSync(from, path.join(OUT, site.path, "media", sub), { recursive: true, force: false });
+      fs.cpSync(from, path.join(OUT, "media", site.id, sub), { recursive: true, force: false });
     }
   }
 }

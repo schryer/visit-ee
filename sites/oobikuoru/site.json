@@ -1,6 +1,5 @@
 {
   "id": "oobikuoru",
-  "path": "south-estonia/rouge/oobikuoru",
   "region": "south-estonia",
   "town": "rouge",
   "source_language": "et",
@@ -431,10 +430,10 @@
   ],
   "redirects": {
     "/puhkekula/": "#stay",
-    "/laagriplats/": "camping-cabins/",
+    "/laagriplats/": "camping-cabins",
     "/lisavoimalused/": "#extras",
     "/hinnakiri/": "#stay",
-    "/klassireis-2023/": "groups/",
+    "/klassireis-2023/": "groups",
     "/pildid/": "#air",
     "/kontakt/": "#contact"
   },

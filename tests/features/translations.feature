@@ -16,6 +16,20 @@ Feature: Incomplete translations
     When I build it
     Then it succeeds
     And there is no page "/en/south-estonia/rouge/oobikuoru/"
-    And the page "/south-estonia/rouge/oobikuoru/" is in "et"
-    And the page "/south-estonia/rouge/oobikuoru/" has no version in "en"
+    And the page "/louna-eesti/rouge/oobikuoru/" is in "et"
+    And the page "/louna-eesti/rouge/oobikuoru/" has no version in "en"
     And the page "/en/" does not link to "/en/south-estonia/rouge/oobikuoru/"
+
+  Scenario: A path part that is not a URL slug stops the build
+    Given a copy of the content
+    And the English string "stay.family-house.slug" of "oobikuoru" is "Family House"
+    When I build it
+    Then it fails
+    And stderr mentions "stay.family-house.slug"
+
+  Scenario: Two pages of a site cannot share a path
+    Given a copy of the content
+    And the English string "stay.family-house.slug" of "oobikuoru" is "large-houses"
+    When I build it
+    Then it fails
+    And stderr mentions "stay.large-houses.slug"

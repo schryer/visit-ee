@@ -5,9 +5,6 @@
 permalink: /_redirects
 eleventyExcludeFromCollections: true
 ---
-{%- for site in visit.sites %}
-# {{ site.id }}
-{%- for from, to in site.redirects %}
-{{ from }} /{{ site.path }}/{{ to }} 301
-{%- endfor %}
+{%- for r in visit.redirects %}
+{{ r.from }} {{ r.to }} 301
 {%- endfor %}

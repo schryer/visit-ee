@@ -3,7 +3,8 @@
 Static sites for places to stay and things to do in Estonia. Each host
 gets its own site under visit.ee, in every language it is translated into.
 The first is Ööbikuoru Puhkekeskus in Rõuge, at
-`/south-estonia/rouge/oobikuoru/`.
+`/louna-eesti/rouge/oobikuoru/` (`/en/south-estonia/rouge/oobikuoru/` in
+English).
 
 For now it is built for `visit.schryer.eu`, a preview that asks search
 engines to keep out. It moves to visit.ee later.
@@ -31,7 +32,7 @@ JPEG versions of every photo. Later builds reuse them.
 |---|---|
 | `sites/<id>/site.json` | A site's facts that don't depend on language: address, prices, stays, photos, videos, nearby places, old addresses to redirect. |
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
-| `sites/<id>/media/` | Photos (resized at build time), logos and drone videos. |
+| `sites/<id>/media/` | Photos (resized at build time), logos and drone videos, served under `/media/<id>/`. |
 | `i18n/languages.json` | Which languages are built, and their URL prefixes. |
 | `i18n/ui/<lang>.json` | The platform's own text: buttons, labels, season names. |
 | `lib/content.js` | Reads all of the above and works out every page to write. |
@@ -41,9 +42,17 @@ JPEG versions of every photo. Later builds reuse them.
 ## Languages
 
 Estonian is the source language and has no URL prefix. Every other
-language lives under its own prefix with the same slugs, for example
-`/en/south-estonia/rouge/oobikuoru/large-houses/`. Each page names its
-other versions with `hreflang` links, and so does the sitemap.
+language lives under its own prefix, and every part of the path is
+translated too: `/louna-eesti/rouge/oobikuoru/suured-puhkemajad/` is
+`/en/south-estonia/rouge/oobikuoru/large-houses/` in English. Region and
+town slugs are UI strings (`slug.region.<id>`, `slug.town.<id>`); a site's
+own are its strings (`slug`, `stay.<id>.slug`, `groups.slug`). The build
+fails on a slug that isn't lowercase a-z, 0-9 and hyphens, or that two
+pages share. Each page names its other versions with `hreflang` links, and
+so does the sitemap.
+
+Changing a slug changes a published address: add the old one to the site's
+`redirects` in `site.json` when that happens.
 
 - **Adding a language:** add its UI strings in `i18n/ui/<code>.json` and
   set `enabled` in `i18n/languages.json`. The build fails if a UI string is

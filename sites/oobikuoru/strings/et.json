@@ -4,35 +4,31 @@
   "site.short_name": "Ööbikuorg",
   "site.place_line": "Rõuge · Võrumaa · Lõuna-Eesti",
   "site.logo_alt": "Ööbikuoru Puhkekeskus, Rõuge, Võrumaa",
+  "slug": "oobikuoru",
   "meta.title": "Ööbikuoru Puhkekeskus: majutus Rõuges, Võrumaal",
   "meta.description": "Puhkemajad, kämpingumajad ja telkimine Rõuge Ööbikuoru serval. Vaade orule ja järvedele, talusaun kose kõrval ning seitse järve ümberringi.",
-
   "nav.stay": "Majutus",
   "nav.extras": "Saun ja paadid",
   "nav.groups": "Grupid ja klassireisid",
   "nav.nearby": "Rõuge ümbrus",
   "nav.contact": "Kontakt",
-
   "hero.summer.line": "Pikad õhtud aasal ja kolm järve, kuhu jalutades ujuma minna.",
   "hero.summer.alt": "Laagriplatsi aas suvel, kämpingumajad metsaserval",
   "hero.autumn.line": "Kuldsed kased, punased katused ja Rõuge kirik üle aasa.",
-
   "intro.title": "Tere tulemast Rõuge Ööbikuorgu!",
   "intro.p1": "Ööbikuoru Puhkekeskus asub Võrumaal Rõuges, looduslikult kaunis paigas Ööbikuoru serval. Meie juurest avaneb suurepärane vaade loodusele ja järvedele. Pakume häid tingimusi nii privaatseks puhkuseks perega kui ka mõnusaks ajaveetmiseks sõprade või suurema seltskonnaga.",
   "intro.p2": "Puhkekeskuses on kaks ala: puhkeküla ja laagriplats. Puhkekülas on viis erineva mugavusastmega puhkemaja. Laagriplatsil pakume majutust kämpingumajades ja telkimisvõimalust järve ääres.",
-
   "facts.lakes.label": "järve Rõuge ümbruses",
   "facts.nearest_lake.label": "lähima järveni, Liinjärveni",
   "facts.deepest.value": "Sügavaim",
   "facts.deepest.label": "järv Eestis: Rõuge Suurjärv",
   "facts.tower.label": "Pesapuu vaatetornini",
-
   "stay.title": "Majutus",
   "stay.note": "Hinnad on ööpäeva kohta. Lastele vanuses 4–12 on hinnasoodustus ning pikemal peatumisel saab soodsamalt.",
   "stay.group.village": "Puhkeküla",
   "stay.group.campsite": "Laagriplats",
-
   "stay.large-houses.title": "Suured puhkemajad",
+  "stay.large-houses.slug": "suured-puhkemajad",
   "stay.large-houses.summary": "Kaks maja köögi ja terrassiga, millelt avaneb vaade orule ja õhtupäikesele.",
   "stay.large-houses.meta": "6–8 inimest · 2 magamistuba · dušš ja WC",
   "stay.large-houses.link": "Vaata maju",
@@ -52,8 +48,8 @@
   "stay.large-houses.price.room2": "Üks tuba, 2 inimest",
   "stay.large-houses.price.room3": "Üks tuba, 3 inimest",
   "stay.large-houses.price.room4": "Üks tuba, 4 inimest",
-
   "stay.family-house.title": "Peremaja",
+  "stay.family-house.slug": "peremaja",
   "stay.family-house.summary": "Magamistuba, elutuba diivanvoodiga, köök ning oma istumiskoht ja grill õues.",
   "stay.family-house.meta": "Kuni 6 inimest · dušš ja WC",
   "stay.family-house.link": "Vaata maja",
@@ -61,8 +57,8 @@
   "stay.family-house.photo_alt": "Peremaja, kollane maja verandaga",
   "stay.family-house.gallery.1": "Peremaja, kollane maja verandaga",
   "stay.family-house.price.night": "Ööpäev, olenevalt inimeste arvust",
-
   "stay.small-houses.title": "Väikesed puhkemajad",
+  "stay.small-houses.slug": "vaikesed-puhkemajad",
   "stay.small-houses.summary": "Kollane ja Punane Puhkemaja: kaks magamistuba, istumisala ja grill õues.",
   "stay.small-houses.meta": "6–8 inimest · dušš ja WC · kööki pole",
   "stay.small-houses.link": "Vaata maju",
@@ -77,8 +73,8 @@
   "stay.small-houses.price.person1": "1 inimene ühes toas",
   "stay.small-houses.price.person2": "2 inimest ühes toas",
   "stay.small-houses.price.person3": "3 inimest ühes toas",
-
   "stay.camping-cabins.title": "Kämpingumajad",
+  "stay.camping-cabins.slug": "kampingumajad",
   "stay.camping-cabins.summary": "Viis köetavat majakest rõduga. Duširuumid, WC-d ja suveköök on kõrvalmajas.",
   "stay.camping-cabins.meta": "Kuni 4 inimest · vannituba pole majas",
   "stay.camping-cabins.link": "Vaata kämpinguid",
@@ -92,14 +88,13 @@
   "stay.camping-cabins.price.person3": "3 inimest",
   "stay.camping-cabins.price.person4": "4 inimest",
   "stay.camping-cabins.price.linen": "Voodipesukomplekti laenutus",
-
   "stay.lakeside-camping.title": "Privaatne telkimine järve ääres",
+  "stay.lakeside-camping.slug": "telkimine-jarve-aares",
   "stay.lakeside-camping.summary": "Oma telk vaiksel platsil järve kaldal.",
   "stay.lakeside-camping.meta": "Laagriplatsi suveköök ja duširuumid on kasutada",
   "stay.lakeside-camping.link": "Vaata platsi",
   "stay.lakeside-camping.body": "Telkimisplats järve ääres, eemal teistest ööbijatest. Laagriplatsi suveköök, duširuumid, WC-d ja lõkkeplatsid on kasutamiseks.",
   "stay.lakeside-camping.photo_alt": "Telkimisplats järve ääres",
-
   "amenity.kitchen": "Köök kõige vajalikuga",
   "amenity.terrace": "Terrass vaatega orule",
   "amenity.shower_wc": "Dušš ja WC",
@@ -112,7 +107,6 @@
   "amenity.shared_facilities": "Duširuumid ja WC-d kõrvalmajas",
   "amenity.summer_kitchen": "Suveköök",
   "amenity.campfire": "Lõkkeplatsid ja varjualune",
-
   "extras.title": "Veel teha",
   "extras.sauna.title": "Talusaun kose kõrval",
   "extras.sauna.body": "Üle 80 aasta vana renoveeritud talusaun, mida kütab vana vedurikeris. Jahutama saab joosta kose alla või 100 m kaugusel asuvasse järve.",
@@ -126,14 +120,12 @@
   "extras.gatherings.body": "Suvepäevad, suguvõsa kokkutulekud ja lõpupeod. Laagriplatsil on ruumi vabaõhuseminarideks ja seltskondlikeks mängudeks.",
   "extras.class_trips.title": "Klassireisid",
   "extras.class_trips.body": "Hea ööbimispaik klassireisiks Lõuna-Eestis, alates 15 € õpilase kohta. Vajadusel korraldame ka toitlustuse.",
-
   "air.title": "Ülevalt vaadates",
   "air.note": "Lühikesed droonilennud laagri ja oru kohal, sügis 2026.",
   "flight.camp": "Laager ja Rõuge kirik",
   "flight.tower_to_camp": "Vaatetornist laagrini",
   "flight.tower": "Pesapuu vaatetorn",
   "flight.villa": "Ööbikuoru villa",
-
   "nearby.title": "Rõuge ümbrus",
   "nearby.hydro_museum": "Ööbikuoru Hüdrotöökoda, muuseum",
   "nearby.valley_bridge": "Ööbikuorg ja üle oru minev sild",
@@ -147,8 +139,8 @@
   "nearby.paganamaa": "Paganamaa õpperada ja vaatetorn",
   "nearby.karula": "Karula rahvuspark",
   "nearby.taevaskoda": "Taevaskoda",
-
   "groups.title": "Grupid ja klassireisid",
+  "groups.slug": "grupid-ja-klassireisid",
   "groups.intro": "Kui otsite klassireisiks või seltskonnale mõnusat ööbimispaika Lõuna-Eestis, siis Ööbikuoru Puhkekeskus on suurepärane valik. Lähedal on mitmed vaatamisväärsused, muuseumid ja tegevused.",
   "groups.cabins.title": "Majutus kämpingumajades",
   "groups.cabins.body": "Klassireisidel on populaarseim valik ööbimine kämpingumajades. Laagriplatsil on viis 4-kohalist kämpingumaja, kus on lai voodi, kahekohaline nari, küte ja väike terrass. Lähedal on suveköök, WC-d, duširuumid, lõkkeplatsid ja varjualune 20 inimesele. Soovi korral korraldame toitlustuse.",

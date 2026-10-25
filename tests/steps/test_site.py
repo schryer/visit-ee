@@ -148,6 +148,14 @@ def remove_site_string(content: Path, key: str, site_id: str) -> None:
     _remove_key(content / "sites" / site_id / "strings" / "en.json", key)
 
 
+@given(parsers.parse('the English string "{key}" of "{site_id}" is "{value}"'))
+def set_site_string(content: Path, key: str, site_id: str, value: str) -> None:
+    path = content / "sites" / site_id / "strings" / "en.json"
+    strings = json.loads(path.read_text(encoding="utf-8"))
+    strings[key] = value
+    path.write_text(json.dumps(strings, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 # --- when --------------------------------------------------------------------
 
 
@@ -177,11 +185,15 @@ def page_is_in(site: Build, url: str, lang: str) -> None:
 
 @then(parsers.parse('every stay of "{site_id}" has a page in "{a}" and in "{b}"'))
 def every_stay_has_pages(site: Build, site_id: str, a: str, b: str) -> None:
-    data = json.loads((ROOT / "sites" / site_id / "site.json").read_text(encoding="utf-8"))
-    for stay in data["stays"]:
-        for lang in (a, b):
-            prefix = "" if lang == data["source_language"] else f"/{lang}"
-            url = f"{prefix}/{data['path']}/{stay['id']}/"
+    folder = ROOT / "sites" / site_id
+    data = json.loads((folder / "site.json").read_text(encoding="utf-8"))
+    for lang in (a, b):
+        strings = json.loads((folder / "strings" / f"{lang}.json").read_text(encoding="utf-8"))
+        ui = json.loads((ROOT / "i18n" / "ui" / f"{lang}.json").read_text(encoding="utf-8"))
+        prefix = "" if lang == data["source_language"] else f"/{lang}"
+        base = f"{prefix}/{ui['slug.region.' + data['region']]}/{ui['slug.town.' + data['town']]}/{strings['slug']}/"
+        for stay in data["stays"]:
+            url = base + strings[f"stay.{stay['id']}.slug"] + "/"
             assert site.page(url).lang == lang, url
 
 
