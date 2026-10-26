@@ -32,11 +32,13 @@ JPEG versions of every photo. Later builds reuse them.
 |---|---|
 | `sites/<id>/site.json` | A site's facts that don't depend on language: address, prices, stays, photos, videos, nearby places, old addresses to redirect. |
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
+| `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. |
+| `i18n/places/<lang>.json` | A short description of each place, by id. A language may leave one out. |
 | `sites/<id>/media/` | Photos (resized at build time), logos and drone videos, served under `/media/<id>/`. |
 | `i18n/languages.json` | Which languages are built, and their URL prefixes. |
 | `i18n/ui/<lang>.json` | The platform's own text: buttons, labels, season names. |
 | `lib/content.js` | Reads all of the above and works out every page to write. |
-| `src/` | The Eleventy templates, CSS and the small script. |
+| `src/` | The Eleventy templates, CSS and scripts, including the area map (`src/assets/map.js`). |
 | `tests/` | The functional tests, run against `bin/visit-ee`. |
 
 ## Languages
@@ -63,6 +65,27 @@ Changing a slug changes a published address: add the old one to the site's
 
 Finnish, German and Ukrainian are set up but not enabled yet.
 
+## The map
+
+Each site page lists the places in its `nearby` list (`site.json`), nearest
+first: walking time under 2 km, then the road distance the site gives
+(`road_km`), then the straight line. The list is plain HTML with
+schema.org data, so it works without JavaScript. `src/assets/map.js` draws
+the same places on a map of the area once it scrolls into view, with On
+foot and By car modes, category filters, layer switches and a link for
+each place (`…/oobikuoru/#suurjarv`).
+
+The map is MapLibre with our own vector tiles, built from Maa- ja
+Ruumiamet (ETAK, EHAK, EHR) and RMK data: one `map.pmtiles` per
+municipality, plus a national overview. A site's `map.packs` names the
+ones it shows. They are too big for this repository's history, so they
+live on the `maps-data` branch, and the deploy copies them in. Locally,
+`bin/visit-ee build --maps DIR` serves a folder of packs under `/maps/`;
+without it the map draws its markers on a blank background.
+
+Labels use Noto Sans (SIL Open Font License), in
+`src/assets/map/fonts/`.
+
 ## Changing the content
 
 Edit the JSON files and open a pull request. Text in square brackets, like
@@ -88,7 +111,8 @@ addresses (`/puhkekula/`, `/kontakt/` and so on) to their new pages.
 
 ## Still to come
 
-- The shared visit.ee map, which mounts on `[data-visit-map]`.
+- A scheduled map build that refreshes the `maps-data` branch from the
+  sources, and the regions map on the home page.
 - Booking.com links: set `booking_url` in `site.json`.
 - Photos and details for private camping by the lake.
 - Spring and winter photos or video for the season switch. A season shows

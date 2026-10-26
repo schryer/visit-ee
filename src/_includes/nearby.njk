@@ -1,14 +1,55 @@
+{#- The places around a site, as a list that works on its own. The shared
+    visit.ee map (src/assets/map.js) draws the same places on a map of the
+    area and adds the modes and filters, which stay hidden without it. -#}
+{%- set icons = {
+  nature: '<path d="M12 3l-5 7h3l-4 6h12l-4-6h3z"/><path d="M12 16v5"/>',
+  lake: '<path d="M3 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+  heritage: '<path d="M4 20h16"/><path d="M6 20v-8l6-6 6 6v8"/><path d="M10 20v-5h4v5"/>',
+  museum: '<path d="M3 9l9-5 9 5"/><path d="M5 9v9M10 9v9M14 9v9M19 9v9"/><path d="M3 20h18"/>',
+  viewpoint: '<path d="M9 21l2-15h2l2 15"/><path d="M8 6h8l-1-3H9z"/><path d="M10 13h4"/>'
+} -%}
 <section class="wrap section" id="nearby" aria-labelledby="nearby-title">
 <h2 id="nearby-title">{{ p.t("nearby.title") }}</h2>
-<div class="nearby">
-{#- The shared visit.ee map component mounts here once it exists. -#}
-<div class="map-slot" data-visit-map data-site="{{ p.site.id }}" data-lat="{{ p.site.geo.lat }}" data-lng="{{ p.site.geo.lng }}" data-lang="{{ p.lang }}">
-<span>{{ p.t("map.slot") }}</span>
+<div class="nearby" data-visit-map>
+<script type="application/json" data-map-config>{{ p.mapConfig | json | safe }}</script>
+<div class="nearby__map" hidden>
+<div class="nearby__canvas" role="region" aria-label="{{ p.t('map.label') }}"></div>
+<div class="nearby__tip" hidden></div>
+</div>
+<div class="nearby__side">
+<div class="nearby__controls" hidden>
+<div class="nearby__modes" role="group" aria-label="{{ p.t('map.modes') }}">
+<button type="button" class="pill" data-mode="foot" aria-pressed="false">{{ p.t("map.foot") }}</button>
+<button type="button" class="pill" data-mode="car" aria-pressed="true">{{ p.t("map.car") }}</button>
+<details class="nearby__layers">
+<summary class="pill">{{ p.t("map.layers") }}</summary>
+<div class="nearby__layerbox">
+{%- for layer in ["roads", "trails", "buildings", "rings", "borders"] %}
+<label><input type="checkbox" data-layer="{{ layer }}" checked> {{ p.t("map.layer." + layer) }}</label>
+{%- endfor %}
+</div>
+</details>
+</div>
+<div class="nearby__chips" role="group" aria-label="{{ p.t('map.categories') }}">
+{%- for cat in p.nearbyCategories %}
+<button type="button" class="chip cat-{{ cat.id }}" data-cat="{{ cat.id }}" aria-pressed="true">{{ p.t("cat." + cat.id + ".many") }} <span class="chip__n">{{ cat.count }}</span></button>
+{%- endfor %}
+</div>
+<p class="nearby__count" aria-live="polite"></p>
 </div>
 <ul class="nearby__list">
-{%- for place in p.site.nearby %}
-<li><span>{{ p.t("nearby." + place.id) }}</span><span>{{ p.distance(place.distance_m) }}</span></li>
+{%- for place in p.nearby %}
+<li id="{{ place.id }}" class="place cat-{{ place.category }}" data-place data-cat="{{ place.category }}" data-lat="{{ place.geo.lat }}" data-lng="{{ place.geo.lng }}" data-foot="{{ place.onFoot }}">
+<span class="place__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ icons[place.category] | safe }}</svg></span>
+<a class="place__name" href="#{{ place.id }}"{% if p.lang != "et" %} lang="et"{% endif %}>{{ place.name }}</a>
+{%- if place.description %}
+<span class="place__gloss">{{ place.description }}</span>
+{%- endif %}
+<span class="place__meta"><b>{{ place.distance }}</b> · {{ p.t("cat." + place.category) }}</span>
+</li>
 {%- endfor %}
 </ul>
 </div>
+</div>
+<script type="module" src="/assets/map.js"></script>
 </section>

@@ -5,3 +5,4 @@ _site/
 .cache/
 __pycache__/
 .pytest_cache/
+_maps/

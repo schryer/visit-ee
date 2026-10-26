@@ -7,7 +7,8 @@
     "light": "media/logo/logo-red.png",
     "dark": "media/logo/logo-cream.png",
     "width": 966,
-    "height": 486
+    "height": 486,
+    "mark": "media/logo/bird-red.png"
   },
   "geo": {
     "lat": 57.729039,
@@ -377,55 +378,84 @@
   ],
   "nearby": [
     {
-      "id": "hydro_museum",
-      "distance_m": 50
+      "place": "hudrotookoda",
+      "walk_m": 50
     },
     {
-      "id": "valley_bridge",
-      "distance_m": 100
+      "place": "oobikuorg",
+      "walk_m": 100
     },
     {
-      "id": "lakes",
-      "distance_m": [
-        100,
-        500
-      ]
+      "place": "liinjarv",
+      "walk_m": 100
     },
     {
-      "id": "water_ram",
-      "distance_m": 600
+      "place": "suurjarv",
+      "walk_m": 500
     },
     {
-      "id": "ancient_farm",
-      "distance_m": 650
+      "place": "vesioinas",
+      "walk_m": 600
     },
     {
-      "id": "pesapuu",
-      "distance_m": 750
+      "place": "muinastalu",
+      "walk_m": 650
     },
     {
-      "id": "munamagi",
-      "distance_m": 9000
+      "place": "pesapuu",
+      "walk_m": 750
     },
     {
-      "id": "luhasoo",
-      "distance_m": 13000
+      "place": "linnamagi"
     },
     {
-      "id": "kreutzwald",
-      "distance_m": 15000
+      "place": "kirik"
     },
     {
-      "id": "paganamaa",
-      "distance_m": 20000
+      "place": "munamagi",
+      "road_km": 9
     },
     {
-      "id": "karula",
-      "distance_m": 40000
+      "place": "hinni"
     },
     {
-      "id": "taevaskoda",
-      "distance_m": 49000
+      "place": "viitina"
+    },
+    {
+      "place": "luhasoo",
+      "road_km": 13
+    },
+    {
+      "place": "kreutzwald",
+      "road_km": 15
+    },
+    {
+      "place": "kultuurikoda",
+      "road_km": 15
+    },
+    {
+      "place": "paganamaa",
+      "road_km": 20
+    },
+    {
+      "place": "karula",
+      "road_km": 40
+    },
+    {
+      "place": "pokumaa",
+      "road_km": 40
+    },
+    {
+      "place": "maanteemuuseum",
+      "road_km": 41
+    },
+    {
+      "place": "taevaskoda",
+      "road_km": 49
+    },
+    {
+      "place": "meenikunno",
+      "road_km": 49
     }
   ],
   "redirects": {
@@ -460,6 +490,14 @@
         "id": "teacher",
         "eur": 25
       }
+    ]
+  },
+  "map": {
+    "packs": [
+      "louna-eesti/rouge",
+      "louna-eesti/voru-vald",
+      "louna-eesti/antsla",
+      "louna-eesti/voru"
     ]
   }
 }

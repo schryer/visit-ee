@@ -13,7 +13,7 @@ from xml.etree import ElementTree
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-scenarios("languages.feature", "translations.feature", "seo.feature")
+scenarios("languages.feature", "translations.feature", "seo.feature", "nearby.feature")
 
 ROOT = Path(__file__).resolve().parents[2]
 PREVIEW_URL = "https://temp.schryer.eu"
@@ -70,6 +70,43 @@ class Page(HTMLParser):
             self.lang_text.append((lang, data.strip()))
 
 
+class Places(HTMLParser):
+    """The nearby list of a page: each place's id, name, description and
+    distance, in order."""
+
+    PARTS = {"place__name": "name", "place__gloss": "description", "place__meta": "meta"}
+
+    def __init__(self, text: str) -> None:
+        super().__init__()
+        self.rows: list[dict[str, str]] = []
+        self._part = ""
+        self.feed(text)
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        a = {k: v or "" for k, v in attrs}
+        if tag == "li" and "data-place" in a:
+            self.rows.append({"id": a["id"], "href": ""})
+        part = self.PARTS.get(a.get("class", ""))
+        if part and self.rows:
+            self._part = part
+            self.rows[-1][part] = ""
+            if tag == "a":
+                self.rows[-1]["href"] = a.get("href", "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in ("a", "span"):
+            self._part = ""
+
+    def handle_data(self, data: str) -> None:
+        if self._part and self.rows:
+            self.rows[-1][self._part] += data
+
+    def find(self, name: str) -> dict[str, str]:
+        row = next((r for r in self.rows if r.get("name", "").strip() == name), None)
+        assert row, f"no place {name!r} in {[r.get('name') for r in self.rows]}"
+        return row
+
+
 class Build:
     def __init__(self, out: Path, base_url: str) -> None:
         self.out = out
@@ -83,6 +120,11 @@ class Build:
         path = self.file(url)
         assert path.is_file(), f"no page {url} in {self.out}"
         return Page(path.read_text(encoding="utf-8"))
+
+    def places(self, url: str) -> Places:
+        path = self.file(url)
+        assert path.is_file(), f"no page {url} in {self.out}"
+        return Places(path.read_text(encoding="utf-8"))
 
     def pages(self) -> list[str]:
         return sorted(
@@ -128,6 +170,7 @@ def a_copy_of_the_content(tmp_path: Path) -> Path:
     content = tmp_path / "content"
     shutil.copytree(ROOT / "i18n", content / "i18n")
     shutil.copytree(ROOT / "sites", content / "sites")
+    shutil.copytree(ROOT / "places", content / "places")
     return content
 
 
@@ -156,6 +199,28 @@ def set_site_string(content: Path, key: str, site_id: str, value: str) -> None:
     path.write_text(json.dumps(strings, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+@given(parsers.parse('the English description of the place "{place}" is removed'))
+def remove_place_description(content: Path, place: str) -> None:
+    _remove_key(content / "i18n" / "places" / "en.json", place)
+
+
+@given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))
+def list_place(content: Path, site_id: str, place: str) -> None:
+    path = content / "sites" / site_id / "site.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["nearby"].append({"place": place})
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+@given(parsers.parse('a folder of map packs with "{a}" and "{b}"'), target_fixture="maps")
+def map_packs(tmp_path: Path, a: str, b: str) -> Path:
+    maps = tmp_path / "maps"
+    for name in (a, b):
+        (maps / name).parent.mkdir(parents=True, exist_ok=True)
+        (maps / name).write_bytes(b"test")
+    return maps
+
+
 # --- when --------------------------------------------------------------------
 
 
@@ -167,6 +232,11 @@ def out(tmp_path: Path) -> Path:
 @when("I build it", target_fixture="result")
 def i_build_it(run, binary, content: Path, out: Path):
     return build(run, binary, content, out)
+
+
+@when("I build it with those maps", target_fixture="result")
+def i_build_it_with_maps(run, binary, content: Path, out: Path, maps: Path):
+    return build(run, binary, content, out, "--maps", maps)
 
 
 @pytest.fixture
@@ -220,6 +290,46 @@ def there_is_no_page(site: Build, url: str) -> None:
 @then(parsers.parse('the page "{url}" does not link to "{target}"'))
 def page_does_not_link(site: Build, url: str, target: str) -> None:
     assert target not in site.page(url).links
+
+
+# --- then: places nearby -----------------------------------------------------
+
+
+@then(parsers.parse('the page "{url}" lists "{name}" at "{distance}"'))
+def lists_place_at(site: Build, url: str, name: str, distance: str) -> None:
+    meta = site.places(url).find(name)["meta"]
+    assert meta.split("·")[0].strip() == distance, meta
+
+
+@then(parsers.parse('the page "{url}" lists "{name}" first'))
+def lists_place_first(site: Build, url: str, name: str) -> None:
+    assert site.places(url).rows[0]["name"].strip() == name
+
+
+@then(parsers.parse('the page "{url}" describes "{name}" as "{text}"'))
+def describes_place(site: Build, url: str, name: str, text: str) -> None:
+    assert site.places(url).find(name).get("description", "").strip() == text
+
+
+@then(parsers.parse('the page "{url}" lists "{name}" without a description'))
+def lists_place_bare(site: Build, url: str, name: str) -> None:
+    assert "description" not in site.places(url).find(name)
+
+
+@then(parsers.parse('the page "{url}" has the place "{place}" at "{href}"'))
+def place_link(site: Build, url: str, place: str, href: str) -> None:
+    row = next(r for r in site.places(url).rows if r["id"] == place)
+    assert row["href"] == href
+
+
+@then(parsers.parse('the build has "{url}"'))
+def build_has(site: Build, url: str) -> None:
+    assert site.file(url).is_file(), url
+
+
+@then(parsers.parse('the build does not have "{url}"'))
+def build_lacks(site: Build, url: str) -> None:
+    assert not site.file(url).exists(), url
 
 
 # --- then: search engines ----------------------------------------------------
