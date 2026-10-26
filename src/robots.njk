@@ -1,0 +1,13 @@
+---
+permalink: /robots.txt
+eleventyExcludeFromCollections: true
+---
+User-agent: *
+{% if build.preview -%}
+# A preview build: keep it out of search results.
+Disallow: /
+{%- else -%}
+Allow: /
+
+Sitemap: {{ build.url }}/sitemap.xml
+{%- endif %}

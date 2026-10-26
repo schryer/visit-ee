@@ -1,0 +1,41 @@
+# Publishes the sites on every push to main: to Cloudflare Pages
+# (visit.schryer.eu) and to the web server's standby copy, both managed by
+# schryer/schryer-eu-infra, like the recipes site.
+#
+# It stays off until the hosting exists: set the repository variable
+# VISIT_EE_DEPLOY to "on" once the Pages project, the deploy key and the
+# secrets below are in place.
+name: deploy
+
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: vars.VISIT_EE_DEPLOY == 'on'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - run: npm ci
+      # visit.schryer.eu is a preview: it asks search engines to keep out
+      # until the site moves to visit.ee and builds with --env production.
+      - run: bin/visit-ee build --out _site --env preview --url https://visit.schryer.eu
+      - uses: schryer/pubkit/actions/deploy-static@v0.14.0
+        with:
+          dir: _site
+          # The key is forced through rrsync into the site's folder on the
+          # server, so the destination is relative to that folder.
+          deploy-key: ${{ secrets.VISIT_EE_DEPLOY_KEY }}
+          deploy-target: deploy@schryer.eu:./
+          # A token that may deploy Cloudflare Pages and nothing else.
+          cloudflare-api-token: ${{ secrets.CLOUDFLARE_GITHUB_API_TOKEN }}
+          cloudflare-account-id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          cloudflare-project: visit-ee

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Builds or serves the visit.ee sites: see lib/cli.js.
+exec node "$(dirname "$0")/../lib/cli.js" "$@"

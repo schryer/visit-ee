@@ -1,0 +1,85 @@
+{%- set id = p.stay.id -%}
+{%- set key = "stay." + id -%}
+{%- if p.stay.gallery.length %}
+<section class="gallery gallery--{{ p.stay.gallery.length if p.stay.gallery.length < 5 else 'many' }}" aria-label="{{ p.t('stay.photos') }}">
+{%- asyncEach photo in p.stay.gallery %}
+{% picture p.site, photo, p.t(key + ".gallery." + loop.index), ("(min-width: 60rem) 50vw, 100vw" if loop.first else "(min-width: 60rem) 25vw, 50vw"), { eager: loop.first, widths: [400, 800, 1200], class: "gallery__img" } %}
+{%- endeach %}
+</section>
+{%- else %}
+<div class="wrap"><div class="gallery-empty">{{ p.t("stay.photos_to_come") }}</div></div>
+{%- endif %}
+
+<div class="wrap stay">
+<article class="stay__main">
+<header>
+<p class="eyebrow">{{ p.t("stay.group." + p.stay.group) }}</p>
+<h1>{{ p.t(key + ".title") }}</h1>
+{%- if p.local(key + ".title") %}
+<p class="stay__local" lang="{{ p.site.source_language }}">{{ p.local(key + ".title") }}</p>
+{%- endif %}
+<p class="stay__meta">{{ p.t(key + ".meta") }}</p>
+</header>
+<p class="stay__body">{{ p.t(key + ".body") }}</p>
+
+{%- if p.stay.units %}
+<section>
+<h2>{{ p.t("stay.units") }}</h2>
+<div class="units">
+{%- for unit in p.stay.units %}
+<div class="unit">
+<h3>{{ p.t(key + ".unit." + unit.id + ".name") }}
+{%- if p.local(key + ".unit." + unit.id + ".name") %} <span lang="{{ p.site.source_language }}">· {{ p.local(key + ".unit." + unit.id + ".name") }}</span>{% endif %}</h3>
+{%- if unit.sleeps %}<p class="unit__sleeps">{{ p.t("stay.sleeps", { n: unit.sleeps }) }}</p>{% endif %}
+<p>{{ p.t(key + ".unit." + unit.id + ".beds") }}</p>
+</div>
+{%- endfor %}
+</div>
+</section>
+{%- endif %}
+
+{%- if p.stay.amenities.length %}
+<section>
+<h2>{{ p.t("stay.amenities") }}</h2>
+<ul class="ticks">
+{%- for a in p.stay.amenities %}
+<li>{{ p.t("amenity." + a) }}</li>
+{%- endfor %}
+</ul>
+</section>
+{%- endif %}
+
+<section>
+<h2>{{ p.t("stay.prices") }}</h2>
+{%- if p.stay.prices.length %}
+<table class="prices">
+<tbody>
+{%- for price in p.stay.prices %}
+<tr><th scope="row">{{ p.t(key + ".price." + price.id) }}</th><td>{{ p.money(price.eur) }}</td></tr>
+{%- endfor %}
+</tbody>
+</table>
+<p class="section__note">{{ p.t("stay.children") }}{% if p.stay.discount_nights %} {{ p.t("stay.discount", { n: p.stay.discount_nights }) }}{% endif %}</p>
+{%- else %}
+<p>{{ p.t("stay.price_on_request") }}</p>
+{%- endif %}
+</section>
+</article>
+
+<aside class="stay__aside">
+<div class="book-box">
+<h2>{{ p.t("book.heading") }}</h2>
+<p>{{ p.t("book.body.booking") if p.site.booking_url else p.t("book.body.email") }}</p>
+{% include "book-link.njk" %}
+<p class="book-box__contact"><a href="mailto:{{ p.site.email }}">{{ p.site.email }}</a> · <a href="tel:{{ p.site.phone }}">{{ p.site.phone_display }}</a></p>
+</div>
+<nav class="other-stays" aria-label="{{ p.t('stay.other') }}">
+<h2>{{ p.t("stay.other") }}</h2>
+<ul>
+{%- for other in p.site.stays %}{% if other.id != id %}
+<li><a href="{{ p.stayUrl(other.id) }}">{{ p.t("stay." + other.id + ".title") }}</a></li>
+{%- endif %}{% endfor %}
+</ul>
+</nav>
+</aside>
+</div>

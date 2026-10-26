@@ -1,0 +1,465 @@
+{
+  "id": "oobikuoru",
+  "region": "south-estonia",
+  "town": "rouge",
+  "source_language": "et",
+  "logo": {
+    "light": "media/logo/logo-red.png",
+    "dark": "media/logo/logo-cream.png",
+    "width": 966,
+    "height": 486
+  },
+  "geo": {
+    "lat": 57.729039,
+    "lng": 26.929422
+  },
+  "address": {
+    "street": "Ööbikuoru 5",
+    "postal_code": "66201",
+    "locality": "Rõuge",
+    "region": "Võrumaa",
+    "country": "EE"
+  },
+  "phone": "+3725218784",
+  "phone_display": "+372 521 8784",
+  "email": "info@visit.ee",
+  "spoken_languages": [
+    "et",
+    "ru",
+    "fi",
+    "en"
+  ],
+  "booking_url": null,
+  "seasons": [
+    {
+      "id": "summer",
+      "kind": "image",
+      "image": "media/photos/meadow-summer.jpg"
+    },
+    {
+      "id": "autumn",
+      "kind": "video",
+      "poster": "media/video/camp-poster.jpg",
+      "sources": [
+        {
+          "src": "media/video/camp-720.webm",
+          "type": "video/webm"
+        },
+        {
+          "src": "media/video/camp-720.mp4",
+          "type": "video/mp4"
+        }
+      ]
+    }
+  ],
+  "default_season": "autumn",
+  "facts": [
+    {
+      "id": "lakes",
+      "value": "7"
+    },
+    {
+      "id": "nearest_lake",
+      "distance_m": 200
+    },
+    {
+      "id": "deepest"
+    },
+    {
+      "id": "tower",
+      "distance_m": 750
+    }
+  ],
+  "stays": [
+    {
+      "id": "large-houses",
+      "group": "village",
+      "photo": "media/photos/kasega-house.jpg",
+      "gallery": [
+        "media/photos/kasega-house.jpg",
+        "media/photos/valley-from-kasega.jpg",
+        "media/photos/kasega-terrace.jpg",
+        "media/photos/kasega-bedroom.jpg",
+        "media/photos/kasega-kitchen.jpg",
+        "media/photos/kasega-bathroom.jpg"
+      ],
+      "sleeps": [
+        6,
+        8
+      ],
+      "bedrooms": 2,
+      "bathroom": "private",
+      "kitchen": true,
+      "from_eur": 70,
+      "units": [
+        {
+          "id": "big",
+          "sleeps": 6
+        },
+        {
+          "id": "kasega",
+          "sleeps": 8
+        }
+      ],
+      "amenities": [
+        "kitchen",
+        "terrace",
+        "shower_wc",
+        "heating",
+        "grill",
+        "tv_wifi"
+      ],
+      "prices": [
+        {
+          "id": "whole",
+          "eur": [
+            100,
+            150
+          ]
+        },
+        {
+          "id": "room2",
+          "eur": 70
+        },
+        {
+          "id": "room3",
+          "eur": 90
+        },
+        {
+          "id": "room4",
+          "eur": 100
+        }
+      ],
+      "discount_nights": 3
+    },
+    {
+      "id": "family-house",
+      "group": "village",
+      "photo": "media/photos/family-house.jpg",
+      "gallery": [
+        "media/photos/family-house.jpg"
+      ],
+      "sleeps": [
+        6,
+        6
+      ],
+      "bedrooms": 1,
+      "bathroom": "private",
+      "kitchen": true,
+      "from_eur": 100,
+      "amenities": [
+        "kitchen",
+        "shower_wc",
+        "sofa_bed",
+        "grill",
+        "tv_wifi"
+      ],
+      "prices": [
+        {
+          "id": "night",
+          "eur": [
+            100,
+            140
+          ]
+        }
+      ],
+      "discount_nights": 2
+    },
+    {
+      "id": "small-houses",
+      "group": "village",
+      "photo": "media/photos/red-house.jpg",
+      "gallery": [
+        "media/photos/red-house.jpg"
+      ],
+      "sleeps": [
+        6,
+        8
+      ],
+      "bedrooms": 2,
+      "bathroom": "private",
+      "kitchen": false,
+      "from_eur": 30,
+      "units": [
+        {
+          "id": "yellow"
+        },
+        {
+          "id": "red"
+        }
+      ],
+      "amenities": [
+        "shower_wc",
+        "seating",
+        "grill"
+      ],
+      "prices": [
+        {
+          "id": "whole",
+          "eur": [
+            90,
+            120
+          ]
+        },
+        {
+          "id": "person1",
+          "eur": 30
+        },
+        {
+          "id": "person2",
+          "eur": 50
+        },
+        {
+          "id": "person3",
+          "eur": 65
+        }
+      ],
+      "discount_nights": 3
+    },
+    {
+      "id": "camping-cabins",
+      "group": "campsite",
+      "photo": "media/photos/camping-cabin.jpg",
+      "gallery": [
+        "media/photos/camping-cabin.jpg",
+        "media/photos/camping-cabin-inside.jpg",
+        "media/photos/meadow-summer.jpg"
+      ],
+      "sleeps": [
+        4,
+        4
+      ],
+      "bathroom": "shared",
+      "kitchen": false,
+      "from_eur": 30,
+      "amenities": [
+        "heating",
+        "balcony",
+        "shared_facilities",
+        "summer_kitchen",
+        "campfire"
+      ],
+      "prices": [
+        {
+          "id": "person1",
+          "eur": 30
+        },
+        {
+          "id": "person2",
+          "eur": 50
+        },
+        {
+          "id": "person3",
+          "eur": 60
+        },
+        {
+          "id": "person4",
+          "eur": 65
+        },
+        {
+          "id": "linen",
+          "eur": 5
+        }
+      ]
+    },
+    {
+      "id": "lakeside-camping",
+      "group": "campsite",
+      "photo": null,
+      "gallery": [],
+      "bathroom": "shared",
+      "kitchen": false,
+      "from_eur": null,
+      "amenities": [
+        "shared_facilities",
+        "summer_kitchen",
+        "campfire"
+      ],
+      "prices": []
+    }
+  ],
+  "extras": [
+    {
+      "id": "sauna",
+      "accent": "red",
+      "prices": [
+        {
+          "id": "small_stove",
+          "eur": 30
+        },
+        {
+          "id": "big_stove",
+          "eur": 140
+        }
+      ]
+    },
+    {
+      "id": "boats",
+      "accent": "blue",
+      "prices": [
+        {
+          "id": "pedal_boat",
+          "eur": 10
+        },
+        {
+          "id": "rowing_boat",
+          "eur": 10
+        }
+      ]
+    },
+    {
+      "id": "gatherings",
+      "accent": "olive"
+    },
+    {
+      "id": "class_trips",
+      "accent": "amber",
+      "from_eur": 15
+    }
+  ],
+  "flights": [
+    {
+      "id": "camp",
+      "poster": "media/video/camp-poster.jpg",
+      "sources": [
+        {
+          "src": "media/video/camp-720.webm",
+          "type": "video/webm"
+        },
+        {
+          "src": "media/video/camp-720.mp4",
+          "type": "video/mp4"
+        }
+      ]
+    },
+    {
+      "id": "tower_to_camp",
+      "poster": "media/video/tower-to-camp-poster.jpg",
+      "sources": [
+        {
+          "src": "media/video/tower-to-camp-720.webm",
+          "type": "video/webm"
+        },
+        {
+          "src": "media/video/tower-to-camp-720.mp4",
+          "type": "video/mp4"
+        }
+      ]
+    },
+    {
+      "id": "tower",
+      "poster": "media/video/viewing-tower-poster.jpg",
+      "sources": [
+        {
+          "src": "media/video/viewing-tower-720.webm",
+          "type": "video/webm"
+        },
+        {
+          "src": "media/video/viewing-tower-720.mp4",
+          "type": "video/mp4"
+        }
+      ]
+    },
+    {
+      "id": "villa",
+      "poster": "media/video/villa-poster.jpg",
+      "sources": [
+        {
+          "src": "media/video/villa-720.webm",
+          "type": "video/webm"
+        },
+        {
+          "src": "media/video/villa-720.mp4",
+          "type": "video/mp4"
+        }
+      ]
+    }
+  ],
+  "nearby": [
+    {
+      "id": "hydro_museum",
+      "distance_m": 50
+    },
+    {
+      "id": "valley_bridge",
+      "distance_m": 100
+    },
+    {
+      "id": "lakes",
+      "distance_m": [
+        100,
+        500
+      ]
+    },
+    {
+      "id": "water_ram",
+      "distance_m": 600
+    },
+    {
+      "id": "ancient_farm",
+      "distance_m": 650
+    },
+    {
+      "id": "pesapuu",
+      "distance_m": 750
+    },
+    {
+      "id": "munamagi",
+      "distance_m": 9000
+    },
+    {
+      "id": "luhasoo",
+      "distance_m": 13000
+    },
+    {
+      "id": "kreutzwald",
+      "distance_m": 15000
+    },
+    {
+      "id": "paganamaa",
+      "distance_m": 20000
+    },
+    {
+      "id": "karula",
+      "distance_m": 40000
+    },
+    {
+      "id": "taevaskoda",
+      "distance_m": 49000
+    }
+  ],
+  "redirects": {
+    "/puhkekula/": "#stay",
+    "/laagriplats/": "camping-cabins",
+    "/lisavoimalused/": "#extras",
+    "/hinnakiri/": "#stay",
+    "/klassireis-2023/": "groups",
+    "/pildid/": "#air",
+    "/kontakt/": "#contact"
+  },
+  "groups": {
+    "photo": "media/photos/camping-cabin.jpg",
+    "prices": [
+      {
+        "id": "cabin",
+        "eur": 15
+      },
+      {
+        "id": "small_house",
+        "eur": 20
+      },
+      {
+        "id": "large_house",
+        "eur": 25
+      },
+      {
+        "id": "linen",
+        "eur": 5
+      },
+      {
+        "id": "teacher",
+        "eur": 25
+      }
+    ]
+  }
+}

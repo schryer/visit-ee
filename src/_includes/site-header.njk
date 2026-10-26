@@ -1,0 +1,19 @@
+{%- set onSite = p.kind == "site" -%}
+{%- set base = "" if onSite else p.siteUrl -%}
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="site-header__logo" href="{{ p.siteUrl }}" aria-label="{{ p.t('site.name') }}">
+<img src="{{ p.media(p.site.logo.light) }}" alt="{{ p.t('site.logo_alt') }}" width="{{ p.site.logo.width }}" height="{{ p.site.logo.height }}">
+</a>
+<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav" hidden
+  data-open="{{ p.t('menu.open') }}" data-close="{{ p.t('menu.close') }}">{{ p.t("menu.open") }}</button>
+<nav class="site-nav" id="site-nav" aria-label="{{ p.t('site.short_name') }}">
+<a href="{{ base }}#stay"{% if p.kind == "stay" %} aria-current="page"{% endif %}>{{ p.t("nav.stay") }}</a>
+<a href="{{ base }}#extras">{{ p.t("nav.extras") }}</a>
+<a href="{{ p.groupsUrl }}"{% if p.kind == "groups" %} aria-current="page"{% endif %}>{{ p.t("nav.groups") }}</a>
+<a href="{{ base }}#nearby">{{ p.t("nav.nearby") }}</a>
+<a href="#contact">{{ p.t("nav.contact") }}</a>
+</nav>
+{% include "book-link.njk" %}
+</div>
+</header>

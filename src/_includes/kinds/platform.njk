@@ -1,0 +1,29 @@
+<section class="platform-hero">
+<div class="wrap platform-hero__inner">
+<div>
+<p class="eyebrow">{{ p.t("platform.tagline") }}</p>
+<h1>{{ p.t("platform.title") }}</h1>
+<p class="platform-hero__intro">{{ p.t("platform.intro") }}</p>
+</div>
+<div class="map-slot map-slot--platform" data-visit-map data-lang="{{ p.lang }}"><span>{{ p.t("platform.map") }}</span></div>
+</div>
+</section>
+<section class="wrap section" aria-labelledby="places-title">
+<h2 id="places-title">{{ p.t("platform.places") }}</h2>
+<div class="cards">
+{%- asyncEach site in visit.sites %}{% set sp = p.pageFor(site.id) %}{% if sp %}
+<a class="card place-card" href="{{ sp.url }}">
+{% picture site, site.seasons[0].image, sp.t("hero.summer.alt"), "(min-width: 60rem) 33vw, 100vw", { widths: [400, 800], class: "card__img" } %}
+<div class="card__body">
+<img class="place-card__logo" src="{{ sp.media(site.logo.light) }}" alt="" width="{{ site.logo.width }}" height="{{ site.logo.height }}" loading="lazy">
+<h3 class="card__title">{{ sp.t("site.name") }}</h3>
+<p class="card__meta">{{ sp.t("site.place_line") }}</p>
+</div>
+</a>
+{%- endif %}{% endeach %}
+<div class="card host-card">
+<h3 class="card__title">{{ p.t("platform.host.title") }}</h3>
+<p>{{ p.t("platform.host.body") }}</p>
+</div>
+</div>
+</section>

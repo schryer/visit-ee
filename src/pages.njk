@@ -1,0 +1,11 @@
+---
+# Every page of every site in every language it is built in: the list
+# comes from lib/content.js, and _includes/kinds/ has a template per kind.
+pagination:
+  data: visit.pages
+  size: 1
+  alias: p
+permalink: "{{ p.url }}index.html"
+eleventyExcludeFromCollections: true
+---
+{% include "base.njk" %}

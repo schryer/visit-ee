@@ -1,0 +1,25 @@
+<div class="platform-bar">
+<div class="wrap platform-bar__inner">
+<nav class="crumbs" aria-label="{{ p.t('breadcrumb') }}">
+<ol>
+{%- for step in p.trail %}
+<li>
+{%- if loop.last %}<span aria-current="page">{{ step.name }}</span>
+{%- elif step.url %}<a href="{{ step.url }}"{% if loop.first %} class="crumbs__home"{% endif %}>{{ step.name }}</a>
+{%- else %}<span>{{ step.name }}</span>{% endif -%}
+</li>
+{%- endfor %}
+</ol>
+</nav>
+{%- if p.alternates.length > 1 %}
+<details class="lang">
+<summary aria-label="{{ p.t('lang.current', { name: p.language.name }) }}">{{ p.lang | upper }}</summary>
+<ul>
+{%- for a in p.alternates %}
+<li><a href="{{ a.url }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}"{% if a.lang == p.lang %} aria-current="true"{% endif %}>{{ a.name }}</a></li>
+{%- endfor %}
+</ul>
+</details>
+{%- endif %}
+</div>
+</div>

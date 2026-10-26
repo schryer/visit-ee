@@ -1,0 +1,42 @@
+<div class="wrap stay">
+<article class="stay__main">
+<header>
+<p class="eyebrow">{{ p.t("site.short_name") }}</p>
+<h1>{{ p.t("groups.title") }}</h1>
+{%- if p.local("groups.title") %}
+<p class="stay__local" lang="{{ p.site.source_language }}">{{ p.local("groups.title") }}</p>
+{%- endif %}
+</header>
+<p class="stay__body">{{ p.t("groups.intro") }}</p>
+{% picture p.site, p.site.groups.photo, p.t("stay.camping-cabins.photo_alt"), "(min-width: 60rem) 60vw, 100vw", { widths: [800, 1200], class: "groups__img" } %}
+<section>
+<h2>{{ p.t("groups.cabins.title") }}</h2>
+<p>{{ p.t("groups.cabins.body") }} <a href="{{ p.stayUrl('camping-cabins') }}">{{ p.t("stay.camping-cabins.link") }}</a></p>
+</section>
+<section>
+<h2>{{ p.t("groups.houses.title") }}</h2>
+<p>{{ p.t("groups.houses.body") }}</p>
+</section>
+<section>
+<h2>{{ p.t("groups.prices.title") }}</h2>
+<p class="todo">{{ p.t("groups.prices.note") }}</p>
+<table class="prices">
+<tbody>
+{%- for price in p.site.groups.prices %}
+<tr><th scope="row">{{ p.t("groups.price." + price.id) }}</th><td>{{ p.money(price.eur) }}</td></tr>
+{%- endfor %}
+</tbody>
+</table>
+<p class="section__note">{{ p.t("groups.linen_note") }}</p>
+</section>
+</article>
+<aside class="stay__aside">
+<div class="book-box">
+<h2>{{ p.t("book.heading") }}</h2>
+<p>{{ p.t("book.body.email") }}</p>
+<a class="button button--book" href="mailto:{{ p.site.email }}?subject={{ p.t('groups.title') | urlencode }}">{{ p.t("book.ask") }}</a>
+<p class="book-box__contact"><a href="tel:{{ p.site.phone }}">{{ p.site.phone_display }}</a></p>
+</div>
+</aside>
+</div>
+{% include "nearby.njk" %}

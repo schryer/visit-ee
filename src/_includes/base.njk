@@ -1,0 +1,70 @@
+{%- if p.kind == "platform" -%}
+  {%- set title = "visit.ee: " + p.t("platform.tagline") -%}
+  {%- set description = p.t("platform.meta_description") -%}
+  {%- set image = "" -%}
+{%- else -%}
+  {%- if p.kind == "site" -%}
+    {%- set title = p.t("meta.title") -%}
+    {%- set description = p.t("meta.description") -%}
+  {%- elif p.kind == "stay" -%}
+    {%- set title = p.t("stay." + p.stay.id + ".title") + " · " + p.t("site.name") -%}
+    {%- set description = p.t("stay." + p.stay.id + ".summary") -%}
+  {%- else -%}
+    {%- set title = p.t("groups.title") + " · " + p.t("site.name") -%}
+    {%- set description = p.t("groups.intro") -%}
+  {%- endif -%}
+  {%- set imageSrc = (p.stay.photo if p.stay and p.stay.photo) or (p.site.groups.photo if p.kind == "groups") or p.site.seasons[0].image -%}
+  {%- set image -%}{% imageUrl p.site, imageSrc %}{%- endset -%}
+{%- endif -%}
+<!doctype html>
+<html lang="{{ p.lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+{%- if build.preview %}
+<meta name="robots" content="noindex, nofollow">
+{%- endif %}
+<link rel="canonical" href="{{ p.canonical }}">
+{%- for a in p.alternates %}
+<link rel="alternate" hreflang="{{ a.lang }}" href="{{ p.absolute(a.url) }}">
+{%- endfor %}
+<link rel="alternate" hreflang="x-default" href="{{ p.absolute(p.xDefault) }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ p.t('site.name') if p.site else 'visit.ee' }}">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ p.canonical }}">
+<meta property="og:locale" content="{{ p.language.locale }}">
+{%- for a in p.alternates %}{% if a.lang != p.lang %}
+<meta property="og:locale:alternate" content="{{ a.locale }}">
+{%- endif %}{% endfor %}
+{%- if image %}
+<meta property="og:image" content="{{ image | trim }}">
+<meta name="twitter:card" content="summary_large_image">
+{%- endif %}
+<meta name="theme-color" content="#273015">
+{%- if p.site %}
+<link rel="icon" type="image/png" href="{{ p.media('media/logo/bird-red.png') }}">
+{%- else %}
+<link rel="icon" href="/assets/visit-ee.svg" type="image/svg+xml">
+{%- endif %}
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/site.js" defer></script>
+<script type="application/ld+json">{{ p.structuredData(image | trim) | json | safe }}</script>
+</head>
+<body class="kind-{{ p.kind }}">
+<a class="skip" href="#main">{{ p.t("skip") }}</a>
+{%- if build.preview %}
+<p class="preview-note">{{ p.t("preview.note") }}</p>
+{%- endif %}
+{% include "platform-bar.njk" %}
+{% if p.site %}{% include "site-header.njk" %}{% endif %}
+<main id="main">
+{% include "kinds/" + p.kind + ".njk" %}
+</main>
+{% if p.site %}{% include "site-footer.njk" %}{% else %}{% include "platform-footer.njk" %}{% endif %}
+</body>
+</html>

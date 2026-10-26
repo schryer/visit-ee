@@ -1,0 +1,40 @@
+{#- The season hero: one panel per season that has media. Without
+    JavaScript the default season shows; site.js adds the switch, picks
+    the season of the current month, and plays video only when the
+    visitor has not asked for reduced motion. -#}
+<section class="hero" data-season-hero data-default="{{ p.site.default_season }}">
+<div class="hero__media">
+{%- asyncEach s in p.site.seasons %}
+<div class="hero__panel" data-season="{{ s.id }}"{% if s.id != p.site.default_season %} hidden{% endif %}>
+{%- if s.kind == "video" %}
+<video muted loop playsinline preload="none" poster="{{ p.media(s.poster) }}" aria-hidden="true">
+{%- for src in s.sources %}
+<source src="{{ p.media(src.src) }}" type="{{ src.type }}">
+{%- endfor %}
+</video>
+{%- else %}
+{% picture p.site, s.image, p.t("hero." + s.id + ".alt"), "100vw", { eager: s.id == p.site.default_season, widths: [800, 1280, 1920] } %}
+{%- endif %}
+</div>
+{%- endeach %}
+</div>
+<div class="wrap hero__overlay">
+<div class="hero__card">
+<p class="hero__place">{{ p.t("site.place_line") }}</p>
+<h1>{{ p.t("site.name") }}</h1>
+{%- if p.local("site.name") %}
+<p class="hero__local" lang="{{ p.site.source_language }}">{{ p.local("site.name") }}</p>
+{%- endif %}
+{%- for s in p.site.seasons %}
+<p class="hero__line" data-season="{{ s.id }}"{% if s.id != p.site.default_season %} hidden{% endif %}>{{ p.t("hero." + s.id + ".line") }}</p>
+{%- endfor %}
+</div>
+{%- if p.site.seasons.length > 1 %}
+<div class="season-switch" role="group" aria-label="{{ p.t('season.label') }}" hidden>
+{%- for s in p.site.seasons %}
+<button type="button" data-season-pick="{{ s.id }}" aria-pressed="{{ 'true' if s.id == p.site.default_season else 'false' }}">{{ p.t("season." + s.id) }}</button>
+{%- endfor %}
+</div>
+{%- endif %}
+</div>
+</section>

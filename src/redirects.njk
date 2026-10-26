@@ -1,0 +1,10 @@
+---
+# Cloudflare Pages redirects: the old WordPress addresses of each site,
+# which lived at the root of its domain, to their new pages. The web
+# server standby does not read this file.
+permalink: /_redirects
+eleventyExcludeFromCollections: true
+---
+{%- for r in visit.redirects %}
+{{ r.from }} {{ r.to }} 301
+{%- endfor %}

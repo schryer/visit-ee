@@ -1,0 +1,21 @@
+{
+  "name": "visit-ee",
+  "version": "0.1.0",
+  "description": "visit.ee: static sites for places to stay and things to do in Estonia, one per host, in every language they are translated into.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "private": true,
+  "bin": { "visit-ee": "bin/visit-ee" },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "bin/visit-ee build",
+    "serve": "bin/visit-ee serve"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "3.1.7",
+    "@11ty/eleventy-img": "7.0.0",
+    "@fontsource-variable/source-serif-4": "5.3.0",
+    "@fontsource/barlow-condensed": "5.3.0",
+    "@fontsource/source-sans-3": "5.3.0"
+  }
+}

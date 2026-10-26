@@ -1,0 +1,32 @@
+<footer class="site-footer" id="contact">
+<div class="wrap site-footer__inner">
+<div class="site-footer__brand">
+<img src="{{ p.media(p.site.logo.dark) }}" alt="{{ p.t('site.logo_alt') }}" width="{{ p.site.logo.width }}" height="{{ p.site.logo.height }}" loading="lazy">
+<span>{{ p.t("site.name") }}</span>
+{%- if p.local("site.name") %}<span lang="{{ p.site.source_language }}">{{ p.local("site.name") }}</span>{% endif %}
+</div>
+<address>
+<span class="site-footer__head">{{ p.t("footer.find") }}</span>
+<span>{{ p.site.address.street }}, {{ p.site.address.locality }} {{ p.site.address.postal_code }}</span>
+<span>{{ p.site.address.region }}, {{ p.country(p.site.address.country) }}</span>
+<a href="https://www.openstreetmap.org/directions?to={{ p.site.geo.lat }}%2C{{ p.site.geo.lng }}#map=15/{{ p.site.geo.lat }}/{{ p.site.geo.lng }}" rel="noopener">{{ p.t("footer.directions") }}</a>
+</address>
+<div class="site-footer__contact">
+<span class="site-footer__head">{{ p.t("footer.contact") }}</span>
+<a href="tel:{{ p.site.phone }}">{{ p.site.phone_display }}</a>
+<a href="mailto:{{ p.site.email }}">{{ p.site.email }}</a>
+<span>{{ p.t("footer.speak", { languages: p.languageList(p.site.spoken_languages) }) }}</span>
+</div>
+<div class="site-footer__langs">
+{%- if p.alternates.length > 1 %}
+<span class="site-footer__head">{{ p.t("lang.label") }}</span>
+<ul>
+{%- for a in p.alternates %}
+<li><a href="{{ a.url }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}"{% if a.lang == p.lang %} aria-current="true"{% endif %}>{{ a.name }}</a></li>
+{%- endfor %}
+</ul>
+{%- endif %}
+<a href="{{ p.home }}">{{ p.t("footer.part_of") }}</a>
+</div>
+</div>
+</footer>
