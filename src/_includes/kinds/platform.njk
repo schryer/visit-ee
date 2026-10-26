@@ -5,7 +5,10 @@
 <h1>{{ p.t("platform.title") }}</h1>
 <p class="platform-hero__intro">{{ p.t("platform.intro") }}</p>
 </div>
-<div class="map-slot map-slot--platform" data-visit-map data-lang="{{ p.lang }}"><span>{{ p.t("platform.map") }}</span></div>
+<div class="platform-map" data-platform-map role="region" aria-label="{{ p.t('platform.map') }}">
+<script type="application/json" data-map-config>{{ p.platformMapConfig | json | safe }}</script>
+<div class="platform-map__canvas"></div>
+</div>
 </div>
 </section>
 <section class="wrap section" aria-labelledby="places-title">
@@ -13,7 +16,7 @@
 <div class="cards">
 {%- asyncEach site in visit.sites %}{% set sp = p.pageFor(site.id) %}{% if sp %}
 <a class="card place-card" href="{{ sp.url }}">
-{% picture site, site.seasons[0].image, sp.t("hero.summer.alt"), "(min-width: 60rem) 33vw, 100vw", { widths: [400, 800], class: "card__img" } %}
+{% picture site, site.photo or site.seasons[0].image, (sp.t("site.photo_alt") if site.photo else sp.t("hero.summer.alt")), "(min-width: 60rem) 33vw, 100vw", { widths: [400, 800], class: "card__img" } %}
 <div class="card__body">
 <img class="place-card__logo" src="{{ sp.media(site.logo.light) }}" alt="" width="{{ site.logo.width }}" height="{{ site.logo.height }}" loading="lazy">
 <h3 class="card__title">{{ sp.t("site.name") }}</h3>
@@ -27,3 +30,4 @@
 </div>
 </div>
 </section>
+<script type="module" src="/assets/platform-map.js"></script>

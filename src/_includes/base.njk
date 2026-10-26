@@ -17,7 +17,7 @@
     {%- set title = p.t("groups.title") + " · " + p.t("site.name") -%}
     {%- set description = p.t("groups.intro") -%}
   {%- endif -%}
-  {%- set imageSrc = (p.stay.photo if p.stay and p.stay.photo) or (p.site.groups.photo if p.kind == "groups") or p.site.seasons[0].image -%}
+  {%- set imageSrc = (p.stay.photo if p.stay and p.stay.photo) or (p.site.groups.photo if p.kind == "groups") or p.site.photo or p.site.seasons[0].image -%}
   {%- set image -%}{% imageUrl p.site, imageSrc %}{%- endset -%}
 {%- endif -%}
 <!doctype html>
