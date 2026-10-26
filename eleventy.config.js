@@ -105,7 +105,14 @@ export default function (eleventyConfig) {
   eleventyConfig.on("eleventy.before", writeFonts);
   eleventyConfig.on("eleventy.after", async () => {
     const { default: visit } = await import("./src/_data/visit.js");
-    copySiteMedia(await visit());
+    const content = await visit();
+    // Content that builds but is not finished, such as a place with no
+    // description in a language its site is built in. In GitHub Actions
+    // they show on the run and the pull request.
+    for (const w of content.warnings) {
+      process.stderr.write(process.env.GITHUB_ACTIONS ? `::warning file=${w.file}::${w.message}\n` : `visit-ee: warning: ${w.file}: ${w.message}\n`);
+    }
+    copySiteMedia(content);
     copyMaps();
   });
 

@@ -134,7 +134,9 @@ class Build:
 
 
 def build(run, binary, content: Path, out: Path, *args: str):
-    return run(binary("visit-ee"), "build", "--quick", "--content", content, "--out", out, *args, timeout=600)
+    # Plain warnings, not GitHub annotations, even when CI runs the tests.
+    return run(binary("visit-ee"), "build", "--quick", "--content", content, "--out", out, *args,
+               env={"GITHUB_ACTIONS": None}, timeout=600)
 
 
 _builds: dict[tuple[str, str], Build] = {}
@@ -202,6 +204,31 @@ def set_site_string(content: Path, key: str, site_id: str, value: str) -> None:
 @given(parsers.parse('the English description of the place "{place}" is removed'))
 def remove_place_description(content: Path, place: str) -> None:
     _remove_key(content / "i18n" / "places" / "en.json", place)
+
+
+@given(parsers.parse('the Estonian description of the place "{place}" is removed'))
+def remove_place_description_et(content: Path, place: str) -> None:
+    _remove_key(content / "i18n" / "places" / "et.json", place)
+
+
+@given(parsers.parse('Finnish is enabled, and "{site_id}" is translated into it'))
+def enable_finnish(content: Path, site_id: str) -> None:
+    path = content / "i18n" / "languages.json"
+    config = json.loads(path.read_text(encoding="utf-8"))
+    for lang in config["languages"]:
+        if lang["code"] == "fi":
+            lang["enabled"] = True
+    path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+    # English text stands in for the Finnish: only completeness matters here.
+    shutil.copy(content / "i18n" / "ui" / "en.json", content / "i18n" / "ui" / "fi.json")
+    strings = content / "sites" / site_id / "strings"
+    shutil.copy(strings / "en.json", strings / "fi.json")
+
+
+@given(parsers.parse('only "{place}" has a Finnish description'))
+def one_finnish_description(content: Path, place: str) -> None:
+    path = content / "i18n" / "places" / "fi.json"
+    path.write_text(json.dumps({place: "Viron syvin järvi"}, ensure_ascii=False), encoding="utf-8")
 
 
 @given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))

@@ -1,6 +1,7 @@
 {
-  "comment": "Languages visit.ee can be built in. The source language has no URL prefix; every other language lives under /<prefix>/. A language is built only when enabled, and it then needs every UI string the source has (i18n/ui/<code>.json). A site is built in a language only when its own strings are complete in it.",
+  "comment": "Languages visit.ee can be built in. The source language has no URL prefix; every other language lives under /<prefix>/. A language is built only when enabled, and it then needs every UI string the source has (i18n/ui/<code>.json). A site is built in a language only when its own strings are complete in it. Every place needs a description in each of place_descriptions (i18n/places/<code>.json); in any other language a site is built in, a missing one is a warning.",
   "source": "et",
+  "place_descriptions": ["et", "en"],
   "languages": [
     { "code": "et", "prefix": "", "name": "Eesti", "locale": "et_EE", "enabled": true },
     { "code": "en", "prefix": "en", "name": "English", "locale": "en_GB", "enabled": true },

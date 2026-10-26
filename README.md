@@ -33,7 +33,7 @@ JPEG versions of every photo. Later builds reuse them.
 | `sites/<id>/site.json` | A site's facts that don't depend on language: address, prices, stays, photos, videos, nearby places, old addresses to redirect. |
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
 | `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. |
-| `i18n/places/<lang>.json` | A short description of each place, by id. A language may leave one out. |
+| `i18n/places/<lang>.json` | A short description of each place, by id. Estonian and English need one for every place (`place_descriptions` in `i18n/languages.json`), or the build fails. In another language a site is built in, a missing one is a build warning, and the place shows without it. |
 | `sites/<id>/media/` | Photos (resized at build time), logos and drone videos, served under `/media/<id>/`. |
 | `i18n/languages.json` | Which languages are built, and their URL prefixes. |
 | `i18n/ui/<lang>.json` | The platform's own text: buttons, labels, season names. |
