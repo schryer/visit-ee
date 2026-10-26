@@ -63,18 +63,14 @@ Feature: Places nearby
     Given the sites are built
     Then the page "/louna-eesti/rouge/oobikuoru/" describes a "TouristAttraction"
 
-  Scenario: The map's script, library and label font ship with the site
+  Scenario: The map comes from the maps service
     Given the sites are built
     Then the build has "/assets/map.js"
-    And the build has "/assets/vendor/maplibre/maplibre-gl.mjs"
-    And the build has "/assets/vendor/maplibre/maplibre-gl-worker.mjs"
-    And the build has "/assets/vendor/pmtiles.js"
-    And the build has "/assets/map/fonts/noto-sans-regular/0-255.pbf"
+    And the build does not have "/assets/vendor/maplibre/maplibre-gl.mjs"
+    And the map on "/louna-eesti/rouge/oobikuoru/" loads from "https://maps.sustenaut.eu"
 
-  Scenario: Map packs are served under /maps/
+  Scenario: A build can use another maps service
     Given a copy of the content
-    And a folder of map packs with "louna-eesti/rouge/map.pmtiles" and "notes.txt"
-    When I build it with those maps
+    When I build it with the maps at "http://localhost:8091/"
     Then it succeeds
-    And the build has "/maps/louna-eesti/rouge/map.pmtiles"
-    And the build does not have "/maps/notes.txt"
+    And the map on "/louna-eesti/rouge/oobikuoru/" loads from "http://localhost:8091"

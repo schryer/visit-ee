@@ -75,16 +75,13 @@ the same places on a map of the area once it scrolls into view, with On
 foot and By car modes, category filters, layer switches and a link for
 each place (`…/oobikuoru/#suurjarv`).
 
-The map is MapLibre with our own vector tiles, built from Maa- ja
-Ruumiamet (ETAK, EHAK, EHR) and RMK data: one `map.pmtiles` per
-municipality, plus a national overview. A site's `map.packs` names the
-ones it shows. They are too big for this repository's history, so they
-live on the `maps-data` branch, and the deploy copies them in. Locally,
-`bin/visit-ee build --maps DIR` serves a folder of packs under `/maps/`;
-without it the map draws its markers on a blank background.
-
-Labels use Noto Sans (SIL Open Font License), in
-`src/assets/map/fonts/`.
+The map comes from maps.sustenaut.eu (schryer/maps), which builds
+vector tiles of Estonia from Maa- ja Ruumiamet (ETAK, EHAK, EHR) and RMK
+data and serves a map package that any sustenaut.eu site loads: MapLibre,
+the area packs within reach of the site, their style and fonts. visit.ee
+adds the places, the rings and the controls. `bin/visit-ee build
+--maps-url URL` points the pages at another copy of the service, such as
+a local `maps` build.
 
 ## Changing the content
 
@@ -111,8 +108,7 @@ addresses (`/puhkekula/`, `/kontakt/` and so on) to their new pages.
 
 ## Still to come
 
-- A scheduled map build that refreshes the `maps-data` branch from the
-  sources, and the regions map on the home page.
+- The regions map on the home page.
 - Booking.com links: set `booking_url` in `site.json`.
 - Photos and details for private camping by the lake.
 - Spring and winter photos or video for the season switch. A season shows
