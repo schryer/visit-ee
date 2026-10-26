@@ -410,10 +410,12 @@
       "place": "kunstikuur"
     },
     {
-      "place": "kohvik"
+      "place": "kohvik",
+      "road_km": 1.2
     },
     {
-      "place": "coop"
+      "place": "coop",
+      "road_km": 1.6
     },
     {
       "place": "linnamagi"

@@ -2,8 +2,7 @@
   "name": "Ööbikuoru külastuskeskus",
   "category": "info",
   "geo": {
-    "lat": 57.729,
-    "lng": 26.9375
-  },
-  "position": "estimate"
+    "lat": 57.72895,
+    "lng": 26.93762
+  }
 }
