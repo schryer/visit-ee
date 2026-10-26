@@ -5,7 +5,9 @@
 // and where to read more.
 // The list works without any of this. The map itself (MapLibre, the area
 // packs and their style) comes from the maps service's package, loaded
-// only when the map is about to scroll into view.
+// only when the map is about to scroll into view. On a town's page the
+// config has no home logo, opens on the town's whole area, and adds the
+// places to stay there as links to their pages.
 
 // Each mode is a saved set of rings, a view and which places it lists.
 const MODES = {
@@ -15,6 +17,10 @@ const MODES = {
 
 // The rings' colour, matching site.css.
 const RED = "#C53E2A";
+
+// Places closer than this on screen share one numbered marker, which
+// splits as the map zooms in.
+const CLUSTER_PX = 34;
 
 const svg = (paths) =>
   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -61,6 +67,10 @@ function start(root) {
   const pins = {};
   const markers = {};
   let ringLabels = [];
+  // The numbered markers on the map now.
+  const clusters = [];
+  // The town's box on the maps service, when the page is a town's.
+  let areaBox = null;
 
   root.querySelector(".nearby__controls").hidden = false;
   box.hidden = false;
@@ -75,8 +85,8 @@ function start(root) {
       const on = visible(p);
       if (on) n++;
       p.row.hidden = !on;
-      if (pins[p.id]) pins[p.id].style.display = on ? "" : "none";
     }
+    cluster();
     count.textContent = config.strings[plural.select(n) === "one" ? "one" : "other"].replace("{n}", n);
   }
 
@@ -118,7 +128,13 @@ function start(root) {
     if (!map) return;
     setRings();
     applyLayers();
-    map.fitBounds(maps.bounds(config.home, MODES[mode].radius), { padding: 24, duration: animate && !calm.matches ? 900 : 0 });
+    map.fitBounds(view(mode), { padding: 24, duration: animate && !calm.matches ? 900 : 0 });
+  }
+
+  // What a mode shows: the town's whole area by car, if it has one, or
+  // the mode's radius around home.
+  function view(mode) {
+    return mode === "car" && areaBox ? areaBox : maps.bounds(config.home, MODES[mode].radius);
   }
 
   function select(id, fly) {
@@ -135,6 +151,7 @@ function start(root) {
       x.row.setAttribute("aria-current", String(x.id === id));
       pins[x.id]?.setAttribute("aria-current", String(x.id === id));
     }
+    cluster();
     try {
       history.replaceState(null, "", "#" + id);
     } catch {}
@@ -222,17 +239,20 @@ function start(root) {
   if (places.some((p) => "#" + p.id === location.hash)) fromHash();
   // ?edit turns the map into an editor for the places (src/assets/edit.js),
   // loaded only then, once the map is up.
-  const editing = new URLSearchParams(location.search).has("edit");
+  const editing = new URLSearchParams(location.search).has("edit") && Boolean(config.edit);
   if (editing) box.scrollIntoView({ block: "start" });
 
   async function load() {
     maps = await import(`${config.maps}/lib/v1/map.js`);
     // The packs that reach the widest ring, with a margin.
     const reach = Math.max(...Object.values(MODES).flatMap((m) => m.rings)) * 1.2;
+    const index = await maps.loadIndex();
+    const [w, s, e, n] = index.areas.find((a) => a.path === config.area)?.bbox || [];
+    if (n !== undefined) areaBox = [[w, s], [e, n]];
     ({ map, maplibre: ml } = await maps.createMap(box.querySelector(".nearby__canvas"), {
       center: config.home,
       radiusKm: reach,
-      bounds: maps.bounds(config.home, MODES[state.mode].radius),
+      bounds: view(state.mode),
       fitBoundsOptions: { padding: 24 },
       minZoom: 6,
       locale: config.locale,
@@ -247,13 +267,24 @@ function start(root) {
       paint: { "line-color": RED, "line-width": 1.2, "line-opacity": 0.7, "line-dasharray": [4, 3] },
     }, maps.firstLabel(map));
     map.addControl(new ml.NavigationControl({ showCompass: false }), "top-right");
+    // Every municipality and its centre; the ones with a page link to it.
+    // An older map package has no such function.
+    maps.addMunicipalities?.(map, { links: config.towns || {} }).catch((err) => console.warn(err));
+    map.on("zoomend", cluster);
 
-    const home = el("div", "map-home");
-    const img = document.createElement("img");
-    img.src = config.home.mark;
-    img.alt = "";
-    home.append(img);
+    // A site's logo at home, or a dot at a town's centre.
+    const home = el("div", config.home.mark ? "map-home" : "map-centre");
+    if (config.home.mark) home.append(image(config.home.mark));
     new ml.Marker({ element: home }).setLngLat([config.home.lng, config.home.lat]).addTo(map);
+
+    for (const stay of config.stays || []) {
+      const link = el("a", "map-stay");
+      link.href = stay.url;
+      link.setAttribute("aria-label", stay.name);
+      link.title = stay.name;
+      link.append(image(stay.mark));
+      new ml.Marker({ element: link }).setLngLat([stay.lng, stay.lat]).addTo(map);
+    }
 
     for (const p of places) {
       const pin = button(`${p.name}, ${p.meta}`, "pin cat-" + p.cat, (event) => {
@@ -272,11 +303,48 @@ function start(root) {
     // The mode or place may have changed while the map loaded.
     const p = places.find((x) => x.id === state.selected);
     if (p) map.jumpTo({ center: p.lngLat, zoom: p.foot ? 14.5 : 11 });
-    else map.fitBounds(maps.bounds(config.home, MODES[state.mode].radius), { padding: 24, duration: 0 });
+    else map.fitBounds(view(state.mode), { padding: 24, duration: 0 });
 
     if (editing) {
       const edit = await import("./edit.js");
       edit.start({ box, map, ml, config, places, markers });
+    }
+  }
+
+  // Group the places that would overlap on screen: each group of two or
+  // more shows as one numbered marker, which zooms in to its places when
+  // tapped. The selected place always keeps its own pin.
+  function cluster() {
+    if (!map) return;
+    const groups = [];
+    for (const p of places) {
+      // In edit mode every pin stands alone, to be dragged.
+      if (!visible(p) || p.id === state.selected || editing) {
+        if (editing && visible(p)) groups.push({ at: null, places: [p] });
+        continue;
+      }
+      const at = map.project(p.lngLat);
+      const near = groups.find((g) => g.at && Math.hypot(g.at.x - at.x, g.at.y - at.y) < CLUSTER_PX);
+      if (near) near.places.push(p);
+      else groups.push({ at, places: [p] });
+    }
+    for (const p of places) {
+      const alone = groups.some((g) => g.places.length === 1 && g.places[0] === p);
+      if (pins[p.id]) pins[p.id].style.display = visible(p) && (alone || p.id === state.selected) ? "" : "none";
+    }
+    for (const marker of clusters) marker.remove();
+    clusters.length = 0;
+    for (const g of groups.filter((g) => g.places.length > 1)) {
+      const n = g.places.length;
+      const lng = g.places.reduce((sum, p) => sum + p.lngLat[0], 0) / n;
+      const lat = g.places.reduce((sum, p) => sum + p.lngLat[1], 0) / n;
+      const label = config.strings[plural.select(n) === "one" ? "one" : "other"].replace("{n}", n);
+      const b = button(label, "cluster", () => {
+        const box = new ml.LngLatBounds(g.places[0].lngLat, g.places[0].lngLat);
+        for (const p of g.places) box.extend(p.lngLat);
+        map.fitBounds(box, { padding: 90, maxZoom: 17, duration: calm.matches ? 0 : 600 });
+      }, String(n));
+      clusters.push(new ml.Marker({ element: b }).setLngLat([lng, lat]).addTo(map));
     }
   }
 
@@ -310,6 +378,13 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+function image(src) {
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = "";
+  return img;
 }
 
 function button(label, className, onClick, text) {

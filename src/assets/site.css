@@ -258,6 +258,43 @@ a.card:hover { border-color: #D8CFAE; box-shadow: 0 6px 18px rgb(46 26 6 / .08);
 .nearby__count { font: 500 .875rem var(--ui); color: var(--muted); }
 .nearby__count:empty { display: none; }
 
+/* A town's page: the map is the page. It fills what is left of the first
+   screen under the heading and controls, and the list goes in columns
+   below it. */
+.town-head { padding-top: 1.25rem; display: grid; gap: .25rem; }
+.town-head .eyebrow { margin: 0; }
+.town-head h1 { font-size: clamp(2.25rem, 1.8rem + 2vw, 3.25rem); color: var(--red); }
+.town-head__lead { margin: 0; max-width: 46rem; color: var(--ink-soft); }
+@media (max-width: 40rem) { .town-head__lead { font-size: 1rem; line-height: 1.5; } }
+.section--map { padding-top: 0; }
+.nearby--wide, .nearby--wide:has(.nearby__map:not([hidden])) { grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 1rem; }
+.nearby--wide .nearby__side { display: contents; }
+.nearby--wide .nearby__controls { order: -1; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+.nearby--wide .nearby__controls > * { min-width: 0; }
+/* On a phone the category chips scroll sideways, to keep the map high. */
+@media (max-width: 40rem) {
+  .nearby--wide .nearby__chips { flex: 0 0 calc(100% + 2 * var(--gutter)); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); }
+  .nearby--wide .nearby__chips .chip { flex: none; }
+}
+.nearby--wide .nearby__map { height: calc(100svh - 14rem); min-height: 22rem; max-height: 56rem; }
+.nearby__note { margin: 0; font: 500 .875rem var(--ui); color: var(--muted); }
+.nearby--wide .nearby__list { max-height: none; overflow: visible; display: grid; column-gap: 1.5rem; }
+@media (min-width: 40rem) { .nearby--wide .nearby__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64rem) { .nearby--wide .nearby__list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 60rem) {
+  .nearby--wide .nearby__map:not([hidden]) + .nearby__side .nearby__list { max-height: none; overflow: visible; }
+}
+.cluster {
+  min-width: 34px; height: 34px; padding: 0 .5rem; border-radius: 999px; border: 2px solid var(--cream); background: var(--ink);
+  color: var(--cream); font: 700 .9375rem var(--ui); font-variant-numeric: tabular-nums; cursor: pointer;
+  box-shadow: 0 0 0 4px rgb(39 48 21 / .25), 0 1px 3px rgb(39 48 21 / .35);
+}
+.cluster:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.map-centre { width: 14px; height: 14px; border-radius: 50%; background: var(--red); border: 3px solid var(--cream); box-shadow: 0 1px 3px rgb(39 48 21 / .35); pointer-events: none; }
+.map-stay { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--cream); border: 2px solid var(--red); box-shadow: 0 2px 6px rgb(39 48 21 / .35); }
+.map-stay img { width: 30px; height: auto; }
+.map-stay:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
 .cat-nature { color: var(--olive); }
 .cat-lake { color: var(--lake); }
 .cat-heritage { color: var(--amber); }

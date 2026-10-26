@@ -20,6 +20,7 @@
   "town.rouge": "Rõuge",
   "slug.region.south-estonia": "louna-eesti",
   "slug.town.rouge": "rouge",
+  "town.all": "Kõik kohad: {town}",
   "lang.label": "Keel",
   "lang.current": "Keel: {name}",
   "menu.open": "Menüü",

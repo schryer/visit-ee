@@ -34,6 +34,7 @@ JPEG versions of every photo. Later builds reuse them.
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
 | `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. Optional: `photo` (a file in `places/media/`), `url` (its official website, one https address or one per language, `{"et": …, "en": …}`) and `site` (the id of its own visit.ee site, which the map links to instead). |
 | `i18n/places/<lang>.json` | A short description of each place, by id. Estonian and English need one for every place (`place_descriptions` in `i18n/languages.json`), or the build fails. In another language a site is built in, a missing one is a build warning, and the place shows without it. |
+| `towns/<id>/town.json` | A town (municipality) page at `/<region>/<town>/`: its centre, the maps service area it opens on, and the places in it. Its text is in `towns/<id>/strings/<lang>.json`, built in a language on the same terms as a site. |
 | `sites/<id>/media/` | Photos (resized at build time), logos and drone videos, served under `/media/<id>/`. |
 | `i18n/languages.json` | Which languages are built, and their URL prefixes. |
 | `i18n/ui/<lang>.json` | The platform's own text: buttons, labels, season names. |
@@ -76,6 +77,16 @@ foot and By car modes, category filters, layer switches and a link for
 each place (`…/oobikuoru/#suurjarv`). A place's card opens up over the map
 with its photo, its description and a link to its visit.ee page or its
 official website, which opens in a new tab.
+
+Each town has a page of its own with the same map, large and first on
+the page, opening on the whole municipality, with every place in
+`towns/<id>/town.json` listed under it (distances from the town centre)
+and the sites in the town as cards and map markers. Every map names all
+the municipalities and marks the settlement each is run from (the maps
+service's `municipalities.json`); a municipality with a town page links to
+it. Places that would overlap on screen share one numbered marker, which
+zooms in to them when tapped. The sites' breadcrumbs
+and place lists link to it.
 
 The map comes from maps.sustenaut.eu (schryer/maps), which builds
 vector tiles of Estonia from Maa- ja Ruumiamet (ETAK, EHAK, EHR) and RMK
