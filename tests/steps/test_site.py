@@ -16,7 +16,7 @@ from pytest_bdd import given, parsers, scenarios, then, when
 scenarios("languages.feature", "translations.feature", "seo.feature")
 
 ROOT = Path(__file__).resolve().parents[2]
-PREVIEW_URL = "https://visit.schryer.eu"
+PREVIEW_URL = "https://temp.schryer.eu"
 
 
 class Page(HTMLParser):

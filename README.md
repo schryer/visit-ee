@@ -6,7 +6,7 @@ The first is Ööbikuoru Puhkekeskus in Rõuge, at
 `/louna-eesti/rouge/oobikuoru/` (`/en/south-estonia/rouge/oobikuoru/` in
 English).
 
-For now it is built for `visit.schryer.eu`, a preview that asks search
+For now it is built for `temp.schryer.eu`, a preview that asks search
 engines to keep out. It moves to visit.ee later.
 
 ## Working on it
@@ -71,19 +71,20 @@ Edit the JSON files and open a pull request. Text in square brackets, like
 ## Deploying
 
 `.github/workflows/deploy.yml` publishes every push to main to Cloudflare
-Pages and to the web server's standby copy, the same way the recipes site
-does. It stays off until the hosting exists in `schryer/schryer-eu-infra`.
-Then set:
+Pages, at temp.schryer.eu. While visit.ee is in development it is on Pages
+only, with no standby copy on the web server; adding one later is a
+`standby` in the infra's `pubkit.json` plus a deploy key here, the way the
+recipes site does it.
+
+The workflow stays off until the hosting exists in
+`schryer/schryer-eu-infra`. Then set:
 
 - the repository variable `VISIT_EE_DEPLOY` to `on`
-- the secret `VISIT_EE_DEPLOY_KEY`: the rsync key for the site's folder on
-  the server
 - the secret `CLOUDFLARE_GITHUB_API_TOKEN` and the variable
   `CLOUDFLARE_ACCOUNT_ID`, as on the recipes repository
 
 Cloudflare Pages reads `_redirects`, which sends the old WordPress
-addresses (`/puhkekula/`, `/kontakt/` and so on) to their new pages. The
-standby web server does not read it.
+addresses (`/puhkekula/`, `/kontakt/` and so on) to their new pages.
 
 ## Still to come
 
