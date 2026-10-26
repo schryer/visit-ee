@@ -13,7 +13,7 @@ from xml.etree import ElementTree
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-scenarios("languages.feature", "translations.feature", "seo.feature")
+scenarios("languages.feature", "translations.feature", "seo.feature", "nearby.feature")
 
 ROOT = Path(__file__).resolve().parents[2]
 PREVIEW_URL = "https://temp.schryer.eu"
@@ -70,6 +70,43 @@ class Page(HTMLParser):
             self.lang_text.append((lang, data.strip()))
 
 
+class Places(HTMLParser):
+    """The nearby list of a page: each place's id, name, description and
+    distance, in order."""
+
+    PARTS = {"place__name": "name", "place__gloss": "description", "place__meta": "meta"}
+
+    def __init__(self, text: str) -> None:
+        super().__init__()
+        self.rows: list[dict[str, str]] = []
+        self._part = ""
+        self.feed(text)
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        a = {k: v or "" for k, v in attrs}
+        if tag == "li" and "data-place" in a:
+            self.rows.append({"id": a["id"], "href": ""})
+        part = self.PARTS.get(a.get("class", ""))
+        if part and self.rows:
+            self._part = part
+            self.rows[-1][part] = ""
+            if tag == "a":
+                self.rows[-1]["href"] = a.get("href", "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in ("a", "span"):
+            self._part = ""
+
+    def handle_data(self, data: str) -> None:
+        if self._part and self.rows:
+            self.rows[-1][self._part] += data
+
+    def find(self, name: str) -> dict[str, str]:
+        row = next((r for r in self.rows if r.get("name", "").strip() == name), None)
+        assert row, f"no place {name!r} in {[r.get('name') for r in self.rows]}"
+        return row
+
+
 class Build:
     def __init__(self, out: Path, base_url: str) -> None:
         self.out = out
@@ -84,6 +121,11 @@ class Build:
         assert path.is_file(), f"no page {url} in {self.out}"
         return Page(path.read_text(encoding="utf-8"))
 
+    def places(self, url: str) -> Places:
+        path = self.file(url)
+        assert path.is_file(), f"no page {url} in {self.out}"
+        return Places(path.read_text(encoding="utf-8"))
+
     def pages(self) -> list[str]:
         return sorted(
             "/" + str(p.parent.relative_to(self.out)).replace("\\", "/").removeprefix(".") + ("/" if p.parent != self.out else "")
@@ -92,7 +134,9 @@ class Build:
 
 
 def build(run, binary, content: Path, out: Path, *args: str):
-    return run(binary("visit-ee"), "build", "--quick", "--content", content, "--out", out, *args, timeout=600)
+    # Plain warnings, not GitHub annotations, even when CI runs the tests.
+    return run(binary("visit-ee"), "build", "--quick", "--content", content, "--out", out, *args,
+               env={"GITHUB_ACTIONS": None}, timeout=600)
 
 
 _builds: dict[tuple[str, str], Build] = {}
@@ -128,6 +172,7 @@ def a_copy_of_the_content(tmp_path: Path) -> Path:
     content = tmp_path / "content"
     shutil.copytree(ROOT / "i18n", content / "i18n")
     shutil.copytree(ROOT / "sites", content / "sites")
+    shutil.copytree(ROOT / "places", content / "places")
     return content
 
 
@@ -156,6 +201,53 @@ def set_site_string(content: Path, key: str, site_id: str, value: str) -> None:
     path.write_text(json.dumps(strings, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+@given(parsers.parse('the English description of the place "{place}" is removed'))
+def remove_place_description(content: Path, place: str) -> None:
+    _remove_key(content / "i18n" / "places" / "en.json", place)
+
+
+@given(parsers.parse('the Estonian description of the place "{place}" is removed'))
+def remove_place_description_et(content: Path, place: str) -> None:
+    _remove_key(content / "i18n" / "places" / "et.json", place)
+
+
+@given(parsers.parse('Finnish is enabled, and "{site_id}" is translated into it'))
+def enable_finnish(content: Path, site_id: str) -> None:
+    path = content / "i18n" / "languages.json"
+    config = json.loads(path.read_text(encoding="utf-8"))
+    for lang in config["languages"]:
+        if lang["code"] == "fi":
+            lang["enabled"] = True
+    path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+    # English text stands in for the Finnish: only completeness matters here.
+    shutil.copy(content / "i18n" / "ui" / "en.json", content / "i18n" / "ui" / "fi.json")
+    strings = content / "sites" / site_id / "strings"
+    shutil.copy(strings / "en.json", strings / "fi.json")
+
+
+@given(parsers.parse('only "{place}" has a Finnish description'))
+def one_finnish_description(content: Path, place: str) -> None:
+    path = content / "i18n" / "places" / "fi.json"
+    path.write_text(json.dumps({place: "Viron syvin järvi"}, ensure_ascii=False), encoding="utf-8")
+
+
+@given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))
+def list_place(content: Path, site_id: str, place: str) -> None:
+    path = content / "sites" / site_id / "site.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["nearby"].append({"place": place})
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+@given(parsers.parse('a folder of map packs with "{a}" and "{b}"'), target_fixture="maps")
+def map_packs(tmp_path: Path, a: str, b: str) -> Path:
+    maps = tmp_path / "maps"
+    for name in (a, b):
+        (maps / name).parent.mkdir(parents=True, exist_ok=True)
+        (maps / name).write_bytes(b"test")
+    return maps
+
+
 # --- when --------------------------------------------------------------------
 
 
@@ -167,6 +259,11 @@ def out(tmp_path: Path) -> Path:
 @when("I build it", target_fixture="result")
 def i_build_it(run, binary, content: Path, out: Path):
     return build(run, binary, content, out)
+
+
+@when("I build it with those maps", target_fixture="result")
+def i_build_it_with_maps(run, binary, content: Path, out: Path, maps: Path):
+    return build(run, binary, content, out, "--maps", maps)
 
 
 @pytest.fixture
@@ -220,6 +317,46 @@ def there_is_no_page(site: Build, url: str) -> None:
 @then(parsers.parse('the page "{url}" does not link to "{target}"'))
 def page_does_not_link(site: Build, url: str, target: str) -> None:
     assert target not in site.page(url).links
+
+
+# --- then: places nearby -----------------------------------------------------
+
+
+@then(parsers.parse('the page "{url}" lists "{name}" at "{distance}"'))
+def lists_place_at(site: Build, url: str, name: str, distance: str) -> None:
+    meta = site.places(url).find(name)["meta"]
+    assert meta.split("·")[0].strip() == distance, meta
+
+
+@then(parsers.parse('the page "{url}" lists "{name}" first'))
+def lists_place_first(site: Build, url: str, name: str) -> None:
+    assert site.places(url).rows[0]["name"].strip() == name
+
+
+@then(parsers.parse('the page "{url}" describes "{name}" as "{text}"'))
+def describes_place(site: Build, url: str, name: str, text: str) -> None:
+    assert site.places(url).find(name).get("description", "").strip() == text
+
+
+@then(parsers.parse('the page "{url}" lists "{name}" without a description'))
+def lists_place_bare(site: Build, url: str, name: str) -> None:
+    assert "description" not in site.places(url).find(name)
+
+
+@then(parsers.parse('the page "{url}" has the place "{place}" at "{href}"'))
+def place_link(site: Build, url: str, place: str, href: str) -> None:
+    row = next(r for r in site.places(url).rows if r["id"] == place)
+    assert row["href"] == href
+
+
+@then(parsers.parse('the build has "{url}"'))
+def build_has(site: Build, url: str) -> None:
+    assert site.file(url).is_file(), url
+
+
+@then(parsers.parse('the build does not have "{url}"'))
+def build_lacks(site: Build, url: str) -> None:
+    assert not site.file(url).exists(), url
 
 
 # --- then: search engines ----------------------------------------------------

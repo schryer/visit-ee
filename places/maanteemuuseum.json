@@ -1,0 +1,9 @@
+{
+  "name": "Eesti Maanteemuuseum",
+  "category": "museum",
+  "geo": {
+    "lat": 58.035,
+    "lng": 27.042
+  },
+  "position": "estimate"
+}

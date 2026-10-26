@@ -1,0 +1,9 @@
+{
+  "name": "Pokumaa",
+  "category": "museum",
+  "geo": {
+    "lat": 58.005,
+    "lng": 26.99
+  },
+  "position": "estimate"
+}

@@ -58,6 +58,19 @@ function copySiteMedia(content) {
   }
 }
 
+// The map packs (map.pmtiles per area, and the national overview), from
+// --maps (VISIT_EE_MAPS), served under /maps/. Without them the map shows
+// its markers on a blank background.
+function copyMaps() {
+  const from = process.env.VISIT_EE_MAPS;
+  if (!from) return;
+  if (!fs.existsSync(from)) throw new Error(`--maps ${from} does not exist`);
+  fs.cpSync(from, path.join(OUT, "maps"), {
+    recursive: true,
+    filter: (src) => fs.statSync(src).isDirectory() || /\.(pmtiles|json)$/.test(src),
+  });
+}
+
 const IMAGE_OPTIONS = {
   formats: ["avif", "webp", "jpeg"],
   outputDir: path.join(OUT, "img"),
@@ -77,6 +90,14 @@ async function imageMetadata(site, src, widths) {
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
+  // The map library, loaded only by pages with a map.
+  eleventyConfig.addPassthroughCopy({
+    "node_modules/maplibre-gl/dist/maplibre-gl.mjs": "assets/vendor/maplibre/maplibre-gl.mjs",
+    "node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs": "assets/vendor/maplibre/maplibre-gl-worker.mjs",
+    "node_modules/maplibre-gl/dist/maplibre-gl.css": "assets/vendor/maplibre/maplibre-gl.css",
+    "node_modules/maplibre-gl/LICENSE.txt": "assets/vendor/maplibre/LICENSE.txt",
+    "node_modules/pmtiles/dist/pmtiles.js": "assets/vendor/pmtiles.js",
+  });
   eleventyConfig.addWatchTarget("sites/");
   eleventyConfig.addWatchTarget("i18n/");
   eleventyConfig.addWatchTarget("lib/");
@@ -84,7 +105,15 @@ export default function (eleventyConfig) {
   eleventyConfig.on("eleventy.before", writeFonts);
   eleventyConfig.on("eleventy.after", async () => {
     const { default: visit } = await import("./src/_data/visit.js");
-    copySiteMedia(await visit());
+    const content = await visit();
+    // Content that builds but is not finished, such as a place with no
+    // description in a language its site is built in. In GitHub Actions
+    // they show on the run and the pull request.
+    for (const w of content.warnings) {
+      process.stderr.write(process.env.GITHUB_ACTIONS ? `::warning file=${w.file}::${w.message}\n` : `visit-ee: warning: ${w.file}: ${w.message}\n`);
+    }
+    copySiteMedia(content);
+    copyMaps();
   });
 
   // {% picture p.site, "media/photos/x.jpg", "alt", "(min-width: 60rem) 33vw, 100vw" %}
