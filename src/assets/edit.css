@@ -1,0 +1,54 @@
+/* The map's edit mode (edit.js), loaded only with ?edit. */
+.nearby__map.is-editing { outline: 3px dashed var(--red); outline-offset: 3px; }
+@media (min-width: 60rem) { .nearby__map.is-editing { min-height: 40rem; } }
+
+.edit-bar {
+  position: absolute; left: .75rem; right: .75rem; bottom: 2.25rem; z-index: 4;
+  display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+  padding: .5rem .75rem; border-radius: 10px; background: var(--spruce); color: var(--on-spruce);
+  font: 500 .875rem var(--ui); box-shadow: 0 6px 18px rgb(46 26 6 / .25);
+}
+.edit-bar b { font: 700 1rem var(--heading); letter-spacing: .03em; color: var(--cream); }
+.edit-bar__tools { display: flex; gap: .375rem; margin-left: auto; flex-wrap: wrap; }
+
+.edit-panel {
+  position: absolute; top: .75rem; right: .75rem; bottom: 6rem; z-index: 5; overflow-y: auto;
+  width: min(22rem, calc(100% - 1.5rem)); padding: .875rem 1rem;
+  background: var(--white); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgb(46 26 6 / .2);
+  font: 400 .9375rem/1.4 var(--ui); color: var(--ink);
+}
+.edit-panel[hidden] { display: none; }
+.edit-panel h3 { margin: 0 0 .5rem; font: 700 1.25rem var(--heading); color: var(--red); }
+.edit-panel p { margin: 0 0 .75rem; }
+.edit-panel a { color: var(--olive-dark); }
+.edit-where { font: 400 .8125rem ui-monospace, Menlo, monospace; color: var(--muted); }
+.edit-field { display: grid; gap: .25rem; margin-bottom: .625rem; font-weight: 600; font-size: .8125rem; color: var(--ink-soft); }
+.edit-field input, .edit-field select {
+  font: 400 1rem var(--ui); padding: .5rem .625rem; min-height: 2.5rem;
+  border: 1px solid #CFC6A8; border-radius: 8px; background: var(--cream); color: var(--ink);
+}
+.edit-field input[readonly] { background: var(--sand); color: var(--muted); }
+.edit-check { display: flex; gap: .5rem; align-items: center; margin: .25rem 0 .75rem; font-weight: 600; }
+.edit-check input { width: 1.125rem; height: 1.125rem; accent-color: var(--red); }
+.edit-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; }
+.edit-bar button, .edit-actions button, .edit-list button {
+  font: 600 .875rem var(--ui); min-height: 2.5rem; padding: .375rem .875rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--white); color: var(--ink);
+}
+.edit-actions button[type="submit"], .edit-actions .edit-primary, .edit-bar .edit-add { background: var(--red); border-color: var(--red); color: var(--white); }
+.edit-actions .edit-danger { margin-left: auto; color: var(--red); border-color: var(--red); }
+.edit-bar button:disabled, .edit-actions button:disabled { opacity: .5; cursor: default; }
+.edit-status { color: var(--red); font-weight: 600; }
+.edit-status:empty { display: none; }
+.edit-list { margin: 0 0 .75rem; padding: 0; list-style: none; }
+.edit-list li { display: flex; gap: .5rem; align-items: center; padding: .375rem 0; border-bottom: 1px solid var(--line); }
+.edit-list .edit-link { flex: 1; border-radius: 0; min-height: 0; text-align: left; font: inherit; background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; cursor: pointer; }
+
+.is-editing .pin { cursor: grab; }
+.pin.pin--other { opacity: .55; border-style: dashed; }
+.pin.pin--edited { box-shadow: 0 0 0 3px var(--cream), 0 0 0 5px var(--red); }
+.pin.pin--estimate::after {
+  content: "?"; position: absolute; top: -6px; right: -6px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--amber); color: var(--white); font: 700 10px/14px var(--ui); text-align: center;
+}
+.pin.pin--deleted { opacity: .35; filter: grayscale(1); }

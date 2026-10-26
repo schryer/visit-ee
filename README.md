@@ -83,6 +83,23 @@ adds the places, the rings and the controls. `bin/visit-ee build
 --maps-url URL` points the pages at another copy of the service, such as
 a local `maps` build.
 
+### Editing places on the map
+
+Add `?edit` to a site page's address (`…/oobikuoru/?edit`) to turn its map
+into an editor. Drag a pin to move a place, tap "Add place" and then the
+map (or "Use where I stand" on a phone) to add one, and tap a pin to change
+its name, category, descriptions, or whether this site lists it, or to
+delete it. Faded pins are places this site doesn't list yet; a "?" marks a
+position that is still an estimate. "Send…" turns every unsent change into
+one pull request on this repository, which CI checks like any other.
+
+The editor (`src/assets/edit.js`, loaded only with `?edit`) talks to GitHub
+from the browser. The first time, it asks for a fine-grained token for
+this repository only, with Contents and Pull requests set to Read and
+write. The browser keeps the token, and any unsent changes, until you sign
+out. What each change does to the files is in
+`src/assets/edit-changes.js`, tested by `node --test tests/js/*.test.js`.
+
 ## Changing the content
 
 Edit the JSON files and open a pull request. Text in square brackets, like
