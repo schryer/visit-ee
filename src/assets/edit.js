@@ -7,9 +7,12 @@
 // repository only), kept in this browser's storage. Pending edits are kept
 // there too, so a reload loses nothing. The editor's own text is English.
 
-import { applyEdits, describe, slug, round, touchedPaths, placePath } from "./edit-changes.js";
+import { applyEdits, describe, slug, round, touchedPaths, placePath, photoPath } from "./edit-changes.js";
 
 const API = "https://api.github.com";
+// Uploaded photos are shrunk to this many pixels on the long side; the
+// build makes the smaller sizes.
+const PHOTO_PX = 2000;
 const TOKEN_KEY = "visit-ee-edit-token";
 const NEW_TOKEN =
   "https://github.com/settings/personal-access-tokens/new?name=visit.ee%20map%20editor" +
@@ -40,7 +43,13 @@ export function start(ctx) {
   const extra = {};
   let picking = null;
 
-  const save = () => store(editsKey, JSON.stringify(edits));
+  // Photos can outgrow the browser's storage: they then last only until
+  // the page reloads, and the bar says so.
+  let kept = true;
+  const save = () => {
+    kept = store(editsKey, JSON.stringify(edits));
+    if (!kept) store(editsKey, JSON.stringify(Object.fromEntries(Object.entries(edits).map(([id, e]) => [id, { ...e, photoData: undefined }]))));
+  };
   const count = () => Object.keys(edits).length;
 
   // --- GitHub ----------------------------------------------------------------
@@ -100,7 +109,17 @@ export function start(ctx) {
   // One commit on a new branch, and a pull request for it.
   async function openPullRequest(title) {
     const fresh = await fetchBase();
-    const list = Object.values(edits);
+    // A new photo is named after its place's final id, and committed as
+    // its own blob.
+    const list = Object.values(edits).map((e) => (e.photoData ? { ...e, photo: photoPath(e.id) } : e));
+    const photos = await Promise.all(
+      list
+        .filter((e) => e.photoData)
+        .map(async (e) => {
+          const blob = await api(`/repos/${repository}/git/blobs`, { method: "POST", body: { content: e.photoData, encoding: "base64" } });
+          return { path: `places/${e.photo}`, mode: "100644", type: "blob", sha: blob.sha };
+        }),
+    );
     const paths = touchedPaths(list, fresh);
     const files = {};
     await Promise.all(
@@ -109,14 +128,17 @@ export function start(ctx) {
       }),
     );
     const changed = applyEdits(files, list, { site });
-    if (!Object.keys(changed).length) throw new Error("Nothing to change: the repository already has these edits.");
+    if (!Object.keys(changed).length && !photos.length) throw new Error("Nothing to change: the repository already has these edits.");
     const tree = await api(`/repos/${repository}/git/trees`, {
       method: "POST",
       body: {
         base_tree: fresh.treeSha,
-        tree: Object.entries(changed).map(([path, content]) =>
-          content === null ? { path, mode: "100644", type: "blob", sha: null } : { path, mode: "100644", type: "blob", content },
-        ),
+        tree: [
+          ...Object.entries(changed).map(([path, content]) =>
+            content === null ? { path, mode: "100644", type: "blob", sha: null } : { path, mode: "100644", type: "blob", content },
+          ),
+          ...photos,
+        ],
       },
     });
     const lines = list.map((e) => describe(e, fresh));
@@ -155,6 +177,14 @@ export function start(ctx) {
       text: Object.fromEntries((base?.langs || ["et", "en"]).map((l) => [l, e.text?.[l] ?? base?.text[l]?.[id] ?? ""])),
       nearby: base?.nearby.find((n) => n.place === id) || {},
       listed: listed(id),
+      // A data: URL for a new photo, else the committed one's address.
+      photo: e.photoData
+        ? `data:image/jpeg;base64,${e.photoData}`
+        : e.photo === null
+          ? null
+          : b.photo && `https://raw.githubusercontent.com/${repository}/${base.commit}/places/${b.photo}`,
+      photo_credit: e.photo_credit !== undefined ? e.photo_credit ?? "" : b.photo_credit ?? "",
+      url: e.url !== undefined ? e.url ?? "" : b.url ?? "",
     };
   }
 
@@ -206,7 +236,9 @@ export function start(ctx) {
         delete extra[id];
       }
     }
-    bar.querySelector(".edit-bar__count").textContent = count() ? `${count()} unsent` : "No changes yet";
+    bar.querySelector(".edit-bar__count").textContent = count()
+      ? `${count()} unsent${kept ? "" : " (too big to keep if you reload: send them first)"}`
+      : "No changes yet";
     bar.querySelector(".edit-send").disabled = !base || !count();
     bar.querySelector(".edit-add").disabled = !base;
   }
@@ -215,10 +247,13 @@ export function start(ctx) {
   // repository again.
   function change(id, fields) {
     const e = { ...(edits[id] || { id }), ...fields };
+    for (const key of Object.keys(e)) if (e[key] === undefined) delete e[key];
     const b = base?.places[id];
     if (b && !e.isNew) {
       if (e.name === b.name) delete e.name;
       if (e.category === b.category) delete e.category;
+      for (const key of ["photo_credit", "url"]) if (e[key] !== undefined && (e[key] ?? undefined) === b[key]) delete e[key];
+      if (e.photo === null && !b.photo) delete e.photo;
       if (e.text) {
         for (const [l, v] of Object.entries(e.text)) if ((base.text[l]?.[id] || "") === v) delete e.text[l];
         if (!Object.keys(e.text).length) delete e.text;
@@ -309,6 +344,45 @@ export function start(ctx) {
     const where = c.geo ? `${round(c.geo.lat)}, ${round(c.geo.lng)}${c.estimate ? " (an estimate: drag the pin to fix it)" : ""}` : "";
     const status = el("p", "edit-status");
 
+    // The photo: picked, shrunk and shown here; sent with the rest.
+    let photo = { data: edits[id]?.photoData, removed: edits[id]?.photo === null };
+    const preview = el("img", "edit-photo");
+    preview.alt = "";
+    const showPhoto = () => {
+      const src = photo.data ? `data:image/jpeg;base64,${photo.data}` : photo.removed ? null : c.photo;
+      preview.hidden = !src;
+      if (src) preview.src = src;
+      drop.hidden = !src;
+    };
+    preview.addEventListener("error", () => (preview.hidden = true));
+    const file = el("input");
+    file.type = "file";
+    file.accept = "image/*";
+    file.addEventListener("change", async () => {
+      if (!file.files[0]) return;
+      status.textContent = "Shrinking the photo…";
+      try {
+        photo = { data: await shrink(file.files[0]), removed: false };
+        status.textContent = "";
+      } catch (err) {
+        status.textContent = `That photo didn't load: ${err.message}`;
+      }
+      showPhoto();
+    });
+    const drop = btn("Remove photo", () => {
+      photo = { data: null, removed: true };
+      file.value = "";
+      showPhoto();
+    });
+    const credit = input(c.photo_credit);
+    credit.placeholder = "Who took it, if not you";
+    // A link per language stays in the JSON; the form edits a single one.
+    const site_url = input(typeof c.url === "string" ? c.url : "");
+    site_url.type = "url";
+    site_url.placeholder = "https://…";
+    site_url.disabled = typeof c.url !== "string";
+    showPhoto();
+
     f.append(
       el("h3", "", c.isNew ? "New place" : c.name),
       el("p", "edit-where", c.deleted ? "Deleted when the pull request is merged." : where),
@@ -319,6 +393,11 @@ export function start(ctx) {
       checkbox(on, "Listed near this site"),
       label("Walk to it, metres (optional)", walk),
       label("By road, km (optional)", road),
+      preview,
+      label("Photo", file),
+      drop,
+      label("Photo credit (optional)", credit),
+      label(site_url.disabled ? "Website (one per language: edit it in the JSON)" : "Official website (optional)", site_url),
       status,
     );
     const actions = el("div", "edit-actions");
@@ -339,12 +418,18 @@ export function start(ctx) {
       for (const l of ["et", "en"]) if (texts[l] && !texts[l].value.trim()) return (status.textContent = `A place needs a description in ${l}.`);
       const text = Object.fromEntries(Object.entries(texts).map(([l, i]) => [l, i.value.trim()]).filter(([l, v]) => v || c.text[l]));
       const number = (i) => (i.value === "" ? null : Number(i.value));
+      if (!site_url.disabled && site_url.value.trim() && !/^https:\/\/[^/]+\./.test(site_url.value.trim()))
+        return (status.textContent = "The website must start with https://.");
       const fields = {
         name: name.value.trim(),
         category: cat.value,
         text,
         nearby: { on: on.checked, walk_m: number(walk), road_km: number(road) },
+        photo_credit: credit.value.trim() || null,
       };
+      if (!site_url.disabled) fields.url = site_url.value.trim() || null;
+      if (photo.data) Object.assign(fields, { photoData: photo.data, photo: undefined });
+      else if (photo.removed) Object.assign(fields, { photoData: undefined, photo: null });
       if (newId !== id) {
         const moved = { ...edits[id], id: newId };
         delete edits[id];
@@ -521,6 +606,23 @@ function link(href, text) {
   return a;
 }
 
+// A picked photo as base64 JPEG, at most PHOTO_PX on the long side, turned
+// the way the camera held it. Drawing it anew leaves its GPS and camera
+// data behind.
+async function shrink(file) {
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const scale = Math.min(1, PHOTO_PX / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+
 // Storage can be missing or refuse (private windows); the editor still works
 // for this visit without it.
 function load(key) {
@@ -534,7 +636,10 @@ function load(key) {
 function store(key, value) {
   try {
     localStorage.setItem(key, value);
-  } catch {}
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function forget(key) {

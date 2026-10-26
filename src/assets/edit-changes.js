@@ -3,9 +3,12 @@
 //
 // An edit is everything pending for one place, by id:
 //   { id, isNew, deleted, geo: { lat, lng }, name, category,
-//     text: { et, en }, nearby: { on, walk_m, road_km } }
-// Every field but id is optional; a missing one leaves the file as it is.
-// A moved place is no longer an estimate, so "position" goes.
+//     text: { et, en }, nearby: { on, walk_m, road_km },
+//     photo, photo_credit, url }
+// Every field but id is optional; a missing one leaves the file as it is,
+// and null removes it (photo, photo_credit, url). A moved place is no
+// longer an estimate, so "position" goes. A new photo's bytes are not
+// here: edit.js commits them to places/<photo> itself (photoPath).
 
 // The files a set of edits reads and writes, given the description
 // languages (i18n/places/<lang>.json) and sites that exist.
@@ -29,11 +32,16 @@ export function applyEdits(files, edits, { site }) {
     return json[path];
   };
   const write = (path, value) => (json[path] = value);
+  // Files that aren't JSON and go: photos no place uses any more.
+  const removed = new Set();
 
   for (const e of edits) {
     const where = placePath(e.id);
     if (e.deleted) {
+      const old = read(where);
       write(where, null);
+      // Its photo goes too.
+      if (old?.photo) removed.add(`places/${old.photo}`);
       for (const path of Object.keys(files).filter(isTextPath)) {
         const text = read(path);
         if (text && e.id in text) delete text[e.id];
@@ -54,7 +62,13 @@ export function applyEdits(files, edits, { site }) {
       place.geo = { lat: round(e.geo.lat), lng: round(e.geo.lng) };
       delete place.position;
     }
-    write(where, ordered(place, ["name", "category", "geo", "position"]));
+    // A replaced or removed photo's file goes.
+    if (place.photo && e.photo !== undefined && e.photo !== place.photo) removed.add(`places/${place.photo}`);
+    for (const key of ["photo", "photo_credit", "url"]) {
+      if (e[key] === null) delete place[key];
+      else if (e[key] !== undefined) place[key] = e[key];
+    }
+    write(where, ordered(place, ["name", "category", "geo", "position", "photo", "photo_credit", "url", "site"]));
 
     for (const [lang, value] of Object.entries(e.text || {})) {
       const path = textPath(lang);
@@ -90,6 +104,7 @@ export function applyEdits(files, edits, { site }) {
     const text = value === null ? null : JSON.stringify(value, null, 2) + "\n";
     if (text !== (files[path] ?? null)) out[path] = text;
   }
+  for (const path of removed) out[path] = null;
   return out;
 }
 
@@ -104,6 +119,10 @@ export function describe(e, base) {
     if (e.name !== undefined) parts.push(`Rename ${e.id} to ${e.name}`);
     if (e.category !== undefined) parts.push(`${name} is now ${e.category}`);
   }
+  if (e.photoData) parts.push(`New photo of ${name}`);
+  else if (e.photo === null) parts.push(`Remove the photo of ${name}`);
+  if (e.photo_credit !== undefined && !e.isNew) parts.push(`Photo credit for ${name}`);
+  if (e.url !== undefined && !e.isNew) parts.push(e.url === null ? `Remove the website of ${name}` : `Website of ${name}: ${e.url}`);
   for (const lang of Object.keys(e.text || {})) if (!e.isNew) parts.push(`New ${lang} description for ${name}`);
   if (e.nearby?.on === true) parts.push(`List ${name} near this site`);
   if (e.nearby?.on === false) parts.push(`Take ${name} off this site`);
@@ -126,6 +145,8 @@ export function round(x) {
 }
 
 export const placePath = (id) => `places/${id}.json`;
+// Where a place's uploaded photo goes, relative to places/ as "photo" says.
+export const photoPath = (id) => `media/${id}.jpg`;
 export const textPath = (lang) => `i18n/places/${lang}.json`;
 export const sitePath = (site) => `sites/${site}/site.json`;
 const isTextPath = (path) => /^i18n\/places\/[^/]+\.json$/.test(path);

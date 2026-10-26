@@ -52,3 +52,6 @@
   background: var(--amber); color: var(--white); font: 700 10px/14px var(--ui); text-align: center;
 }
 .pin.pin--deleted { opacity: .35; filter: grayscale(1); }
+.edit-photo { display: block; width: 100%; max-height: 12rem; object-fit: cover; border-radius: 8px; margin-bottom: .5rem; }
+.edit-photo[hidden], .edit-panel button[hidden] { display: none; }
+.edit-form > button { font: 600 .8125rem var(--ui); border: 1px solid var(--line); background: var(--white); border-radius: 999px; padding: .25rem .75rem; min-height: 2.25rem; margin-bottom: .625rem; cursor: pointer; }
