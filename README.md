@@ -110,8 +110,10 @@ to visit.ee's part of the storage service, storage.sustenaut.eu
 build lists the photos places use at `/photos.json`, and the storage
 service deletes the others once they are 30 days old.
 
-`GITHUB_TOKEN=… bin/move-photos` moves the photos still in `places/media/`
-to the storage service in the same way.
+`./with-secrets bin/move-photos` moves the photos still in `places/media/`
+to the storage service in the same way. It needs `GITHUB_TOKEN`, a token
+that may push to this repository: with-secrets exports the Bitwarden secret
+`github-token` under that name (or set `GITHUB_TOKEN=…` yourself).
 
 The editor (`src/assets/edit.js`, loaded only with `?edit`) talks to GitHub
 from the browser. The first time, it asks for a fine-grained token for
