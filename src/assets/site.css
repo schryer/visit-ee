@@ -222,13 +222,6 @@ a.card:hover { border-color: #D8CFAE; box-shadow: 0 6px 18px rgb(46 26 6 / .08);
 .flight video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; background: var(--spruce); }
 .flight figcaption { font: 600 1rem var(--ui); }
 
-.map-slot {
-  flex: 999 1 30rem; min-width: 0; min-height: 18rem; border-radius: var(--radius); background: #E3E8D2;
-  border: 2px dashed #B7C29C; display: flex; align-items: center; justify-content: center; text-align: center;
-  padding: 1rem; font: 600 1rem var(--ui); color: var(--spruce-line);
-}
-@media (min-width: 48rem) { .map-slot { min-height: 28rem; } }
-
 /* Around the site: the place list, and the area map beside it once the
    map script runs. Phones get the map above the list. */
 .nearby { display: grid; gap: 1.5rem; padding-bottom: 3rem; margin-top: 1.5rem; }
@@ -372,7 +365,17 @@ a.card:hover { border-color: #D8CFAE; box-shadow: 0 6px 18px rgb(46 26 6 / .08);
 .platform-hero .eyebrow { color: #C9D19F; margin: 0; }
 .platform-hero h1 { color: var(--white); font-size: clamp(2.5rem, 1.8rem + 3vw, 4rem); }
 .platform-hero__intro { font-size: 1.1875rem; line-height: 1.6; max-width: 36rem; }
-.map-slot--platform { flex: 1 1 22rem; background: #33401C; border-color: var(--spruce-line); color: var(--on-spruce); }
+/* The map of every site on the platform home (platform-map.js). Without
+   JavaScript it stays an empty panel and the cards below list the sites. */
+.platform-map { flex: 1 1 22rem; position: relative; min-height: 20rem; border-radius: var(--radius); overflow: hidden; background: #33401C; }
+@media (min-width: 48rem) { .platform-map { min-height: 28rem; } }
+.platform-map .platform-map__canvas { position: absolute; inset: 0; }
+.platform-map__failed { padding: 1rem; font: 500 1rem var(--ui); color: var(--on-spruce); }
+.map-site { display: flex; align-items: center; gap: .5rem; text-decoration: none; color: var(--ink); }
+.map-site .map-home { pointer-events: auto; }
+.map-site--east { flex-direction: row-reverse; }
+.map-site__name { font: 700 .9375rem var(--heading); letter-spacing: .02em; background: var(--cream); border-radius: 999px; padding: .25rem .625rem; box-shadow: 0 1px 4px rgb(39 48 21 / .3); white-space: nowrap; }
+.map-site:hover .map-site__name, .map-site:focus-visible .map-site__name { background: var(--red); color: var(--white); }
 .place-card__logo { height: 2.75rem; width: auto; align-self: flex-start; }
 .host-card { padding: 1.5rem; gap: .75rem; background: var(--sand); border-style: dashed; }
 .host-card p { color: var(--ink-soft); font-size: 1rem; }

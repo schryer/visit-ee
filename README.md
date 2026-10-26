@@ -38,7 +38,7 @@ JPEG versions of every photo. Later builds reuse them.
 | `i18n/languages.json` | Which languages are built, and their URL prefixes. |
 | `i18n/ui/<lang>.json` | The platform's own text: buttons, labels, season names. |
 | `lib/content.js` | Reads all of the above and works out every page to write. |
-| `src/` | The Eleventy templates, CSS and scripts, including the area map (`src/assets/map.js`). |
+| `src/` | The Eleventy templates, CSS and scripts, including the area map (`src/assets/map.js`) and the map of every site on the home page (`src/assets/platform-map.js`). |
 | `tests/` | The functional tests, run against `bin/visit-ee`. |
 
 ## Languages
