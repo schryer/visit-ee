@@ -398,12 +398,21 @@
       "walk_m": 600
     },
     {
-      "place": "muinastalu",
-      "walk_m": 650
-    },
-    {
       "place": "pesapuu",
       "walk_m": 750
+    },
+    {
+      "place": "kulastuskeskus",
+      "walk_m": 750
+    },
+    {
+      "place": "kunstikuur"
+    },
+    {
+      "place": "kohvik"
+    },
+    {
+      "place": "coop"
     },
     {
       "place": "linnamagi"

@@ -5,5 +5,9 @@
     "lat": 58.035,
     "lng": 27.042
   },
-  "position": "estimate"
+  "position": "estimate",
+  "url": {
+    "et": "https://maanteemuuseum.ee",
+    "en": "https://maanteemuuseum.ee/en"
+  }
 }
