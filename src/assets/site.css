@@ -350,6 +350,7 @@ a.card:hover { border-color: #D8CFAE; box-shadow: 0 6px 18px rgb(46 26 6 / .08);
 .nearby__tip picture { display: block; }
 .nearby__tip .more__img { display: block; width: 100%; height: auto; max-height: 22rem; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 8px; }
 .nearby__tip .more__link { font-weight: 600; color: var(--lake); text-decoration: none; }
+.nearby__tip .more__credit { font-size: .75rem; color: var(--muted); margin-top: -.25rem; }
 .nearby__tip .more__link > span:first-child { text-decoration: underline; }
 .nearby__tip .more__link svg { vertical-align: -2px; margin: 0 .25rem; }
 .nearby__tip .more__note { font-weight: 400; font-size: .8125rem; color: var(--muted); white-space: nowrap; }

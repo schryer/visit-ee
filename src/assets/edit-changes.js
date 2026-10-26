@@ -7,8 +7,9 @@
 //     photo, photo_credit, url }
 // Every field but id is optional; a missing one leaves the file as it is,
 // and null removes it (photo, photo_credit, url). A moved place is no
-// longer an estimate, so "position" goes. A new photo's bytes are not
-// here: edit.js commits them to places/<photo> itself (photoPath).
+// longer an estimate, so "position" goes. A photo is the storage service's
+// object for it (edit.js uploads it first), or a file in places/ from
+// before the service, which goes from the repository when replaced.
 
 // The files a set of edits reads and writes, given the description
 // languages (i18n/places/<lang>.json) and sites that exist.
@@ -41,7 +42,7 @@ export function applyEdits(files, edits, { site }) {
       const old = read(where);
       write(where, null);
       // Its photo goes too.
-      if (old?.photo) removed.add(`places/${old.photo}`);
+      if (typeof old?.photo === "string") removed.add(`places/${old.photo}`);
       for (const path of Object.keys(files).filter(isTextPath)) {
         const text = read(path);
         if (text && e.id in text) delete text[e.id];
@@ -63,7 +64,7 @@ export function applyEdits(files, edits, { site }) {
       delete place.position;
     }
     // A replaced or removed photo's file goes.
-    if (place.photo && e.photo !== undefined && e.photo !== place.photo) removed.add(`places/${place.photo}`);
+    if (typeof place.photo === "string" && e.photo !== undefined && e.photo !== place.photo) removed.add(`places/${place.photo}`);
     for (const key of ["photo", "photo_credit", "url"]) {
       if (e[key] === null) delete place[key];
       else if (e[key] !== undefined) place[key] = e[key];
@@ -119,7 +120,7 @@ export function describe(e, base) {
     if (e.name !== undefined) parts.push(`Rename ${e.id} to ${e.name}`);
     if (e.category !== undefined) parts.push(`${name} is now ${e.category}`);
   }
-  if (e.photoData) parts.push(`New photo of ${name}`);
+  if (e.photo) parts.push(`New photo of ${name}`);
   else if (e.photo === null) parts.push(`Remove the photo of ${name}`);
   if (e.photo_credit !== undefined && !e.isNew) parts.push(`Photo credit for ${name}`);
   if (e.url !== undefined && !e.isNew) parts.push(e.url === null ? `Remove the website of ${name}` : `Website of ${name}: ${e.url}`);
@@ -145,8 +146,6 @@ export function round(x) {
 }
 
 export const placePath = (id) => `places/${id}.json`;
-// Where a place's uploaded photo goes, relative to places/ as "photo" says.
-export const photoPath = (id) => `media/${id}.jpg`;
 export const textPath = (lang) => `i18n/places/${lang}.json`;
 export const sitePath = (site) => `sites/${site}/site.json`;
 const isTextPath = (path) => /^i18n\/places\/[^/]+\.json$/.test(path);

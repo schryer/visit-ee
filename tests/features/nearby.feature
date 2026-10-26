@@ -56,6 +56,22 @@ Feature: Places nearby
     Given the sites are built
     Then the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" has a photo
 
+  Scenario: A place's photo can live in the storage service
+    Given a copy of the content
+    And the place "pesapuu" shows the stored photo "0123456789abcdef", by "Mari"
+    When I build it with the photos at "https://photos.example"
+    Then it succeeds
+    And the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" shows "https://photos.example/p/0123456789abcdef/960.jpg"
+    And the page "/en/south-estonia/rouge/oobikuoru/" shows "Photo: Mari" in "en"
+    And "/photos.json" lists the photo "0123456789abcdef"
+
+  Scenario: A photo the storage service could not have made fails the build
+    Given a copy of the content
+    And the place "pesapuu" shows the stored photo "not-a-hash", by "Mari"
+    When I build it
+    Then it fails
+    And stderr mentions "places/pesapuu.json: photo must be"
+
   Scenario: A place card links to the place's official website, in a new tab
     Given the sites are built
     Then the place card of "Eesti Maanteemuuseum" on "/en/south-estonia/rouge/oobikuoru/" links to "https://maanteemuuseum.ee/en" in a new tab
