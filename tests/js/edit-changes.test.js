@@ -67,3 +67,26 @@ test("ids come from names", () => {
   assert.equal(slug("Rõuge Suurjärv"), "rouge-suurjarv");
   assert.equal(slug("Käsitöö- ja kohvikukoda"), "kasitoo-ja-kohvikukoda");
 });
+
+test("a photo, its credit and a website go into the place's file", () => {
+  const out = applyEdits(files(), [{ id: "kirik", photo: "media/kirik.jpg", photo_credit: "David", url: "https://eelk.ee/rouge" }], opts);
+  const place = JSON.parse(out["places/kirik.json"]);
+  assert.equal(place.photo, "media/kirik.jpg");
+  assert.equal(place.photo_credit, "David");
+  assert.equal(place.url, "https://eelk.ee/rouge");
+  assert.deepEqual(Object.keys(place), ["name", "category", "geo", "position", "photo", "photo_credit", "url"]);
+});
+
+test("a removed or replaced photo's file goes, and so does a deleted place's", () => {
+  const f = { ...files(), "places/muinastalu.json": j({ name: "Muinastalu", category: "heritage", geo: { lat: 1, lng: 2 }, photo: "media/old.webp", url: "https://x.ee" }) };
+  let out = applyEdits(f, [{ id: "muinastalu", photo: null, url: null }], opts);
+  assert.equal(out["places/media/old.webp"], null);
+  assert.equal(JSON.parse(out["places/muinastalu.json"]).photo, undefined);
+  assert.equal(JSON.parse(out["places/muinastalu.json"]).url, undefined);
+  out = applyEdits(f, [{ id: "muinastalu", photo: "media/muinastalu.jpg" }], opts);
+  assert.equal(out["places/media/old.webp"], null);
+  out = applyEdits(f, [{ id: "muinastalu", deleted: true }], opts);
+  assert.equal(out["places/media/old.webp"], null);
+  out = applyEdits(f, [{ id: "muinastalu", photo: "media/old.webp" }], opts);
+  assert.equal("places/media/old.webp" in out, false);
+});

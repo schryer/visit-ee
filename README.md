@@ -90,8 +90,10 @@ a local `maps` build.
 Add `?edit` to a site page's address (`…/oobikuoru/?edit`) to turn its map
 into an editor. Drag a pin to move a place, tap "Add place" and then the
 map (or "Use where I stand" on a phone) to add one, and tap a pin to change
-its name, category, descriptions, or whether this site lists it, or to
-delete it. Faded pins are places this site doesn't list yet; a "?" marks a
+its name, category, descriptions, photo (with its credit), official
+website, or whether this site lists it, or to delete it. A photo you pick
+is shrunk to 2000 px and saved as `places/media/<id>.jpg`; drawing it anew
+drops the camera's GPS and other data. Faded pins are places this site doesn't list yet; a "?" marks a
 position that is still an estimate. "Send…" turns every unsent change into
 one pull request on this repository, which CI checks like any other.
 
