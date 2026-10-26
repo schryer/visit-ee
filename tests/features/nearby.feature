@@ -52,6 +52,29 @@ Feature: Places nearby
     Given the sites are built
     Then the page "/en/south-estonia/rouge/oobikuoru/" has the place "suurjarv" at "#suurjarv"
 
+  Scenario: A place card can open up with a photo
+    Given the sites are built
+    Then the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" has a photo
+
+  Scenario: A place card links to the place's official website, in a new tab
+    Given the sites are built
+    Then the place card of "Eesti Maanteemuuseum" on "/en/south-estonia/rouge/oobikuoru/" links to "https://maanteemuuseum.ee/en" in a new tab
+    And the place card of "Eesti Maanteemuuseum" on "/louna-eesti/rouge/oobikuoru/" links to "https://maanteemuuseum.ee" in a new tab
+
+  Scenario: A place with its own visit.ee site links there instead
+    Given a copy of the content
+    And the place "pesapuu" has the site "oobikuoru"
+    When I build it
+    Then it succeeds
+    And the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" links to "/en/south-estonia/rouge/oobikuoru/"
+
+  Scenario: A place's website must be an https address
+    Given a copy of the content
+    And the place "pesapuu" has the url "http://example.com"
+    When I build it
+    Then it fails
+    And stderr mentions "places/pesapuu.json"
+
   Scenario: A site cannot name a place that does not exist
     Given a copy of the content
     And "oobikuoru" lists the place "nowhere" nearby

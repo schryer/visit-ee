@@ -51,6 +51,18 @@
     },
     {
       "place": "paganamaa"
+    },
+    {
+      "place": "kulastuskeskus"
+    },
+    {
+      "place": "kunstikuur"
+    },
+    {
+      "place": "kohvik"
+    },
+    {
+      "place": "coop"
     }
   ]
 }

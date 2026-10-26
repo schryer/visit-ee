@@ -86,6 +86,12 @@ class Places(HTMLParser):
         a = {k: v or "" for k, v in attrs}
         if tag == "li" and "data-place" in a:
             self.rows.append({"id": a["id"], "href": ""})
+        # What the map's place card shows when it opens up.
+        if self.rows and tag == "img" and "more__img" in a.get("class", ""):
+            self.rows[-1]["photo"] = a.get("src", "")
+        if self.rows and tag == "a" and a.get("class") == "more__link":
+            self.rows[-1]["more"] = a.get("href", "")
+            self.rows[-1]["more_target"] = a.get("target", "")
         part = self.PARTS.get(a.get("class", ""))
         if part and self.rows:
             self._part = part
@@ -231,6 +237,14 @@ def one_finnish_description(content: Path, place: str) -> None:
     path.write_text(json.dumps({place: "Viron syvin järvi"}, ensure_ascii=False), encoding="utf-8")
 
 
+@given(parsers.parse('the place "{place}" has the {field} "{value}"'))
+def set_place_field(content: Path, place: str, field: str, value: str) -> None:
+    path = content / "places" / f"{place}.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data[field] = value
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 @given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))
 def list_place(content: Path, site_id: str, place: str) -> None:
     path = content / "sites" / site_id / "site.json"
@@ -343,6 +357,24 @@ def lists_place_bare(site: Build, url: str, name: str) -> None:
 def place_link(site: Build, url: str, place: str, href: str) -> None:
     row = next(r for r in site.places(url).rows if r["id"] == place)
     assert row["href"] == href
+
+
+@then(parsers.parse('the place card of "{name}" on "{url}" links to "{href}" in a new tab'))
+def card_links_out(site: Build, url: str, name: str, href: str) -> None:
+    row = site.places(url).find(name)
+    assert (row.get("more"), row.get("more_target")) == (href, "_blank"), row
+
+
+@then(parsers.parse('the place card of "{name}" on "{url}" links to "{href}"'))
+def card_links(site: Build, url: str, name: str, href: str) -> None:
+    row = site.places(url).find(name)
+    assert (row.get("more"), row.get("more_target")) == (href, ""), row
+
+
+@then(parsers.parse('the place card of "{name}" on "{url}" has a photo'))
+def card_has_photo(site: Build, url: str, name: str) -> None:
+    photo = site.places(url).find(name).get("photo", "")
+    assert photo and site.file(photo).is_file(), photo
 
 
 @then(parsers.parse('the build has "{url}"'))

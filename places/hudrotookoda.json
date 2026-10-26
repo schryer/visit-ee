@@ -2,8 +2,7 @@
   "name": "Ööbikuoru Hüdrotöökoda",
   "category": "museum",
   "geo": {
-    "lat": 57.7288,
-    "lng": 26.9304
-  },
-  "position": "estimate"
+    "lat": 57.728,
+    "lng": 26.9302
+  }
 }

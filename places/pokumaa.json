@@ -5,5 +5,9 @@
     "lat": 58.005,
     "lng": 26.99
   },
-  "position": "estimate"
+  "position": "estimate",
+  "url": {
+    "et": "https://www.pokumaa.ee",
+    "en": "https://www.pokumaa.ee/en"
+  }
 }
