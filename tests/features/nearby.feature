@@ -92,6 +92,13 @@ Feature: Places nearby
     And the build does not have "/assets/vendor/maplibre/maplibre-gl.mjs"
     And the map on "/louna-eesti/rouge/oobikuoru/" loads from "https://maps.sustenaut.eu"
 
+  Scenario: The home page maps every site
+    Given the sites are built
+    Then the build has "/assets/platform-map.js"
+    And the map on "/en/" loads from "https://maps.sustenaut.eu"
+    And the map on "/en/" has "Nightingale Valley" at "/en/south-estonia/rouge/oobikuoru/"
+    And the map on "/" has "Ööbikuorg" at "/louna-eesti/rouge/oobikuoru/"
+
   Scenario: A build can use another maps service
     Given a copy of the content
     When I build it with the maps at "http://localhost:8091/"

@@ -475,9 +475,19 @@ def every_link_resolves(site: Build) -> None:
     assert not broken, "\n".join(broken)
 
 
-@then(parsers.parse('the map on "{url}" loads from "{maps}"'))
-def map_loads_from(site: Build, url: str, maps: str) -> None:
+def map_config(site: Build, url: str) -> dict:
     text = site.file(url).read_text(encoding="utf-8")
     config = re.search(r"<script type=\"application/json\" data-map-config>(.*?)</script>", text, re.S)
     assert config, f"no map on {url}"
-    assert json.loads(config.group(1))["maps"] == maps
+    return json.loads(config.group(1))
+
+
+@then(parsers.parse('the map on "{url}" loads from "{maps}"'))
+def map_loads_from(site: Build, url: str, maps: str) -> None:
+    assert map_config(site, url)["maps"] == maps
+
+
+@then(parsers.parse('the map on "{url}" has "{name}" at "{href}"'))
+def map_has_site(site: Build, url: str, name: str, href: str) -> None:
+    sites = {s["name"]: s["url"] for s in map_config(site, url)["sites"]}
+    assert sites.get(name) == href, sites

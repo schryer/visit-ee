@@ -24,8 +24,10 @@ $(VENV)/.done: tests/requirements.lock
 	$(VENV)/bin/pip install --quiet --require-hashes -r tests/requirements.lock
 	touch $@
 
-# The Gherkin suite, run against bin/visit-ee.
+# The Gherkin suite, run against bin/visit-ee, and the browser scripts'
+# own tests (tests/js).
 functional: venv node
+	node --test tests/js/*.test.js
 	cd tests && VISIT_EE_BIN_DIR=$(CURDIR)/bin ../$(VENV)/bin/pytest -n auto
 
 lock: venv

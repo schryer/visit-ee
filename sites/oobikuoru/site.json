@@ -40,20 +40,21 @@
     {
       "id": "autumn",
       "kind": "video",
-      "poster": "media/video/camp-poster.jpg",
+      "poster": "media/video/flyover-poster.jpg",
       "sources": [
         {
-          "src": "media/video/camp-720.webm",
+          "src": "media/video/flyover-720.webm",
           "type": "video/webm"
         },
         {
-          "src": "media/video/camp-720.mp4",
+          "src": "media/video/flyover-720.mp4",
           "type": "video/mp4"
         }
       ]
     }
   ],
   "default_season": "autumn",
+  "photo": "media/photos/lakes-from-tower.jpg",
   "facts": [
     {
       "id": "lakes",
