@@ -1,5 +1,5 @@
 // The edit mode's file changes (src/assets/edit-changes.js), run with
-// `node --test tests/js`.
+// `node --test tests/js/*.test.js`.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyEdits, touchedPaths, describe, slug } from "../../src/assets/edit-changes.js";
@@ -89,4 +89,15 @@ test("a removed or replaced photo's file goes, and so does a deleted place's", (
   assert.equal(out["places/media/old.webp"], null);
   out = applyEdits(f, [{ id: "muinastalu", photo: "media/old.webp" }], opts);
   assert.equal("places/media/old.webp" in out, false);
+});
+
+test("a photo from the photo service replaces a file in the repository", () => {
+  const f = { ...files(), "places/muinastalu.json": j({ name: "Muinastalu", category: "heritage", geo: { lat: 1, lng: 2 }, photo: "media/old.jpg" }) };
+  const photo = { id: "0123456789abcdef", width: 1600, height: 1200, widths: [480, 960, 1600], formats: ["webp", "jpg"] };
+  const out = applyEdits(f, [{ id: "muinastalu", photo }], opts);
+  assert.deepEqual(JSON.parse(out["places/muinastalu.json"]).photo, photo);
+  assert.equal(out["places/media/old.jpg"], null);
+  // Replacing a service photo leaves the service to clean up.
+  const again = applyEdits({ ...f, "places/muinastalu.json": out["places/muinastalu.json"] }, [{ id: "muinastalu", photo: null }], opts);
+  assert.deepEqual(Object.keys(again), ["places/muinastalu.json"]);
 });

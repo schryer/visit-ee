@@ -65,6 +65,7 @@
   "map.less": "Näita vähem",
   "map.website": "Koduleht",
   "map.new_tab": "avaneb uues aknas",
+  "map.photo_by": "Foto: {name}",
   "map.page": "Loe edasi visit.ee-s",
   "map.no_detail": "Selle piirkonna täpset kaarti veel ei ole, seega siin lähemale suumida ei saa.",
   "map.label": "Lähedalasuvate kohtade kaart",

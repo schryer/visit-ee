@@ -65,6 +65,7 @@
   "map.less": "Show less",
   "map.website": "Website",
   "map.new_tab": "opens in a new tab",
+  "map.photo_by": "Photo: {name}",
   "map.page": "Read more on visit.ee",
   "map.no_detail": "There is no detailed map of this area yet, so the map zooms no closer here.",
   "map.label": "Map of the places nearby",

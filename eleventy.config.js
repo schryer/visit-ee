@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import Image from "@11ty/eleventy-img";
+import { photosInUse } from "./lib/content.js";
 
 const require = createRequire(import.meta.url);
 const OUT = process.env.VISIT_EE_OUT || "_site";
@@ -114,6 +115,7 @@ export default function (eleventyConfig) {
   });
 
   eleventyConfig.addFilter("json", (value) => JSON.stringify(value).replace(/</g, "\\u003c"));
+  eleventyConfig.addFilter("photosInUse", (content) => photosInUse(content));
 
   return {
     dir: { input: "src", includes: "_includes", data: "_data" },

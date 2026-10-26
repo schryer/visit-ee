@@ -245,6 +245,15 @@ def set_place_field(content: Path, place: str, field: str, value: str) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+@given(parsers.parse('the place "{place}" shows the stored photo "{photo_id}", by "{credit}"'))
+def service_photo(content: Path, place: str, photo_id: str, credit: str) -> None:
+    path = content / "places" / f"{place}.json"
+    data = json.loads(path.read_text())
+    data["photo"] = {"id": photo_id, "width": 1600, "height": 1200, "widths": [480, 960, 1600], "formats": ["webp", "jpg"]}
+    data["photo_credit"] = credit
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+
+
 @given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))
 def list_place(content: Path, site_id: str, place: str) -> None:
     path = content / "sites" / site_id / "site.json"
@@ -269,6 +278,11 @@ def i_build_it(run, binary, content: Path, out: Path):
 @when(parsers.parse('I build it with the maps at "{url}"'), target_fixture="result")
 def i_build_it_with_maps(run, binary, content: Path, out: Path, url: str):
     return build(run, binary, content, out, "--maps-url", url)
+
+
+@when(parsers.parse('I build it with the photos at "{url}"'), target_fixture="result")
+def i_build_it_with_photos(run, binary, content: Path, out: Path, url: str):
+    return build(run, binary, content, out, "--photos-url", url)
 
 
 @pytest.fixture
@@ -369,6 +383,16 @@ def card_links_out(site: Build, url: str, name: str, href: str) -> None:
 def card_links(site: Build, url: str, name: str, href: str) -> None:
     row = site.places(url).find(name)
     assert (row.get("more"), row.get("more_target")) == (href, ""), row
+
+
+@then(parsers.parse('the place card of "{name}" on "{url}" shows "{src}"'))
+def card_shows(site: Build, url: str, name: str, src: str) -> None:
+    assert site.places(url).find(name).get("photo") == src
+
+
+@then(parsers.parse('"{url}" lists the photo "{photo_id}"'))
+def lists_photo(site: Build, url: str, photo_id: str) -> None:
+    assert photo_id in json.loads(site.file(url).read_text())["photos"]
 
 
 @then(parsers.parse('the place card of "{name}" on "{url}" has a photo'))

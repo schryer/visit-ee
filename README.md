@@ -32,7 +32,7 @@ JPEG versions of every photo. Later builds reuse them.
 |---|---|
 | `sites/<id>/site.json` | A site's facts that don't depend on language: address, prices, stays, photos, videos, nearby places, old addresses to redirect. |
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
-| `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. Optional: `photo` (a file in `places/media/`), `url` (its official website, one https address or one per language, `{"et": …, "en": …}`) and `site` (the id of its own visit.ee site, which the map links to instead). |
+| `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. Optional: `photo` (in the storage service, as the edit mode writes it: `{id, width, height, widths, formats}`; a file in `places/media/` still works until it is moved), `photo_credit`, `url` (its official website, one https address or one per language, `{"et": …, "en": …}`) and `site` (the id of its own visit.ee site, which the map links to instead). |
 | `i18n/places/<lang>.json` | A short description of each place, by id. Estonian and English need one for every place (`place_descriptions` in `i18n/languages.json`), or the build fails. In another language a site is built in, a missing one is a build warning, and the place shows without it. |
 | `towns/<id>/town.json` | A town (municipality) page at `/<region>/<town>/`: its centre, the maps service area it opens on, and the places in it. Its text is in `towns/<id>/strings/<lang>.json`, built in a language on the same terms as a site. |
 | `sites/<id>/media/` | Photos (resized at build time), logos and drone videos, served under `/media/<id>/`. |
@@ -103,10 +103,17 @@ into an editor. Drag a pin to move a place, tap "Add place" and then the
 map (or "Use where I stand" on a phone) to add one, and tap a pin to change
 its name, category, descriptions, photo (with its credit), official
 website, or whether this site lists it, or to delete it. A photo you pick
-is shrunk to 2000 px and saved as `places/media/<id>.jpg`; drawing it anew
-drops the camera's GPS and other data. Faded pins are places this site doesn't list yet; a "?" marks a
-position that is still an estimate. "Send…" turns every unsent change into
-one pull request on this repository, which CI checks like any other.
+is made into 480, 960 and 1600 px copies (JPEG and WebP) in the browser,
+which leaves the camera's GPS and other data behind, and uploaded at once
+to visit.ee's part of the storage service, storage.sustenaut.eu
+(schryer/storage, `--photos-url`). Only the place's JSON records it. The
+build lists the photos places use at `/photos.json`, and the storage
+service deletes the others once they are 30 days old.
+
+`./with-secrets bin/move-photos` moves the photos still in `places/media/`
+to the storage service in the same way. It needs `GITHUB_TOKEN`, a token
+that may push to this repository: with-secrets exports the Bitwarden secret
+`github-token` under that name (or set `GITHUB_TOKEN=…` yourself).
 
 The editor (`src/assets/edit.js`, loaded only with `?edit`) talks to GitHub
 from the browser. The first time, it asks for a fine-grained token for

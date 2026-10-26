@@ -1,0 +1,7 @@
+---
+permalink: /photos.json
+eleventyExcludeFromCollections: true
+---
+{#- The photos in the storage service that places use: it deletes
+    the others once they are old enough. -#}
+{{ { photos: visit | photosInUse } | json | safe }}

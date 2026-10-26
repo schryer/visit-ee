@@ -1,0 +1,4 @@
+#!/bin/sh
+# Moves the place photos still in places/media/ to the storage service:
+# see lib/move-photos.js.
+exec node "$(dirname "$0")/../lib/move-photos.js" "$@"

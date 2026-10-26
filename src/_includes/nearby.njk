@@ -61,8 +61,16 @@
 <span class="place__meta"><b>{{ place.distance }}</b> · {{ p.t("cat." + place.category) }}</span>
 {#- What the map's place card shows when it opens up: a photo and where to read more. #}
 <template class="place__more">
-{%- if place.photo %}
+{%- if place.photo and place.photo.remote %}
+<picture>
+{%- if place.photo.webp %}<source type="image/webp" srcset="{{ place.photo.webp }}" sizes="(min-width: 60rem) 40rem, 100vw">{% endif %}
+<img class="more__img" src="{{ place.photo.src }}" srcset="{{ place.photo.jpg }}" sizes="(min-width: 60rem) 40rem, 100vw" width="{{ place.photo.width }}" height="{{ place.photo.height }}" alt="{{ place.name }}" loading="lazy" decoding="async">
+</picture>
+{%- elif place.photo %}
 {% picture place.photo.owner, place.photo.src, place.name, "(min-width: 60rem) 40rem, 100vw", { widths: [480, 800, 1200], class: "more__img" } %}
+{%- endif %}
+{%- if place.photo and place.photo.credit %}
+<span class="more__credit">{{ p.t("map.photo_by", { name: place.photo.credit }) }}</span>
 {%- endif %}
 {%- if place.link and place.link.external %}
 <a class="more__link" href="{{ place.link.href }}" target="_blank" rel="noopener"><span>{{ p.t("map.website") }}: {{ place.link.host }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="more__note">({{ p.t("map.new_tab") }})</span></a>
