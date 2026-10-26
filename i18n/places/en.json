@@ -4,10 +4,9 @@
   "liinjarv": "Boats from the camp",
   "suurjarv": "Estonia’s deepest lake, 38 m",
   "vesioinas": "Water ram pump that runs without electricity",
-  "muinastalu": "Reconstructed ancient farm",
   "linnamagi": "Hill fort and ancient settlement",
   "kirik": "St Mary’s church",
-  "pesapuu": "Viewing tower and visitor centre",
+  "pesapuu": "Viewing tower over the valley and lakes",
   "munamagi": "Highest hill in the Baltics, with a tower",
   "hinni": "Sandstone canyon",
   "viitina": "Manor and park",
@@ -19,5 +18,9 @@
   "pokumaa": "Nature centre for families",
   "maanteemuuseum": "Old roads, vehicles and road building",
   "taevaskoda": "Sandstone cliffs on the Ahja river",
-  "meenikunno": "Bog boardwalk"
+  "meenikunno": "Bog boardwalk",
+  "kulastuskeskus": "Tourist information, by the viewing tower",
+  "kunstikuur": "Local crafts, workshops and exhibitions",
+  "kohvik": "Café in the village centre",
+  "coop": "Village grocery shop"
 }

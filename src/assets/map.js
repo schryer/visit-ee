@@ -1,6 +1,8 @@
 // The visit.ee area map: draws a site's nearby places (the list in
 // nearby.njk) on a map of the area, with On foot and By car modes,
 // category filters, layer switches and a shareable link for each place.
+// A place's card opens up over the map to show its photo, its description
+// and where to read more.
 // The list works without any of this. The map itself (MapLibre, the area
 // packs and their style) comes from the maps service's package, loaded
 // only when the map is about to scroll into view.
@@ -13,6 +15,13 @@ const MODES = {
 
 // The rings' colour, matching site.css.
 const RED = "#C53E2A";
+
+const svg = (paths) =>
+  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+const ICON = {
+  expand: svg('<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>'),
+  collapse: svg('<path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/>'),
+};
 
 const root = document.querySelector("[data-visit-map]");
 if (root) start(root);
@@ -27,7 +36,9 @@ function start(root) {
     lngLat: [Number(row.dataset.lng), Number(row.dataset.lat)],
     foot: row.dataset.foot === "true",
     name: row.querySelector(".place__name").textContent,
+    gloss: row.querySelector(".place__gloss")?.textContent || "",
     meta: row.querySelector(".place__meta").textContent,
+    more: row.querySelector(".place__more"),
     icon: row.querySelector(".place__icon").innerHTML,
   }));
   const chips = [...root.querySelectorAll("[data-cat]")].filter((el) => el.tagName === "BUTTON");
@@ -137,27 +148,50 @@ function start(root) {
     }
   }
 
+  // The place card: its name, with a button after it that opens the card
+  // up over most of the map, and closes it again.
   function showTip(p) {
-    const link = config.link + "#" + p.id;
     tip.replaceChildren();
-    const head = el("div", "tip__row");
-    head.append(el("b", "", p.name), button(config.strings.close, "tip__close", () => (tip.hidden = true), "✕"));
-    const url = el("span", "tip__link", link);
-    const done = el("span", "", config.strings.copied);
+    tip.classList.remove("nearby__tip--open");
+    const name = button(config.strings.more.replace("{name}", p.name), "tip__name", () => toggle(), p.name);
+    const icon = button(config.strings.more.replace("{name}", p.name), "tip__toggle", () => toggle(), "");
+    icon.innerHTML = ICON.expand;
+    for (const b of [name, icon]) b.setAttribute("aria-expanded", "false");
+    const head = el("div", "tip__row tip__head");
+    head.append(name, icon, button(config.strings.close, "tip__close", () => (tip.hidden = true), "✕"));
+
+    const body = el("div", "tip__body");
+    body.hidden = true;
+    if (p.more) body.append(p.more.content.cloneNode(true));
+    if (p.gloss) body.append(el("p", "tip__gloss", p.gloss));
+    const done = el("span", "tip__done", config.strings.copied);
     done.hidden = true;
+    const link = config.link + "#" + p.id;
+    const copy = button(config.strings.copy, "", () => {
+      try {
+        navigator.clipboard.writeText(link).then(() => (done.hidden = false), () => prompt("", link));
+      } catch {
+        prompt("", link);
+      }
+    });
     const actions = el("div", "tip__row");
-    actions.append(
-      button(config.strings.copy, "", () => {
-        const fallback = () => getSelection().selectAllChildren(url);
-        try {
-          navigator.clipboard.writeText(link).then(() => (done.hidden = false), fallback);
-        } catch {
-          fallback();
-        }
-      }),
-      done,
-    );
-    tip.append(head, el("span", "", p.meta), url, actions);
+    actions.append(copy, done);
+    body.append(actions);
+    // The link out goes last, so it is the next stop after the photo.
+    const out = body.querySelector(".more__link");
+    if (out) actions.before(out);
+
+    function toggle(open = body.hidden) {
+      body.hidden = !open;
+      tip.classList.toggle("nearby__tip--open", open);
+      icon.innerHTML = open ? ICON.collapse : ICON.expand;
+      icon.setAttribute("aria-label", open ? config.strings.less : config.strings.more.replace("{name}", p.name));
+      for (const b of [name, icon]) b.setAttribute("aria-expanded", String(open));
+    }
+    tip.onkeydown = (event) => {
+      if (event.key === "Escape") body.hidden ? (tip.hidden = true) : toggle(false);
+    };
+    tip.append(head, el("span", "tip__meta", p.meta), body);
     tip.hidden = false;
   }
 
@@ -202,6 +236,7 @@ function start(root) {
       fitBoundsOptions: { padding: 24 },
       minZoom: 6,
       locale: config.locale,
+      detailNote: config.detailNote,
     }));
     map.addSource("rings", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     map.addLayer({

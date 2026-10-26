@@ -41,7 +41,7 @@
 <p class="nearby__count" aria-live="polite"></p>
 </div>
 <ul class="nearby__list">
-{%- for place in p.nearby %}
+{%- asyncEach place in p.nearby %}
 <li id="{{ place.id }}" class="place cat-{{ place.category }}" data-place data-cat="{{ place.category }}" data-lat="{{ place.geo.lat }}" data-lng="{{ place.geo.lng }}" data-foot="{{ place.onFoot }}">
 <span class="place__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ icons[place.category] | safe }}</svg></span>
 <a class="place__name" href="#{{ place.id }}"{% if p.lang != "et" %} lang="et"{% endif %}>{{ place.name }}</a>
@@ -49,8 +49,19 @@
 <span class="place__gloss">{{ place.description }}</span>
 {%- endif %}
 <span class="place__meta"><b>{{ place.distance }}</b> · {{ p.t("cat." + place.category) }}</span>
+{#- What the map's place card shows when it opens up: a photo and where to read more. #}
+<template class="place__more">
+{%- if place.photo %}
+{% picture place.photo.owner, place.photo.src, place.name, "(min-width: 60rem) 40rem, 100vw", { widths: [480, 800, 1200], class: "more__img" } %}
+{%- endif %}
+{%- if place.link and place.link.external %}
+<a class="more__link" href="{{ place.link.href }}" target="_blank" rel="noopener"><span>{{ p.t("map.website") }}: {{ place.link.host }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="more__note">({{ p.t("map.new_tab") }})</span></a>
+{%- elif place.link %}
+<a class="more__link" href="{{ place.link.href }}">{{ p.t("map.page") }} →</a>
+{%- endif %}
+</template>
 </li>
-{%- endfor %}
+{%- endeach %}
 </ul>
 </div>
 </div>

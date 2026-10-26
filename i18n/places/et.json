@@ -4,9 +4,8 @@
   "liinjarv": "Paadiga sõitma otse laagrist",
   "suurjarv": "Eesti sügavaim järv, 38 m",
   "vesioinas": "Vana veepump, mis töötab ilma elektrita",
-  "muinastalu": "Taastatud muinasaegne talu",
   "linnamagi": "Linnamägi ja muinasasula",
-  "pesapuu": "Vaatetorn ja külastuskeskus",
+  "pesapuu": "Vaatetorn oru ja järvede kohal",
   "munamagi": "Baltimaade kõrgeim tipp, vaatetorniga",
   "hinni": "Liivakivikanjon",
   "viitina": "Mõis ja park",
@@ -19,5 +18,9 @@
   "taevaskoda": "Liivakivipaljandid Ahja jõe ääres",
   "meenikunno": "Laudtee rabas",
   "kirik": "Püha Maarja kirik",
-  "maanteemuuseum": "Vanad teed, sõidukid ja teede ehitus"
+  "maanteemuuseum": "Vanad teed, sõidukid ja teede ehitus",
+  "kulastuskeskus": "Turismiinfo vaatetorni juures",
+  "kunstikuur": "Kohalik käsitöö, töötoad ja näitused",
+  "kohvik": "Kohvik aleviku keskel",
+  "coop": "Aleviku toidupood"
 }

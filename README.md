@@ -32,7 +32,7 @@ JPEG versions of every photo. Later builds reuse them.
 |---|---|
 | `sites/<id>/site.json` | A site's facts that don't depend on language: address, prices, stays, photos, videos, nearby places, old addresses to redirect. |
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
-| `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. |
+| `places/<id>.json` | A place guests can visit, shared by every site: its name (never translated), category and position. `"position": "estimate"` marks one still to check. Optional: `photo` (a file in `places/media/`), `url` (its official website, one https address or one per language, `{"et": …, "en": …}`) and `site` (the id of its own visit.ee site, which the map links to instead). |
 | `i18n/places/<lang>.json` | A short description of each place, by id. Estonian and English need one for every place (`place_descriptions` in `i18n/languages.json`), or the build fails. In another language a site is built in, a missing one is a build warning, and the place shows without it. |
 | `sites/<id>/media/` | Photos (resized at build time), logos and drone videos, served under `/media/<id>/`. |
 | `i18n/languages.json` | Which languages are built, and their URL prefixes. |
@@ -73,7 +73,9 @@ first: walking time under 2 km, then the road distance the site gives
 schema.org data, so it works without JavaScript. `src/assets/map.js` draws
 the same places on a map of the area once it scrolls into view, with On
 foot and By car modes, category filters, layer switches and a link for
-each place (`…/oobikuoru/#suurjarv`).
+each place (`…/oobikuoru/#suurjarv`). A place's card opens up over the map
+with its photo, its description and a link to its visit.ee page or its
+official website, which opens in a new tab.
 
 The map comes from maps.sustenaut.eu (schryer/maps), which builds
 vector tiles of Estonia from Maa- ja Ruumiamet (ETAK, EHAK, EHR) and RMK
