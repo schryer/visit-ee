@@ -197,7 +197,10 @@ export function start(ctx) {
       if (!c.geo) continue;
       const marker = markerFor(id);
       const pin = marker.getElement();
-      pin.className = `pin cat-${c.category}`;
+      // Only the category class changes: MapLibre's own classes on the pin
+      // (maplibregl-marker) are what keep it on its spot.
+      for (const name of [...pin.classList]) if (name.startsWith("cat-")) pin.classList.remove(name);
+      pin.classList.add("pin", `cat-${c.category}`);
       if (!pageIds.has(id)) pin.setAttribute("aria-label", c.name);
       pin.title = c.name;
       pin.classList.toggle("pin--other", !c.listed);
