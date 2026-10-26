@@ -26,19 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - run: npm ci
-      # The map packs live on the maps-data branch, outside main's history
-      # (about 60 MB, replaced whenever the map data is rebuilt). Without
-      # the branch the site still builds, and the map has no background.
-      - name: Fetch the map packs
-        run: |
-          if git ls-remote --exit-code --heads origin maps-data; then
-            git fetch --depth 1 origin maps-data
-            mkdir _maps
-            git archive FETCH_HEAD | tar -x -C _maps
-          fi
       # temp.schryer.eu is a preview: it asks search engines to keep out
       # until the site moves to visit.ee and builds with --env production.
-      - run: bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu $([ -d _maps ] && echo --maps _maps)
+      - run: bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu
       - uses: schryer/pubkit/actions/deploy-static@v0.14.0
         with:
           dir: _site

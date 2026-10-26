@@ -491,13 +491,5 @@
         "eur": 25
       }
     ]
-  },
-  "map": {
-    "packs": [
-      "louna-eesti/rouge",
-      "louna-eesti/voru-vald",
-      "louna-eesti/antsla",
-      "louna-eesti/voru"
-    ]
   }
 }

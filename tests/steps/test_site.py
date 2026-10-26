@@ -239,15 +239,6 @@ def list_place(content: Path, site_id: str, place: str) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-@given(parsers.parse('a folder of map packs with "{a}" and "{b}"'), target_fixture="maps")
-def map_packs(tmp_path: Path, a: str, b: str) -> Path:
-    maps = tmp_path / "maps"
-    for name in (a, b):
-        (maps / name).parent.mkdir(parents=True, exist_ok=True)
-        (maps / name).write_bytes(b"test")
-    return maps
-
-
 # --- when --------------------------------------------------------------------
 
 
@@ -261,9 +252,9 @@ def i_build_it(run, binary, content: Path, out: Path):
     return build(run, binary, content, out)
 
 
-@when("I build it with those maps", target_fixture="result")
-def i_build_it_with_maps(run, binary, content: Path, out: Path, maps: Path):
-    return build(run, binary, content, out, "--maps", maps)
+@when(parsers.parse('I build it with the maps at "{url}"'), target_fixture="result")
+def i_build_it_with_maps(run, binary, content: Path, out: Path, url: str):
+    return build(run, binary, content, out, "--maps-url", url)
 
 
 @pytest.fixture
@@ -450,3 +441,11 @@ def every_link_resolves(site: Build) -> None:
             if not site.file(target).exists():
                 broken.append(f"{url} -> {link}")
     assert not broken, "\n".join(broken)
+
+
+@then(parsers.parse('the map on "{url}" loads from "{maps}"'))
+def map_loads_from(site: Build, url: str, maps: str) -> None:
+    text = site.file(url).read_text(encoding="utf-8")
+    config = re.search(r"<script type=\"application/json\" data-map-config>(.*?)</script>", text, re.S)
+    assert config, f"no map on {url}"
+    assert json.loads(config.group(1))["maps"] == maps
