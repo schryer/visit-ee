@@ -19,6 +19,7 @@
   "town.rouge": "Rõuge",
   "slug.region.south-estonia": "south-estonia",
   "slug.town.rouge": "rouge",
+  "town.all": "Everything in {town}",
   "lang.label": "Language",
   "lang.current": "Language: {name}",
   "menu.open": "Menu",

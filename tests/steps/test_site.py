@@ -13,7 +13,7 @@ from xml.etree import ElementTree
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-scenarios("languages.feature", "translations.feature", "seo.feature", "nearby.feature")
+scenarios("languages.feature", "translations.feature", "seo.feature", "nearby.feature", "towns.feature")
 
 ROOT = Path(__file__).resolve().parents[2]
 PREVIEW_URL = "https://temp.schryer.eu"
@@ -303,6 +303,11 @@ def page_shows_text_in(site: Build, url: str, text: str, lang: str) -> None:
 @then(parsers.parse('there is no page "{url}"'))
 def there_is_no_page(site: Build, url: str) -> None:
     assert not site.file(url).exists(), f"{url} was built"
+
+
+@then(parsers.parse('the page "{url}" links to "{target}"'))
+def page_links(site: Build, url: str, target: str) -> None:
+    assert target in site.page(url).links, site.page(url).links
 
 
 @then(parsers.parse('the page "{url}" does not link to "{target}"'))

@@ -3,7 +3,9 @@
 // category filters, layer switches and a shareable link for each place.
 // The list works without any of this. The map itself (MapLibre, the area
 // packs and their style) comes from the maps service's package, loaded
-// only when the map is about to scroll into view.
+// only when the map is about to scroll into view. On a town's page the
+// config has no home logo, opens on the town's whole area, and adds the
+// places to stay there as links to their pages.
 
 // Each mode is a saved set of rings, a view and which places it lists.
 const MODES = {
@@ -49,6 +51,8 @@ function start(root) {
   let maps = null;
   const pins = {};
   let ringLabels = [];
+  // The town's box on the maps service, when the page is a town's.
+  let areaBox = null;
 
   root.querySelector(".nearby__controls").hidden = false;
   box.hidden = false;
@@ -106,7 +110,13 @@ function start(root) {
     if (!map) return;
     setRings();
     applyLayers();
-    map.fitBounds(maps.bounds(config.home, MODES[mode].radius), { padding: 24, duration: animate && !calm.matches ? 900 : 0 });
+    map.fitBounds(view(mode), { padding: 24, duration: animate && !calm.matches ? 900 : 0 });
+  }
+
+  // What a mode shows: the town's whole area by car, if it has one, or
+  // the mode's radius around home.
+  function view(mode) {
+    return mode === "car" && areaBox ? areaBox : maps.bounds(config.home, MODES[mode].radius);
   }
 
   function select(id, fly) {
@@ -190,10 +200,13 @@ function start(root) {
     maps = await import(`${config.maps}/lib/v1/map.js`);
     // The packs that reach the widest ring, with a margin.
     const reach = Math.max(...Object.values(MODES).flatMap((m) => m.rings)) * 1.2;
+    const index = await maps.loadIndex();
+    const [w, s, e, n] = index.areas.find((a) => a.path === config.area)?.bbox || [];
+    if (n !== undefined) areaBox = [[w, s], [e, n]];
     ({ map, maplibre: ml } = await maps.createMap(box.querySelector(".nearby__canvas"), {
       center: config.home,
       radiusKm: reach,
-      bounds: maps.bounds(config.home, MODES[state.mode].radius),
+      bounds: view(state.mode),
       fitBoundsOptions: { padding: 24 },
       minZoom: 6,
       locale: config.locale,
@@ -208,12 +221,19 @@ function start(root) {
     }, maps.firstLabel(map));
     map.addControl(new ml.NavigationControl({ showCompass: false }), "top-right");
 
-    const home = el("div", "map-home");
-    const img = document.createElement("img");
-    img.src = config.home.mark;
-    img.alt = "";
-    home.append(img);
+    // A site's logo at home, or a dot at a town's centre.
+    const home = el("div", config.home.mark ? "map-home" : "map-centre");
+    if (config.home.mark) home.append(image(config.home.mark));
     new ml.Marker({ element: home }).setLngLat([config.home.lng, config.home.lat]).addTo(map);
+
+    for (const stay of config.stays || []) {
+      const link = el("a", "map-stay");
+      link.href = stay.url;
+      link.setAttribute("aria-label", stay.name);
+      link.title = stay.name;
+      link.append(image(stay.mark));
+      new ml.Marker({ element: link }).setLngLat([stay.lng, stay.lat]).addTo(map);
+    }
 
     for (const p of places) {
       const pin = button(`${p.name}, ${p.meta}`, "pin cat-" + p.cat, (event) => {
@@ -232,7 +252,7 @@ function start(root) {
     // The mode or place may have changed while the map loaded.
     const p = places.find((x) => x.id === state.selected);
     if (p) map.jumpTo({ center: p.lngLat, zoom: p.foot ? 14.5 : 11 });
-    else map.fitBounds(maps.bounds(config.home, MODES[state.mode].radius), { padding: 24, duration: 0 });
+    else map.fitBounds(view(state.mode), { padding: 24, duration: 0 });
   }
 
   function setRings() {
@@ -265,6 +285,13 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+function image(src) {
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = "";
+  return img;
 }
 
 function button(label, className, onClick, text) {

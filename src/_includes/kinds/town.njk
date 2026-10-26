@@ -1,0 +1,30 @@
+{#- A town's page: the map large, first thing on the page, then every
+    place in the town and the places to stay there. -#}
+<header class="wrap town-head">
+<p class="eyebrow">{{ p.t("town.eyebrow") }}</p>
+<h1 id="town-title">{{ p.t("town." + p.town.id) }}</h1>
+<p class="town-head__lead">{{ p.t("town.lead") }}</p>
+</header>
+
+{% set nearbyWide = true %}
+{% set nearbyNote = p.t("town.distances") %}
+{% include "nearby.njk" %}
+
+{%- set stays = p.townSites %}
+{%- if stays.length %}
+<section class="wrap section" id="stay" aria-labelledby="stay-title">
+<h2 id="stay-title">{{ p.t("town.stay.title") }}</h2>
+<div class="cards">
+{%- asyncEach s in stays %}
+<a class="card place-card" href="{{ s.url }}">
+{% picture s.site, s.site.seasons[0].image, s.photoAlt, "(min-width: 60rem) 33vw, 100vw", { widths: [400, 800], class: "card__img" } %}
+<div class="card__body">
+<img class="place-card__logo" src="{{ s.logo }}" alt="" width="{{ s.site.logo.width }}" height="{{ s.site.logo.height }}" loading="lazy">
+<h3 class="card__title">{{ s.name }}</h3>
+<p class="card__meta">{{ s.line }}</p>
+</div>
+</a>
+{%- endeach %}
+</div>
+</section>
+{%- endif %}

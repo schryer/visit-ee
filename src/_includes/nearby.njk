@@ -8,9 +8,16 @@
   museum: '<path d="M3 9l9-5 9 5"/><path d="M5 9v9M10 9v9M14 9v9M19 9v9"/><path d="M3 20h18"/>',
   viewpoint: '<path d="M9 21l2-15h2l2 15"/><path d="M8 6h8l-1-3H9z"/><path d="M10 13h4"/>'
 } -%}
-<section class="wrap section" id="nearby" aria-labelledby="nearby-title">
+{#- nearbyWide (a town's page): the map full width and tall, under the
+    page's own heading, with the list in columns below it. -#}
+<section class="wrap section{% if nearbyWide %} section--map{% endif %}" id="nearby" aria-labelledby="{{ 'town-title' if nearbyWide else 'nearby-title' }}">
+{%- if not nearbyWide %}
 <h2 id="nearby-title">{{ p.t("nearby.title") }}</h2>
-<div class="nearby" data-visit-map>
+{%- if p.townUrl %}
+<p class="section__note"><a href="{{ p.townUrl }}">{{ p.t("town.all", { town: p.t("town." + p.site.town) }) }}</a></p>
+{%- endif %}
+{%- endif %}
+<div class="nearby{% if nearbyWide %} nearby--wide{% endif %}" data-visit-map>
 <script type="application/json" data-map-config>{{ p.mapConfig | json | safe }}</script>
 <div class="nearby__map" hidden>
 <div class="nearby__canvas" role="region" aria-label="{{ p.t('map.label') }}"></div>
@@ -37,6 +44,9 @@
 </div>
 <p class="nearby__count" aria-live="polite"></p>
 </div>
+{%- if nearbyNote %}
+<p class="nearby__note">{{ nearbyNote }}</p>
+{%- endif %}
 <ul class="nearby__list">
 {%- for place in p.nearby %}
 <li id="{{ place.id }}" class="place cat-{{ place.category }}" data-place data-cat="{{ place.category }}" data-lat="{{ place.geo.lat }}" data-lng="{{ place.geo.lng }}" data-foot="{{ place.onFoot }}">

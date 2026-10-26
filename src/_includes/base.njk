@@ -2,6 +2,10 @@
   {%- set title = "visit.ee: " + p.t("platform.tagline") -%}
   {%- set description = p.t("platform.meta_description") -%}
   {%- set image = "" -%}
+{%- elif p.kind == "town" -%}
+  {%- set title = p.t("meta.title") -%}
+  {%- set description = p.t("meta.description") -%}
+  {%- set image = "" -%}
 {%- else -%}
   {%- if p.kind == "site" -%}
     {%- set title = p.t("meta.title") -%}
