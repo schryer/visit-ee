@@ -54,6 +54,7 @@ function start(root) {
   let ml = null;
   let maps = null;
   const pins = {};
+  const markers = {};
   let ringLabels = [];
   // The numbered markers on the map now.
   const clusters = [];
@@ -202,6 +203,10 @@ function start(root) {
   );
   watch.observe(box);
   if (places.some((p) => "#" + p.id === location.hash)) fromHash();
+  // ?edit turns the map into an editor for the places (src/assets/edit.js),
+  // loaded only then, once the map is up.
+  const editing = new URLSearchParams(location.search).has("edit") && Boolean(config.edit);
+  if (editing) box.scrollIntoView({ block: "start" });
 
   async function load() {
     maps = await import(`${config.maps}/lib/v1/map.js`);
@@ -254,7 +259,7 @@ function start(root) {
       pin.innerHTML = p.icon;
       pin.setAttribute("aria-current", String(p.id === state.selected));
       pins[p.id] = pin;
-      new ml.Marker({ element: pin }).setLngLat(p.lngLat).addTo(map);
+      markers[p.id] = new ml.Marker({ element: pin }).setLngLat(p.lngLat).addTo(map);
     }
 
     setRings();
@@ -264,6 +269,11 @@ function start(root) {
     const p = places.find((x) => x.id === state.selected);
     if (p) map.jumpTo({ center: p.lngLat, zoom: p.foot ? 14.5 : 11 });
     else map.fitBounds(view(state.mode), { padding: 24, duration: 0 });
+
+    if (editing) {
+      const edit = await import("./edit.js");
+      edit.start({ box, map, ml, config, places, markers });
+    }
   }
 
   // Group the places that would overlap on screen: each group of two or
@@ -273,9 +283,13 @@ function start(root) {
     if (!map) return;
     const groups = [];
     for (const p of places) {
-      if (!visible(p) || p.id === state.selected) continue;
+      // In edit mode every pin stands alone, to be dragged.
+      if (!visible(p) || p.id === state.selected || editing) {
+        if (editing && visible(p)) groups.push({ at: null, places: [p] });
+        continue;
+      }
       const at = map.project(p.lngLat);
-      const near = groups.find((g) => Math.hypot(g.at.x - at.x, g.at.y - at.y) < CLUSTER_PX);
+      const near = groups.find((g) => g.at && Math.hypot(g.at.x - at.x, g.at.y - at.y) < CLUSTER_PX);
       if (near) near.places.push(p);
       else groups.push({ at, places: [p] });
     }
