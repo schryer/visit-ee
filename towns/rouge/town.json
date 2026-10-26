@@ -1,22 +1,56 @@
 {
-  "comment": "Rõuge vald, the municipality: its page at /louna-eesti/rouge/ shows the map large and every place in it. geo is the centre of Rõuge village, which distances are measured from; map_area is the area pack on the maps service, whose box the map opens on. places names places/<id>.json, as a site's nearby list does.",
+  "comment": "Rõuge vald, the municipality: its page at /louna-eesti/rouge/ shows the map large and every place in it. municipality is its EHAK name, which the map's municipality names use to link here. geo is the centre of Rõuge village, which distances are measured from; map_area is the area pack on the maps service, whose box the map opens on. settlements counts its villages and small boroughs in EHAK (ehak:asustusyksuste_piirid, 2026-10-26). places names places/<id>.json, as a site's nearby list does.",
   "region": "south-estonia",
   "source_language": "et",
-  "geo": { "lat": 57.7286, "lng": 26.925 },
+  "municipality": "Rõuge vald",
+  "geo": {
+    "lat": 57.7286,
+    "lng": 26.925
+  },
   "map_area": "louna-eesti/rouge",
+  "settlements": {
+    "villages": 273,
+    "small_boroughs": 3
+  },
   "places": [
-    { "place": "suurjarv" },
-    { "place": "kirik" },
-    { "place": "linnamagi" },
-    { "place": "oobikuorg" },
-    { "place": "hudrotookoda" },
-    { "place": "liinjarv" },
-    { "place": "vesioinas" },
-    { "place": "pesapuu" },
-    { "place": "munamagi" },
-    { "place": "hinni" },
-    { "place": "viitina" },
-    { "place": "luhasoo" },
-    { "place": "paganamaa" }
+    {
+      "place": "suurjarv"
+    },
+    {
+      "place": "kirik"
+    },
+    {
+      "place": "linnamagi"
+    },
+    {
+      "place": "oobikuorg"
+    },
+    {
+      "place": "hudrotookoda"
+    },
+    {
+      "place": "liinjarv"
+    },
+    {
+      "place": "vesioinas"
+    },
+    {
+      "place": "pesapuu"
+    },
+    {
+      "place": "munamagi"
+    },
+    {
+      "place": "hinni"
+    },
+    {
+      "place": "viitina"
+    },
+    {
+      "place": "luhasoo"
+    },
+    {
+      "place": "paganamaa"
+    }
   ]
 }

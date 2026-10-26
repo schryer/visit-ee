@@ -16,6 +16,10 @@ const MODES = {
 // The rings' colour, matching site.css.
 const RED = "#C53E2A";
 
+// Places closer than this on screen share one numbered marker, which
+// splits as the map zooms in.
+const CLUSTER_PX = 34;
+
 const root = document.querySelector("[data-visit-map]");
 if (root) start(root);
 
@@ -51,6 +55,8 @@ function start(root) {
   let maps = null;
   const pins = {};
   let ringLabels = [];
+  // The numbered markers on the map now.
+  const clusters = [];
   // The town's box on the maps service, when the page is a town's.
   let areaBox = null;
 
@@ -67,8 +73,8 @@ function start(root) {
       const on = visible(p);
       if (on) n++;
       p.row.hidden = !on;
-      if (pins[p.id]) pins[p.id].style.display = on ? "" : "none";
     }
+    cluster();
     count.textContent = config.strings[plural.select(n) === "one" ? "one" : "other"].replace("{n}", n);
   }
 
@@ -133,6 +139,7 @@ function start(root) {
       x.row.setAttribute("aria-current", String(x.id === id));
       pins[x.id]?.setAttribute("aria-current", String(x.id === id));
     }
+    cluster();
     try {
       history.replaceState(null, "", "#" + id);
     } catch {}
@@ -220,6 +227,10 @@ function start(root) {
       paint: { "line-color": RED, "line-width": 1.2, "line-opacity": 0.7, "line-dasharray": [4, 3] },
     }, maps.firstLabel(map));
     map.addControl(new ml.NavigationControl({ showCompass: false }), "top-right");
+    // Every municipality and its centre; the ones with a page link to it.
+    // An older map package has no such function.
+    maps.addMunicipalities?.(map, { links: config.towns || {} }).catch((err) => console.warn(err));
+    map.on("zoomend", cluster);
 
     // A site's logo at home, or a dot at a town's centre.
     const home = el("div", config.home.mark ? "map-home" : "map-centre");
@@ -253,6 +264,39 @@ function start(root) {
     const p = places.find((x) => x.id === state.selected);
     if (p) map.jumpTo({ center: p.lngLat, zoom: p.foot ? 14.5 : 11 });
     else map.fitBounds(view(state.mode), { padding: 24, duration: 0 });
+  }
+
+  // Group the places that would overlap on screen: each group of two or
+  // more shows as one numbered marker, which zooms in to its places when
+  // tapped. The selected place always keeps its own pin.
+  function cluster() {
+    if (!map) return;
+    const groups = [];
+    for (const p of places) {
+      if (!visible(p) || p.id === state.selected) continue;
+      const at = map.project(p.lngLat);
+      const near = groups.find((g) => Math.hypot(g.at.x - at.x, g.at.y - at.y) < CLUSTER_PX);
+      if (near) near.places.push(p);
+      else groups.push({ at, places: [p] });
+    }
+    for (const p of places) {
+      const alone = groups.some((g) => g.places.length === 1 && g.places[0] === p);
+      if (pins[p.id]) pins[p.id].style.display = visible(p) && (alone || p.id === state.selected) ? "" : "none";
+    }
+    for (const marker of clusters) marker.remove();
+    clusters.length = 0;
+    for (const g of groups.filter((g) => g.places.length > 1)) {
+      const n = g.places.length;
+      const lng = g.places.reduce((sum, p) => sum + p.lngLat[0], 0) / n;
+      const lat = g.places.reduce((sum, p) => sum + p.lngLat[1], 0) / n;
+      const label = config.strings[plural.select(n) === "one" ? "one" : "other"].replace("{n}", n);
+      const b = button(label, "cluster", () => {
+        const box = new ml.LngLatBounds(g.places[0].lngLat, g.places[0].lngLat);
+        for (const p of g.places) box.extend(p.lngLat);
+        map.fitBounds(box, { padding: 90, maxZoom: 17, duration: calm.matches ? 0 : 600 });
+      }, String(n));
+      clusters.push(new ml.Marker({ element: b }).setLngLat([lng, lat]).addTo(map));
+    }
   }
 
   function setRings() {

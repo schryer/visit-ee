@@ -284,6 +284,12 @@ a.card:hover { border-color: #D8CFAE; box-shadow: 0 6px 18px rgb(46 26 6 / .08);
 @media (min-width: 60rem) {
   .nearby--wide .nearby__map:not([hidden]) + .nearby__side .nearby__list { max-height: none; overflow: visible; }
 }
+.cluster {
+  min-width: 34px; height: 34px; padding: 0 .5rem; border-radius: 999px; border: 2px solid var(--cream); background: var(--ink);
+  color: var(--cream); font: 700 .9375rem var(--ui); font-variant-numeric: tabular-nums; cursor: pointer;
+  box-shadow: 0 0 0 4px rgb(39 48 21 / .25), 0 1px 3px rgb(39 48 21 / .35);
+}
+.cluster:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .map-centre { width: 14px; height: 14px; border-radius: 50%; background: var(--red); border: 3px solid var(--cream); box-shadow: 0 1px 3px rgb(39 48 21 / .35); pointer-events: none; }
 .map-stay { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--cream); border: 2px solid var(--red); box-shadow: 0 2px 6px rgb(39 48 21 / .35); }
 .map-stay img { width: 30px; height: auto; }

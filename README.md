@@ -79,7 +79,11 @@ each place (`…/oobikuoru/#suurjarv`).
 Each town has a page of its own with the same map, large and first on
 the page, opening on the whole municipality, with every place in
 `towns/<id>/town.json` listed under it (distances from the town centre)
-and the sites in the town as cards and map markers. The sites' breadcrumbs
+and the sites in the town as cards and map markers. Every map names all
+the municipalities and marks the settlement each is run from (the maps
+service's `municipalities.json`); a municipality with a town page links to
+it. Places that would overlap on screen share one numbered marker, which
+zooms in to them when tapped. The sites' breadcrumbs
 and place lists link to it.
 
 The map comes from maps.sustenaut.eu (schryer/maps), which builds
