@@ -48,6 +48,7 @@ function start(root) {
   let ml = null;
   let maps = null;
   const pins = {};
+  const markers = {};
   let ringLabels = [];
 
   root.querySelector(".nearby__controls").hidden = false;
@@ -185,6 +186,10 @@ function start(root) {
   );
   watch.observe(box);
   if (places.some((p) => "#" + p.id === location.hash)) fromHash();
+  // ?edit turns the map into an editor for the places (src/assets/edit.js),
+  // loaded only then, once the map is up.
+  const editing = new URLSearchParams(location.search).has("edit");
+  if (editing) box.scrollIntoView({ block: "start" });
 
   async function load() {
     maps = await import(`${config.maps}/lib/v1/map.js`);
@@ -223,7 +228,7 @@ function start(root) {
       pin.innerHTML = p.icon;
       pin.setAttribute("aria-current", String(p.id === state.selected));
       pins[p.id] = pin;
-      new ml.Marker({ element: pin }).setLngLat(p.lngLat).addTo(map);
+      markers[p.id] = new ml.Marker({ element: pin }).setLngLat(p.lngLat).addTo(map);
     }
 
     setRings();
@@ -233,6 +238,11 @@ function start(root) {
     const p = places.find((x) => x.id === state.selected);
     if (p) map.jumpTo({ center: p.lngLat, zoom: p.foot ? 14.5 : 11 });
     else map.fitBounds(maps.bounds(config.home, MODES[state.mode].radius), { padding: 24, duration: 0 });
+
+    if (editing) {
+      const edit = await import("./edit.js");
+      edit.start({ box, map, ml, config, places, markers });
+    }
   }
 
   function setRings() {

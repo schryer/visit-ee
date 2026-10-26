@@ -263,6 +263,9 @@ a.card:hover { border-color: #D8CFAE; box-shadow: 0 6px 18px rgb(46 26 6 / .08);
 .cat-heritage { color: var(--amber); }
 .cat-museum { color: var(--ink-soft); }
 .cat-viewpoint { color: var(--red); }
+.cat-info { color: var(--spruce); }
+.cat-food { color: #7A3E1D; }
+.cat-shop { color: var(--olive-dark); }
 
 .nearby__list { margin: 0; padding: 0; list-style: none; font-family: var(--ui); }
 .place {
