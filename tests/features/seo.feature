@@ -18,6 +18,8 @@ Feature: Search engines
     And the page "/louna-eesti/rouge/" has a link preview with an image that resolves
     And the page "/en/south-estonia/rouge/oobikuoru/" has a link preview with an image that resolves
     And the page "/en/south-estonia/rouge/oobikuoru/large-houses/" has a link preview with an image that resolves
+    And the link preview of "/en/south-estonia/rouge/oobikuoru/small-houses/" is a 1200×630 card
+    And the link preview of "/en/south-estonia/rouge/oobikuoru/family-house/" is the one of "/en/south-estonia/rouge/oobikuoru/"
 
   Scenario: A production build lets them in
     Given the sites are built for production at "https://visit.ee"

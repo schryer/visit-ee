@@ -76,6 +76,35 @@ async function imageMetadata(site, src, widths) {
   return Image(path.join(site.dir, src), options);
 }
 
+// A photo as a link-preview card: 1200×630 (LinkedIn's large card is
+// 1.91:1), cropped to keep the part sharp finds most interesting, so a
+// portrait photo still makes a good card. Always full size, --quick or not:
+// `pubkit site check` reads these.
+const CARD = { width: 1200, height: 630 };
+// How far a photo may be enlarged to fill the card before it looks soft.
+const CARD_STRETCH = 1.1;
+// sharp, as eleventy-img itself loads it.
+const sharp = createRequire(require.resolve("@11ty/eleventy-img"))("sharp");
+
+// Whether a photo is large enough for a sharp card.
+async function cardWorthy(site, src) {
+  const { width, height } = await sharp(path.join(site.dir, src)).metadata();
+  return width * CARD_STRETCH >= CARD.width && height * CARD_STRETCH >= CARD.height;
+}
+
+function card(sharp) {
+  sharp.resize({ ...CARD, fit: "cover", position: "attention" });
+}
+async function cardMetadata(site, src) {
+  return Image(path.join(site.dir, src), {
+    ...IMAGE_OPTIONS,
+    formats: ["jpeg"],
+    widths: [CARD.width],
+    transform: card,
+    filenameFormat: (id, _src, _width, format) => `${id}-card.${format}`,
+  });
+}
+
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
   eleventyConfig.addWatchTarget("sites/");
@@ -108,15 +137,19 @@ export default function (eleventyConfig) {
     });
   });
 
-  // The 1200px JPEG of a site's photo, for og:image and JSON-LD:
-  // {url, width, height}, url absolute. A filter, not a shortcode, so
+  // The link-preview card of a site's photo, for og:image and JSON-LD:
+  // {url, width, height}, url absolute. A photo too small for a sharp card
+  // gives way to the site's main photo. A filter, not a shortcode, so
   // `{% set %}` can take it: an async shortcode inside a set block comes
-  // out empty, which left every page without og:image.
-  // Null with no site: a home or town page with no site in its language.
+  // out empty. Null with no site: a home or town page with no site in its
+  // language.
   eleventyConfig.addAsyncFilter("previewImage", async (src, site) => {
     if (!site) return null;
-    const jpeg = (await imageMetadata(site, src, [1200])).jpeg.at(-1);
-    return { url: process.env.VISIT_EE_URL + jpeg.url, width: jpeg.width, height: jpeg.height };
+    if (!(await cardWorthy(site, src)) && site.photo) src = site.photo;
+    const jpeg = (await cardMetadata(site, src)).jpeg.at(-1);
+    // The card's own size: eleventy-img reports the photo's when it reuses
+    // a card it made on an earlier build.
+    return { url: process.env.VISIT_EE_URL + jpeg.url, ...CARD };
   });
 
   eleventyConfig.addFilter("json", (value) => JSON.stringify(value).replace(/</g, "\\u003c"));

@@ -457,6 +457,22 @@ def page_link_preview(site: Build, url: str) -> None:
     assert site.file(og["og:image"]).is_file(), f"{url}: og:image {og['og:image']} was not built"
 
 
+@then(parsers.parse('the link preview of "{url}" is a 1200×630 card'))
+def link_preview_card(site: Build, url: str) -> None:
+    og = site.page(url).og
+    assert (og["og:image:width"], og["og:image:height"]) == ("1200", "630")
+    data = site.file(og["og:image"]).read_bytes()
+    # The JPEG's frame header: height, then width.
+    sof = re.search(rb"\xff[\xc0-\xc2]..\x08(..)(..)", data, re.S)
+    assert sof, f"{og['og:image']} is not a JPEG"
+    assert (int.from_bytes(sof.group(2)), int.from_bytes(sof.group(1))) == (1200, 630)
+
+
+@then(parsers.parse('the link preview of "{url}" is the one of "{other}"'))
+def link_preview_same(site: Build, url: str, other: str) -> None:
+    assert site.page(url).og["og:image"] == site.page(other).og["og:image"]
+
+
 @then(parsers.parse('robots.txt names the sitemap "{url}"'))
 def robots_names_sitemap(site: Build, url: str) -> None:
     text = site.file("/robots.txt").read_text()
