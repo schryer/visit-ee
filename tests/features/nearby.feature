@@ -53,8 +53,11 @@ Feature: Places nearby
     Then the page "/en/south-estonia/rouge/oobikuoru/" has the place "suurjarv" at "#suurjarv"
 
   Scenario: A place card can open up with a photo
-    Given the sites are built
-    Then the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" has a photo
+    Given a copy of the content
+    And the place "pesapuu" has a photo file in the repository
+    When I build it
+    Then it succeeds
+    And the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" has a photo
 
   Scenario: A place's photo can live in the storage service
     Given a copy of the content

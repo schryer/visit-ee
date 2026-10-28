@@ -254,6 +254,17 @@ def service_photo(content: Path, place: str, photo_id: str, credit: str) -> None
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
 
 
+@given(parsers.parse('the place "{place}" has a photo file in the repository'))
+def repository_photo(content: Path, place: str) -> None:
+    media = content / "places" / "media"
+    media.mkdir(exist_ok=True)
+    shutil.copy(ROOT / "tests" / "fixtures" / "photo.jpg", media / f"{place}.jpg")
+    path = content / "places" / f"{place}.json"
+    data = json.loads(path.read_text())
+    data["photo"] = f"media/{place}.jpg"
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+
+
 @given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))
 def list_place(content: Path, site_id: str, place: str) -> None:
     path = content / "sites" / site_id / "site.json"
