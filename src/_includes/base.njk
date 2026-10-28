@@ -1,11 +1,16 @@
-{%- if p.kind == "platform" -%}
-  {%- set title = "visit.ee: " + p.t("platform.tagline") -%}
-  {%- set description = p.t("platform.meta_description") -%}
-  {%- set image = "" -%}
-{%- elif p.kind == "town" -%}
-  {%- set title = p.t("meta.title") -%}
-  {%- set description = p.t("meta.description") -%}
-  {%- set image = "" -%}
+{#- Link previews (LinkedIn, Facebook, Slack…) need an og:image on every
+    page. The home and town pages have no photo of their own, so they show
+    the main photo of the first site (in that town, for a town page). -#}
+{%- if p.kind == "platform" or p.kind == "town" -%}
+  {%- if p.kind == "platform" -%}
+    {%- set title = "visit.ee: " + p.t("platform.tagline") -%}
+    {%- set description = p.t("platform.meta_description") -%}
+  {%- else -%}
+    {%- set title = p.t("meta.title") -%}
+    {%- set description = p.t("meta.description") -%}
+  {%- endif -%}
+  {%- set imageSite = p.previewSite -%}
+  {%- set image = imageSite.photo | previewImage(imageSite) -%}
 {%- else -%}
   {%- if p.kind == "site" -%}
     {%- set title = p.t("meta.title") -%}
@@ -18,7 +23,7 @@
     {%- set description = p.t("groups.intro") -%}
   {%- endif -%}
   {%- set imageSrc = (p.stay.photo if p.stay and p.stay.photo) or (p.site.groups.photo if p.kind == "groups") or p.site.photo or p.site.seasons[0].image -%}
-  {%- set image -%}{% imageUrl p.site, imageSrc %}{%- endset -%}
+  {%- set image = imageSrc | previewImage(p.site) -%}
 {%- endif -%}
 <!doctype html>
 <html lang="{{ p.lang }}">
@@ -45,7 +50,10 @@
 <meta property="og:locale:alternate" content="{{ a.locale }}">
 {%- endif %}{% endfor %}
 {%- if image %}
-<meta property="og:image" content="{{ image | trim }}">
+<meta property="og:image" content="{{ image.url }}">
+<meta property="og:image:width" content="{{ image.width }}">
+<meta property="og:image:height" content="{{ image.height }}">
+<meta property="og:image:alt" content="{{ title }}">
 <meta name="twitter:card" content="summary_large_image">
 {%- endif %}
 <meta name="theme-color" content="#273015">
@@ -57,7 +65,7 @@
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="stylesheet" href="/assets/site.css">
 <script src="/assets/site.js" defer></script>
-<script type="application/ld+json">{{ p.structuredData(image | trim) | json | safe }}</script>
+<script type="application/ld+json">{{ p.structuredData(image.url if image else "") | json | safe }}</script>
 </head>
 <body class="kind-{{ p.kind }}">
 <a class="skip" href="#main">{{ p.t("skip") }}</a>

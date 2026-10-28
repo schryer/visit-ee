@@ -8,6 +8,7 @@ import shutil
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+from urllib.robotparser import RobotFileParser
 from xml.etree import ElementTree
 
 import pytest
@@ -28,6 +29,7 @@ class Page(HTMLParser):
         self.alternates: dict[str, str] = {}
         self.canonical = ""
         self.robots = ""
+        self.og: dict[str, str] = {}
         self.links: list[str] = []
         self.lang_text: list[tuple[str, str]] = []
         self.json_ld: list[dict] = []
@@ -45,6 +47,8 @@ class Page(HTMLParser):
             self.canonical = a["href"]
         if tag == "meta" and a.get("name") == "robots":
             self.robots = a.get("content", "")
+        if tag == "meta" and a.get("property", "").startswith("og:"):
+            self.og.setdefault(a["property"], a.get("content", ""))
         if tag == "script" and a.get("type") == "application/ld+json":
             self._in_ld = True
         for attr in ("href", "src", "poster"):
@@ -428,6 +432,29 @@ def build_lacks(site: Build, url: str) -> None:
 @then("robots.txt disallows everything")
 def robots_disallows(site: Build) -> None:
     assert re.search(r"^Disallow: /$", site.file("/robots.txt").read_text(), re.M)
+
+
+@then(parsers.parse('robots.txt lets "{agent}" read "{url}"'))
+def robots_allows(site: Build, agent: str, url: str) -> None:
+    robots = RobotFileParser()
+    robots.parse(site.file("/robots.txt").read_text().splitlines())
+    assert robots.can_fetch(agent, site.base_url + url)
+
+
+@then(parsers.parse('robots.txt keeps "{agent}" out of "{url}"'))
+def robots_disallows_agent(site: Build, agent: str, url: str) -> None:
+    robots = RobotFileParser()
+    robots.parse(site.file("/robots.txt").read_text().splitlines())
+    assert not robots.can_fetch(agent, site.base_url + url)
+
+
+@then(parsers.parse('the page "{url}" has a link preview with an image that resolves'))
+def page_link_preview(site: Build, url: str) -> None:
+    og = site.page(url).og
+    for key in ("og:title", "og:description", "og:url", "og:image", "og:image:width", "og:image:height"):
+        assert og.get(key), f"{url} has no {key}"
+    assert og["og:image"].startswith(site.base_url + "/"), og["og:image"]
+    assert site.file(og["og:image"]).is_file(), f"{url}: og:image {og['og:image']} was not built"
 
 
 @then(parsers.parse('robots.txt names the sitemap "{url}"'))

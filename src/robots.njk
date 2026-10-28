@@ -2,11 +2,23 @@
 permalink: /robots.txt
 eleventyExcludeFromCollections: true
 ---
-User-agent: *
 {% if build.preview -%}
-# A preview build: keep it out of search results.
+# A preview build: keep it out of search results, but let the bots that
+# draw link previews read pages and photos, so a link shared on LinkedIn,
+# Facebook, Slack and the like shows its card. The pages still say noindex.
+User-agent: LinkedInBot
+User-agent: facebookexternalhit
+User-agent: Twitterbot
+User-agent: Slackbot
+User-agent: WhatsApp
+User-agent: TelegramBot
+User-agent: Discordbot
+Allow: /
+
+User-agent: *
 Disallow: /
 {%- else -%}
+User-agent: *
 Allow: /
 
 Sitemap: {{ build.url }}/sitemap.xml
