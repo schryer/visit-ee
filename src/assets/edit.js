@@ -11,7 +11,7 @@ import { applyEdits, describe, slug, round, touchedPaths, placePath } from "./ed
 
 const API = "https://api.github.com";
 // The widths of the copies of a photo the editor makes for the storage
-// service (storage.sustenaut.eu, schryer/storage), as JPEG and, where the
+// service (storage.sustenaut.eu, Sustenaut/storage), as JPEG and, where the
 // browser can, WebP.
 const PHOTO_WIDTHS = [480, 960, 1600];
 const TOKEN_KEY = "visit-ee-edit-token";

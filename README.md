@@ -90,7 +90,7 @@ it. Places that would overlap on screen share one numbered marker, which
 zooms in to them when tapped. The sites' breadcrumbs
 and place lists link to it.
 
-The map comes from maps.sustenaut.eu (schryer/maps), which builds
+The map comes from maps.sustenaut.eu (Sustenaut/maps), which builds
 vector tiles of Estonia from Maa- ja Ruumiamet (ETAK, EHAK, EHR) and RMK
 data and serves a map package that any sustenaut.eu site loads: MapLibre,
 the area packs within reach of the site, their style and fonts. visit.ee
@@ -108,7 +108,7 @@ website, or whether this site lists it, or to delete it. A photo you pick
 is made into 480, 960 and 1600 px copies (JPEG and WebP) in the browser,
 which leaves the camera's GPS and other data behind, and uploaded at once
 to visit.ee's part of the storage service, storage.sustenaut.eu
-(schryer/storage, `--photos-url`). Only the place's JSON records it. The
+(Sustenaut/storage, `--photos-url`). Only the place's JSON records it. The
 build lists the photos places use at `/photos.json`, and the storage
 service deletes the others once they are 30 days old.
 
