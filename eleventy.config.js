@@ -108,10 +108,15 @@ export default function (eleventyConfig) {
     });
   });
 
-  // The absolute address of a 1200px JPEG, for og:image and JSON-LD.
-  eleventyConfig.addAsyncShortcode("imageUrl", async (site, src) => {
-    const metadata = await imageMetadata(site, src, [1200]);
-    return process.env.VISIT_EE_URL + metadata.jpeg.at(-1).url;
+  // The 1200px JPEG of a site's photo, for og:image and JSON-LD:
+  // {url, width, height}, url absolute. A filter, not a shortcode, so
+  // `{% set %}` can take it: an async shortcode inside a set block comes
+  // out empty, which left every page without og:image.
+  // Null with no site: a home or town page with no site in its language.
+  eleventyConfig.addAsyncFilter("previewImage", async (src, site) => {
+    if (!site) return null;
+    const jpeg = (await imageMetadata(site, src, [1200])).jpeg.at(-1);
+    return { url: process.env.VISIT_EE_URL + jpeg.url, width: jpeg.width, height: jpeg.height };
   });
 
   eleventyConfig.addFilter("json", (value) => JSON.stringify(value).replace(/</g, "\\u003c"));

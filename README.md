@@ -7,7 +7,9 @@ The first is Ööbikuoru Puhkekeskus in Rõuge, at
 English).
 
 For now it is built for `temp.schryer.eu`, a preview that asks search
-engines to keep out. It moves to visit.ee later.
+engines to keep out. Its robots.txt still lets the bots that draw link
+previews (LinkedIn, Facebook, Slack and the like) read it, so a shared
+link shows its card. It moves to visit.ee later.
 
 ## Working on it
 

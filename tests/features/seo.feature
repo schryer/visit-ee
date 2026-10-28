@@ -1,5 +1,6 @@
 Feature: Search engines
-  A preview build keeps search engines out; a production build gives
+  A preview build keeps search engines out but lets link-preview bots
+  in; every page has an Open Graph card with a photo; a production build gives
   them a sitemap with every language version, canonical addresses,
   structured data, and redirects from the old WordPress addresses.
 
@@ -7,6 +8,16 @@ Feature: Search engines
     Given the sites are built
     Then robots.txt disallows everything
     And the page "/louna-eesti/rouge/oobikuoru/" asks not to be indexed
+
+  Scenario: Shared links show a preview card, even on a preview
+    Given the sites are built
+    Then robots.txt lets "LinkedInBot" read "/louna-eesti/rouge/oobikuoru/"
+    And robots.txt lets "facebookexternalhit" read "/"
+    And robots.txt keeps "Googlebot" out of "/louna-eesti/rouge/oobikuoru/"
+    And the page "/" has a link preview with an image that resolves
+    And the page "/louna-eesti/rouge/" has a link preview with an image that resolves
+    And the page "/en/south-estonia/rouge/oobikuoru/" has a link preview with an image that resolves
+    And the page "/en/south-estonia/rouge/oobikuoru/large-houses/" has a link preview with an image that resolves
 
   Scenario: A production build lets them in
     Given the sites are built for production at "https://visit.ee"
