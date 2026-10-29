@@ -13,5 +13,9 @@
       "ci / passed"
     ],
     "tags": false
+  },
+  "site": {
+    "check_dir": "_site",
+    "pr_build": "npm ci && bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu"
   }
 }

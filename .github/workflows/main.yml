@@ -11,12 +11,12 @@ permissions:
 jobs:
   checks:
     name: ci
-    uses: Sustenaut/pubkit/.github/workflows/job-service-checks.yml@f0984614ce18dd9f5eedfb7a39451c2bff89d232 # v0.17.0
+    uses: Sustenaut/pubkit/.github/workflows/job-service-checks.yml@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
     with: {"shellcheck": "with-secrets bin/visit-ee"}
 
   tests:
     name: ci
-    uses: Sustenaut/pubkit/.github/workflows/job-service-tests.yml@f0984614ce18dd9f5eedfb7a39451c2bff89d232 # v0.17.0
+    uses: Sustenaut/pubkit/.github/workflows/job-service-tests.yml@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
     with: {"setup": "make venv node", "test": "make functional"}
 
   # The one check a ruleset requires: it passes only when every job
