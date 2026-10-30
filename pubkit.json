@@ -13,6 +13,7 @@
       "ci / passed"
     ],
     "tags": false,
+    "queue": false,
     "auto_merge": true
   },
   "site": {
