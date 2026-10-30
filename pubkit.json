@@ -12,7 +12,8 @@
     "checks": [
       "ci / passed"
     ],
-    "tags": false
+    "tags": false,
+    "auto_merge": true
   },
   "site": {
     "check_dir": "_site",
