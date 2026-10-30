@@ -431,6 +431,13 @@ def lists_photo(site: Build, url: str, photo_id: str) -> None:
     assert photo_id in json.loads(site.file(url).read_text())["photos"]
 
 
+@then(parsers.parse('"{url}" lists the place "{place_id}" at {lat:g}, {lng:g}'))
+def lists_place(site: Build, url: str, place_id: str, lat: float, lng: float) -> None:
+    listed = json.loads(site.file(url).read_text())
+    assert listed["version"] == 1, listed
+    assert {"id": place_id, "lat": lat, "lng": lng} in listed["places"], listed
+
+
 @then(parsers.parse('the place card of "{name}" on "{url}" has a photo'))
 def card_has_photo(site: Build, url: str, name: str) -> None:
     photo = site.places(url).find(name).get("photo", "")

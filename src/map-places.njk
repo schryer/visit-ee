@@ -1,0 +1,7 @@
+---
+permalink: /map-places.json
+eleventyExcludeFromCollections: true
+---
+{#- Where every place is: the maps service builds a detailed map of each
+    municipality with a place in it. -#}
+{{ { version: 1, places: visit | mapPlaces } | json | safe }}
