@@ -2,22 +2,26 @@
 // from the page so the tests can run it in Node.
 //
 // An edit is everything pending for one place, by id:
-//   { id, isNew, deleted, geo: { lat, lng }, name, category,
+//   { id, dir, isNew, deleted, geo: { lat, lng }, name, category,
 //     text: { et, en }, nearby: { on, walk_m, road_km },
 //     photo, photo_credit, url }
-// Every field but id is optional; a missing one leaves the file as it is,
-// and null removes it (photo, photo_credit, url). A moved place is no
-// longer an estimate, so "position" goes. A photo is the storage service's
-// object for it (edit.js uploads it first), or a file in places/ from
-// before the service, which goes from the repository when replaced.
+// dir is the place's folder, which says who looks after it:
+// towns/<town>/places/<id> for a public place, sites/<site>/places/<id>
+// for a private one. It holds place.json and strings/<lang>.json, whose
+// "description" is the text. Every other field but id is optional; a
+// missing one leaves the file as it is, and null removes it (photo,
+// photo_credit, url). A moved place is no longer an estimate, so
+// "position" goes. A photo is the storage service's object for it
+// (edit.js uploads it first), or a file in the place's folder from before
+// the service, which goes from the repository when replaced.
 
 // The files a set of edits reads and writes, given the description
-// languages (i18n/places/<lang>.json) and sites that exist.
+// languages and the sites that exist.
 export function touchedPaths(edits, { langs, sites }) {
   const paths = new Set();
   for (const e of edits) {
-    paths.add(placePath(e.id));
-    if (e.deleted || e.text) for (const lang of langs) paths.add(textPath(lang));
+    paths.add(placePath(e.dir));
+    if (e.deleted || e.text) for (const lang of langs) paths.add(textPath(e.dir, lang));
     if (e.deleted || e.nearby) for (const site of sites) paths.add(sitePath(site));
   }
   return [...paths];
@@ -37,16 +41,13 @@ export function applyEdits(files, edits, { site }) {
   const removed = new Set();
 
   for (const e of edits) {
-    const where = placePath(e.id);
+    const where = placePath(e.dir);
     if (e.deleted) {
       const old = read(where);
       write(where, null);
-      // Its photo goes too.
-      if (typeof old?.photo === "string") removed.add(`places/${old.photo}`);
-      for (const path of Object.keys(files).filter(isTextPath)) {
-        const text = read(path);
-        if (text && e.id in text) delete text[e.id];
-      }
+      // Its photo and its descriptions go too.
+      if (typeof old?.photo === "string") removed.add(`${e.dir}/${old.photo}`);
+      for (const path of Object.keys(files).filter((p) => p.startsWith(`${e.dir}/strings/`))) write(path, null);
       for (const path of Object.keys(files).filter(isSitePath)) {
         const s = read(path);
         if (s?.nearby) s.nearby = s.nearby.filter((n) => n.place !== e.id);
@@ -64,7 +65,7 @@ export function applyEdits(files, edits, { site }) {
       delete place.position;
     }
     // A replaced or removed photo's file goes.
-    if (typeof place.photo === "string" && e.photo !== undefined && e.photo !== place.photo) removed.add(`places/${place.photo}`);
+    if (typeof place.photo === "string" && e.photo !== undefined && e.photo !== place.photo) removed.add(`${e.dir}/${place.photo}`);
     for (const key of ["photo", "photo_credit", "url"]) {
       if (e[key] === null) delete place[key];
       else if (e[key] !== undefined) place[key] = e[key];
@@ -72,11 +73,11 @@ export function applyEdits(files, edits, { site }) {
     write(where, ordered(place, ["name", "category", "geo", "position", "photo", "photo_credit", "url", "site"]));
 
     for (const [lang, value] of Object.entries(e.text || {})) {
-      const path = textPath(lang);
+      const path = textPath(e.dir, lang);
       const text = read(path) || {};
-      if (value) text[e.id] = value;
-      else delete text[e.id];
-      write(path, text);
+      if (value) text.description = value;
+      else delete text.description;
+      write(path, Object.keys(text).length ? text : null);
     }
 
     if (e.nearby) {
@@ -145,10 +146,17 @@ export function round(x) {
   return Math.round(x * 1e5) / 1e5;
 }
 
-export const placePath = (id) => `places/${id}.json`;
-export const textPath = (lang) => `i18n/places/${lang}.json`;
+// A place's folder in the repository, from its owner (towns/<town> or
+// sites/<site>) and id, and the files in it.
+export const placeDir = (owner, id) => `${owner}/places/${id}`;
+export const placePath = (dir) => `${dir}/place.json`;
+export const textPath = (dir, lang) => `${dir}/strings/${lang}.json`;
 export const sitePath = (site) => `sites/${site}/site.json`;
-const isTextPath = (path) => /^i18n\/places\/[^/]+\.json$/.test(path);
+// The folder, owner and id of a place.json path, or null.
+export function parsePlacePath(path) {
+  const m = path.match(/^((towns|sites)\/([a-z0-9-]+))\/places\/([a-z0-9-]+)\/place\.json$/);
+  return m && { dir: placeDir(m[1], m[4]), owner: m[1], id: m[4] };
+}
 const isSitePath = (path) => /^sites\/[^/]+\/site\.json$/.test(path);
 
 // The keys in `first` come first, in that order; the rest keep theirs.
