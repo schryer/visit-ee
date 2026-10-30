@@ -3,7 +3,7 @@
 Static sites for places to stay and things to do in Estonia. Each host
 gets its own site under visit.ee, in every language it is translated into.
 The first is Ööbikuoru Puhkekeskus in Rõuge, at
-`/louna-eesti/rouge/oobikuoru/` (`/en/south-estonia/rouge/oobikuoru/` in
+`/vorumaa/rouge/oobikuoru/` (`/en/voru-county/rouge/oobikuoru/` in
 English).
 
 For now it is built for `temp.schryer.eu`, a preview that asks search
@@ -67,8 +67,8 @@ another owner is moving its folder.
 
 Estonian is the source language and has no URL prefix. Every other
 language lives under its own prefix, and every part of the path is
-translated too: `/louna-eesti/rouge/oobikuoru/suured-puhkemajad/` is
-`/en/south-estonia/rouge/oobikuoru/large-houses/` in English. Region and
+translated too: `/vorumaa/rouge/oobikuoru/suured-puhkemajad/` is
+`/en/voru-county/rouge/oobikuoru/large-houses/` in English. Region and
 town slugs are UI strings (`slug.region.<id>`, `slug.town.<id>`); a site's
 own are its strings (`slug`, `stay.<id>.slug`, `groups.slug`). The build
 fails on a slug that isn't lowercase a-z, 0-9 and hyphens, or that two

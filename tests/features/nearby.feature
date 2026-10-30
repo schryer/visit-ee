@@ -8,20 +8,20 @@ Feature: Places nearby
 
   Scenario: Distances are walking time, road distance or the straight line
     Given the sites are built
-    Then the page "/en/south-estonia/rouge/oobikuoru/" lists "Rõuge Suurjärv" at "6 min walk"
-    And the page "/en/south-estonia/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km by road"
-    And the page "/en/south-estonia/rouge/oobikuoru/" lists "Hinni kanjon" at "≈ 7.9 km as the crow flies"
-    And the page "/louna-eesti/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km autoga"
+    Then the page "/en/voru-county/rouge/oobikuoru/" lists "Rõuge Suurjärv" at "6 min walk"
+    And the page "/en/voru-county/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km by road"
+    And the page "/en/voru-county/rouge/oobikuoru/" lists "Hinni kanjon" at "≈ 7.9 km as the crow flies"
+    And the page "/vorumaa/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km autoga"
 
   Scenario: The nearest places come first
     Given the sites are built
-    Then the page "/en/south-estonia/rouge/oobikuoru/" lists "Ööbikuoru Hüdrotöökoda" first
+    Then the page "/en/voru-county/rouge/oobikuoru/" lists "Ööbikuoru Hüdrotöökoda" first
 
   Scenario: Names stay in Estonian, descriptions follow the page
     Given the sites are built
-    Then the page "/en/south-estonia/rouge/oobikuoru/" shows "Rõuge Suurjärv" in "et"
-    And the page "/en/south-estonia/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Estonia’s deepest lake, 38 m"
-    And the page "/louna-eesti/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Eesti sügavaim järv, 38 m"
+    Then the page "/en/voru-county/rouge/oobikuoru/" shows "Rõuge Suurjärv" in "et"
+    And the page "/en/voru-county/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Estonia’s deepest lake, 38 m"
+    And the page "/vorumaa/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Eesti sügavaim järv, 38 m"
 
   Scenario: Every place needs an Estonian description
     Given a copy of the content
@@ -44,27 +44,27 @@ Feature: Places nearby
     When I build it
     Then it succeeds
     And stderr mentions "warning: towns/rouge/places/pesapuu/strings/fi.json"
-    And the page "/fi/south-estonia/rouge/oobikuoru/" lists "Pesapuu vaatetorn" without a description
-    And the page "/fi/south-estonia/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Viron syvin järvi"
+    And the page "/fi/voru-county/rouge/oobikuoru/" lists "Pesapuu vaatetorn" without a description
+    And the page "/fi/voru-county/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Viron syvin järvi"
 
   Scenario: Every place has a link of its own
     Given the sites are built
-    Then the page "/en/south-estonia/rouge/oobikuoru/" has the place "suurjarv" at "#suurjarv"
+    Then the page "/en/voru-county/rouge/oobikuoru/" has the place "suurjarv" at "#suurjarv"
 
   Scenario: A place card can open up with a photo
     Given a copy of the content
     And the place "pesapuu" has a photo file in the repository
     When I build it
     Then it succeeds
-    And the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" has a photo
+    And the place card of "Pesapuu vaatetorn" on "/en/voru-county/rouge/oobikuoru/" has a photo
 
   Scenario: A place's photo can live in the storage service
     Given a copy of the content
     And the place "pesapuu" shows the stored photo "0123456789abcdef", by "Mari"
     When I build it with the photos at "https://photos.example"
     Then it succeeds
-    And the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" shows "https://photos.example/p/0123456789abcdef/960.jpg"
-    And the page "/en/south-estonia/rouge/oobikuoru/" shows "Photo: Mari" in "en"
+    And the place card of "Pesapuu vaatetorn" on "/en/voru-county/rouge/oobikuoru/" shows "https://photos.example/p/0123456789abcdef/960.jpg"
+    And the page "/en/voru-county/rouge/oobikuoru/" shows "Photo: Mari" in "en"
     And "/photos.json" lists the photo "0123456789abcdef"
 
   Scenario: A photo the storage service could not have made fails the build
@@ -76,15 +76,15 @@ Feature: Places nearby
 
   Scenario: A place card links to the place's official website, in a new tab
     Given the sites are built
-    Then the place card of "Eesti Maanteemuuseum" on "/en/south-estonia/rouge/oobikuoru/" links to "https://maanteemuuseum.ee/en" in a new tab
-    And the place card of "Eesti Maanteemuuseum" on "/louna-eesti/rouge/oobikuoru/" links to "https://maanteemuuseum.ee" in a new tab
+    Then the place card of "Eesti Maanteemuuseum" on "/en/voru-county/rouge/oobikuoru/" links to "https://maanteemuuseum.ee/en" in a new tab
+    And the place card of "Eesti Maanteemuuseum" on "/vorumaa/rouge/oobikuoru/" links to "https://maanteemuuseum.ee" in a new tab
 
   Scenario: A place with its own visit.ee site links there instead
     Given a copy of the content
     And the place "pesapuu" has the site "oobikuoru"
     When I build it
     Then it succeeds
-    And the place card of "Pesapuu vaatetorn" on "/en/south-estonia/rouge/oobikuoru/" links to "/en/south-estonia/rouge/oobikuoru/"
+    And the place card of "Pesapuu vaatetorn" on "/en/voru-county/rouge/oobikuoru/" links to "/en/voru-county/rouge/oobikuoru/"
 
   Scenario: A place's website must be an https address
     Given a copy of the content
@@ -106,8 +106,8 @@ Feature: Places nearby
     And "oobikuoru" lists the place "saun" nearby
     When I build it
     Then it succeeds
-    And the page "/en/south-estonia/rouge/oobikuoru/" describes "Järvesaun" as "Sauna by the lake"
-    And the page "/en/south-estonia/rouge/" describes "Järvesaun" as "Sauna by the lake"
+    And the page "/en/voru-county/rouge/oobikuoru/" describes "Järvesaun" as "Sauna by the lake"
+    And the page "/en/voru-county/rouge/" describes "Järvesaun" as "Sauna by the lake"
 
   Scenario: A site cannot name a place that does not exist
     Given a copy of the content
@@ -118,23 +118,23 @@ Feature: Places nearby
 
   Scenario: Search engines learn about the places
     Given the sites are built
-    Then the page "/louna-eesti/rouge/oobikuoru/" describes a "TouristAttraction"
+    Then the page "/vorumaa/rouge/oobikuoru/" describes a "TouristAttraction"
 
   Scenario: The map comes from the maps service
     Given the sites are built
     Then the build has "/assets/map.js"
     And the build does not have "/assets/vendor/maplibre/maplibre-gl.mjs"
-    And the map on "/louna-eesti/rouge/oobikuoru/" loads from "https://maps.sustenaut.eu"
+    And the map on "/vorumaa/rouge/oobikuoru/" loads from "https://maps.sustenaut.eu"
 
   Scenario: The home page maps every site
     Given the sites are built
     Then the build has "/assets/platform-map.js"
     And the map on "/en/" loads from "https://maps.sustenaut.eu"
-    And the map on "/en/" has "Nightingale Valley" at "/en/south-estonia/rouge/oobikuoru/"
-    And the map on "/" has "Ööbikuorg" at "/louna-eesti/rouge/oobikuoru/"
+    And the map on "/en/" has "Nightingale Valley" at "/en/voru-county/rouge/oobikuoru/"
+    And the map on "/" has "Ööbikuorg" at "/vorumaa/rouge/oobikuoru/"
 
   Scenario: A build can use another maps service
     Given a copy of the content
     When I build it with the maps at "http://localhost:8091/"
     Then it succeeds
-    And the map on "/louna-eesti/rouge/oobikuoru/" loads from "http://localhost:8091"
+    And the map on "/vorumaa/rouge/oobikuoru/" loads from "http://localhost:8091"
