@@ -7,7 +7,7 @@
 // repository only), kept in this browser's storage. Pending edits are kept
 // there too, so a reload loses nothing. The editor's own text is English.
 
-import { applyEdits, describe, slug, round, touchedPaths, placePath } from "./edit-changes.js";
+import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath } from "./edit-changes.js";
 
 const API = "https://api.github.com";
 // The widths of the copies of a photo the editor makes for the storage
@@ -21,7 +21,7 @@ const NEW_TOKEN =
 
 export function start(ctx) {
   const { box, map, ml, config, places, markers } = ctx;
-  const { repository, site, categories } = config.edit;
+  const { repository, site, town, categories } = config.edit;
   const editsKey = `visit-ee-edits:${repository}:${site}`;
 
   const css = document.createElement("link");
@@ -76,16 +76,28 @@ export function start(ctx) {
     const commit = ref.object.sha;
     const tree = await api(`/repos/${repository}/git/trees/${commit}?recursive=1`);
     const paths = tree.tree.filter((t) => t.type === "blob").map((t) => t.path);
-    const langs = paths.map((p) => p.match(/^i18n\/places\/([^/]+)\.json$/)?.[1]).filter(Boolean);
     const sites = paths.map((p) => p.match(/^sites\/([^/]+)\/site\.json$/)?.[1]).filter(Boolean);
-    const placeIds = paths.map((p) => p.match(/^places\/([^/]+)\.json$/)?.[1]).filter(Boolean);
+    // Every place's folder (towns/<town>/places/<id> or
+    // sites/<site>/places/<id>), by id, and the languages any has a
+    // description in.
+    const found = paths.map(parsePlacePath).filter(Boolean);
+    const dirs = Object.fromEntries(found.map((p) => [p.id, p.dir]));
+    const texts = paths.filter((p) => found.some((f) => p.startsWith(`${f.dir}/strings/`)) && p.endsWith(".json"));
+    const langs = [...new Set(["et", "en", ...texts.map((p) => p.split("/").pop().slice(0, -5))])];
+    // The owners a new place can go to: every town, and this site.
+    const towns = [...new Set([town, ...paths.map((p) => p.match(/^towns\/([^/]+)\//)?.[1]).filter(Boolean)])].sort();
+    const owners = [...towns.map((t) => `towns/${t}`), `sites/${site}`];
     const read = (path) => api(`/repos/${repository}/contents/${encodeURI(path)}?ref=${commit}`, { raw: true });
     const files = {};
     await Promise.all(
-      [...placeIds.map(placePath), ...langs.map((l) => `i18n/places/${l}.json`), `sites/${site}/site.json`].map(async (path) => {
+      [...found.map((p) => placePath(p.dir)), ...texts, `sites/${site}/site.json`].map(async (path) => {
         files[path] = await read(path);
       }),
     );
+    const description = (id, l) => {
+      const text = files[textPath(dirs[id], l)];
+      return text ? JSON.parse(text).description : undefined;
+    };
     return {
       branch,
       commit,
@@ -93,10 +105,12 @@ export function start(ctx) {
       paths: new Set(paths),
       langs,
       sites,
+      owners,
+      dirs,
       files,
       read,
-      places: Object.fromEntries(placeIds.map((id) => [id, JSON.parse(files[placePath(id)])])),
-      text: Object.fromEntries(langs.map((l) => [l, JSON.parse(files[`i18n/places/${l}.json`])])),
+      places: Object.fromEntries(found.map((p) => [p.id, JSON.parse(files[placePath(p.dir)])])),
+      text: Object.fromEntries(langs.map((l) => [l, Object.fromEntries(found.map((p) => [p.id, description(p.id, l)]).filter(([, v]) => v))])),
       nearby: JSON.parse(files[`sites/${site}/site.json`]).nearby || [],
     };
   }
@@ -104,7 +118,13 @@ export function start(ctx) {
   // One commit on a new branch, and a pull request for it.
   async function openPullRequest(title) {
     const fresh = await fetchBase();
-    const list = Object.values(edits);
+    // Each edit with its place's folder: a new one's from the owner picked
+    // for it, any other's from where the repository has it now.
+    const list = Object.values(edits).map((e) => {
+      const dir = e.isNew ? placeDir(e.owner || `towns/${town}`, e.id) : fresh.dirs[e.id];
+      if (!dir) throw new Error(`${e.id} is no longer in the repository.`);
+      return { ...e, dir };
+    });
     const paths = touchedPaths(list, fresh);
     const files = {};
     await Promise.all(
@@ -252,9 +272,9 @@ export function start(ctx) {
 
   // A photo's address: a small copy from the storage service, or a file in
   // the repository from before it.
-  function photoUrl(photo) {
+  function photoUrl(photo, id) {
     if (!photo) return null;
-    if (typeof photo === "string") return `https://raw.githubusercontent.com/${repository}/${base.commit}/places/${photo}`;
+    if (typeof photo === "string") return `https://raw.githubusercontent.com/${repository}/${base.commit}/${base.dirs[id]}/${photo}`;
     return `${config.edit.photos}/p/${photo.id}/${photo.widths[0]}.jpg`;
   }
 
@@ -321,6 +341,18 @@ export function start(ctx) {
     key.readOnly = !c.isNew;
     key.pattern = "[a-z0-9]+(-[a-z0-9]+)*";
     if (c.isNew) name.addEventListener("input", () => (key.value = slug(name.value)));
+    // Who looks after it: a town's admins for a public place, the site's
+    // for a private one. Only a new place's can be picked here.
+    const owner = el("select");
+    const ownerOf = edits[id]?.owner || base.dirs[id]?.split("/places/")[0] || `towns/${town}`;
+    for (const o of c.isNew ? base.owners : [ownerOf]) {
+      const [kind, who] = o.split("/");
+      const option = el("option", "", kind === "towns" ? `Public, in ${who}` : `Private, ${who}'s`);
+      option.value = o;
+      option.selected = o === ownerOf;
+      owner.append(option);
+    }
+    owner.disabled = !c.isNew;
     const cat = el("select");
     for (const k of categories) {
       const o = el("option", "", k);
@@ -349,7 +381,7 @@ export function start(ctx) {
     const preview = el("img", "edit-photo");
     preview.alt = "";
     const showPhoto = () => {
-      const src = photoUrl(photo);
+      const src = photoUrl(photo, id);
       preview.hidden = !src;
       if (src) preview.src = src;
       drop.hidden = !src;
@@ -388,6 +420,7 @@ export function start(ctx) {
       el("p", "edit-where", c.deleted ? "Deleted when the pull request is merged." : where),
       label("Name (never translated)", name),
       label("Id, used in links (#id)", key),
+      label("Looked after by", owner),
       label("Category", cat),
       ...Object.entries(texts).map(([l, i]) => label(`Description, ${l}${["et", "en"].includes(l) ? " (needed)" : ""}`, i)),
       checkbox(on, "Listed near this site"),
@@ -429,6 +462,7 @@ export function start(ctx) {
       };
       if (!site_url.disabled) fields.url = site_url.value.trim() || null;
       fields.photo = photo;
+      if (c.isNew) fields.owner = owner.value;
       if (newId !== id) {
         const moved = { ...edits[id], id: newId };
         delete edits[id];
@@ -455,7 +489,7 @@ export function start(ctx) {
     let n = 1;
     while (edits[`new-${n}`] || base.places[`new-${n}`]) n++;
     const id = `new-${n}`;
-    edits[id] = { id, isNew: true, geo: { lat: round(geo.lat), lng: round(geo.lng) }, category: categories[0], nearby: { on: true } };
+    edits[id] = { id, isNew: true, owner: `towns/${town}`, geo: { lat: round(geo.lat), lng: round(geo.lng) }, category: categories[0], nearby: { on: true } };
     save();
     redraw();
     openForm(id);

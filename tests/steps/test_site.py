@@ -182,8 +182,14 @@ def a_copy_of_the_content(tmp_path: Path) -> Path:
     content = tmp_path / "content"
     shutil.copytree(ROOT / "i18n", content / "i18n")
     shutil.copytree(ROOT / "sites", content / "sites")
-    shutil.copytree(ROOT / "places", content / "places")
+    shutil.copytree(ROOT / "towns", content / "towns")
     return content
+
+
+def _place(content: Path, place: str) -> Path:
+    """A place's folder, in its town's or its site's places/."""
+    (found,) = [*content.glob(f"towns/*/places/{place}"), *content.glob(f"sites/*/places/{place}")]
+    return found
 
 
 def _remove_key(path: Path, key: str) -> None:
@@ -213,12 +219,12 @@ def set_site_string(content: Path, key: str, site_id: str, value: str) -> None:
 
 @given(parsers.parse('the English description of the place "{place}" is removed'))
 def remove_place_description(content: Path, place: str) -> None:
-    _remove_key(content / "i18n" / "places" / "en.json", place)
+    (_place(content, place) / "strings" / "en.json").unlink()
 
 
 @given(parsers.parse('the Estonian description of the place "{place}" is removed'))
 def remove_place_description_et(content: Path, place: str) -> None:
-    _remove_key(content / "i18n" / "places" / "et.json", place)
+    _remove_key(_place(content, place) / "strings" / "et.json", "description")
 
 
 @given(parsers.parse('Finnish is enabled, and "{site_id}" is translated into it'))
@@ -237,13 +243,13 @@ def enable_finnish(content: Path, site_id: str) -> None:
 
 @given(parsers.parse('only "{place}" has a Finnish description'))
 def one_finnish_description(content: Path, place: str) -> None:
-    path = content / "i18n" / "places" / "fi.json"
-    path.write_text(json.dumps({place: "Viron syvin järvi"}, ensure_ascii=False), encoding="utf-8")
+    path = _place(content, place) / "strings" / "fi.json"
+    path.write_text(json.dumps({"description": "Viron syvin järvi"}, ensure_ascii=False), encoding="utf-8")
 
 
 @given(parsers.parse('the place "{place}" has the {field} "{value}"'))
 def set_place_field(content: Path, place: str, field: str, value: str) -> None:
-    path = content / "places" / f"{place}.json"
+    path = _place(content, place) / "place.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     data[field] = value
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -251,7 +257,7 @@ def set_place_field(content: Path, place: str, field: str, value: str) -> None:
 
 @given(parsers.parse('the place "{place}" shows the stored photo "{photo_id}", by "{credit}"'))
 def service_photo(content: Path, place: str, photo_id: str, credit: str) -> None:
-    path = content / "places" / f"{place}.json"
+    path = _place(content, place) / "place.json"
     data = json.loads(path.read_text())
     data["photo"] = {"id": photo_id, "width": 1600, "height": 1200, "widths": [480, 960, 1600], "formats": ["webp", "jpg"]}
     data["photo_credit"] = credit
@@ -260,13 +266,28 @@ def service_photo(content: Path, place: str, photo_id: str, credit: str) -> None
 
 @given(parsers.parse('the place "{place}" has a photo file in the repository'))
 def repository_photo(content: Path, place: str) -> None:
-    media = content / "places" / "media"
+    media = _place(content, place) / "media"
     media.mkdir(exist_ok=True)
     shutil.copy(ROOT / "tests" / "fixtures" / "photo.jpg", media / f"{place}.jpg")
-    path = content / "places" / f"{place}.json"
+    path = _place(content, place) / "place.json"
     data = json.loads(path.read_text())
     data["photo"] = f"media/{place}.jpg"
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+
+
+@given(parsers.parse('the place "{place}" is also in "{owner}"'))
+def duplicate_place(content: Path, place: str, owner: str) -> None:
+    shutil.copytree(_place(content, place), content / owner / "places" / place)
+
+
+@given(parsers.parse('"{site_id}" has a private place "{place}" called "{name}"'))
+def private_place(content: Path, site_id: str, place: str, name: str) -> None:
+    folder = content / "sites" / site_id / "places" / place
+    (folder / "strings").mkdir(parents=True)
+    data = {"name": name, "category": "nature", "geo": {"lat": 57.7292, "lng": 26.9297}}
+    (folder / "place.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    for lang, text in (("et", "Saun järve ääres"), ("en", "Sauna by the lake")):
+        (folder / "strings" / f"{lang}.json").write_text(json.dumps({"description": text}), encoding="utf-8")
 
 
 @given(parsers.parse('"{site_id}" lists the place "{place}" nearby'))

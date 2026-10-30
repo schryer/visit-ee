@@ -35,7 +35,7 @@ Feature: Places nearby
     And the English description of the place "suurjarv" is removed
     When I build it
     Then it fails
-    And stderr mentions "i18n/places/en.json"
+    And stderr mentions "towns/rouge/places/suurjarv/strings/en.json"
 
   Scenario: Other languages may lack a description, with a warning
     Given a copy of the content
@@ -43,8 +43,7 @@ Feature: Places nearby
     And only "suurjarv" has a Finnish description
     When I build it
     Then it succeeds
-    And stderr mentions "warning: i18n/places/fi.json"
-    And stderr mentions "pesapuu"
+    And stderr mentions "warning: towns/rouge/places/pesapuu/strings/fi.json"
     And the page "/fi/south-estonia/rouge/oobikuoru/" lists "Pesapuu vaatetorn" without a description
     And the page "/fi/south-estonia/rouge/oobikuoru/" describes "Rõuge Suurjärv" as "Viron syvin järvi"
 
@@ -79,7 +78,7 @@ Feature: Places nearby
     And the place "pesapuu" shows the stored photo "not-a-hash", by "Mari"
     When I build it
     Then it fails
-    And stderr mentions "places/pesapuu.json: photo must be"
+    And stderr mentions "towns/rouge/places/pesapuu/place.json: photo must be"
 
   Scenario: A place card links to the place's official website, in a new tab
     Given the sites are built
@@ -98,7 +97,23 @@ Feature: Places nearby
     And the place "pesapuu" has the url "http://example.com"
     When I build it
     Then it fails
-    And stderr mentions "places/pesapuu.json"
+    And stderr mentions "towns/rouge/places/pesapuu/place.json"
+
+  Scenario: A place id is used once, whoever owns it
+    Given a copy of the content
+    And the place "pesapuu" is also in "sites/oobikuoru"
+    When I build it
+    Then it fails
+    And stderr mentions "sites/oobikuoru/places/pesapuu/place.json: there is already a place"
+
+  Scenario: A site's private place is on its map and its town's
+    Given a copy of the content
+    And "oobikuoru" has a private place "saun" called "Järvesaun"
+    And "oobikuoru" lists the place "saun" nearby
+    When I build it
+    Then it succeeds
+    And the page "/en/south-estonia/rouge/oobikuoru/" describes "Järvesaun" as "Sauna by the lake"
+    And the page "/en/south-estonia/rouge/" describes "Järvesaun" as "Sauna by the lake"
 
   Scenario: A site cannot name a place that does not exist
     Given a copy of the content

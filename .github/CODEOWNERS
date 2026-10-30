@@ -1,0 +1,15 @@
+# Who looks after which content. A pull request that changes a folder asks
+# its owners for review, and the edit mode's GitHub sign-in will check the
+# same lines before it opens one. The last line that matches a path wins,
+# so every line names the super admins too.
+#
+#   Super admins: everything.
+#   Town admins: towns/<town>/, the town's page and its public places.
+#   Private admins: sites/<site>/, the site and its private places
+#   (sites/<site>/places/).
+#
+# Add an admin by their GitHub login, for example:
+#   /towns/rouge/        @schryer @rouge-admin
+#   /sites/oobikuoru/    @schryer @oobikuoru-admin
+
+*                        @schryer
