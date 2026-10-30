@@ -114,6 +114,19 @@ function start(root) {
     });
   }
 
+  // The layer list closes on a click anywhere else, or on Escape.
+  const layerBox = root.querySelector(".nearby__layers");
+  if (layerBox) {
+    document.addEventListener("click", (event) => {
+      if (layerBox.open && !layerBox.contains(event.target)) layerBox.open = false;
+    });
+    layerBox.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !layerBox.open) return;
+      layerBox.open = false;
+      layerBox.querySelector("summary").focus();
+    });
+  }
+
   for (const p of places) {
     p.row.querySelector(".place__name").addEventListener("click", (event) => {
       event.preventDefault();
