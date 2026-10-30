@@ -96,7 +96,11 @@ data and serves a map package that any sustenaut.eu site loads: MapLibre,
 the area packs within reach of the site, their style and fonts. visit.ee
 adds the places, the rings and the controls. `bin/visit-ee build
 --maps-url URL` points the pages at another copy of the service, such as
-a local `maps` build.
+a local `maps` build. The build lists where every place is at
+`/map-places.json`, and the maps service builds a detailed map of each
+municipality with a place in it, again whenever the places there change,
+so a place added anywhere in Estonia can be zoomed into once both have
+deployed.
 
 ### Editing places on the map
 

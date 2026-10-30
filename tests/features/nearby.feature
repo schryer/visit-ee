@@ -68,6 +68,12 @@ Feature: Places nearby
     And the page "/en/south-estonia/rouge/oobikuoru/" shows "Photo: Mari" in "en"
     And "/photos.json" lists the photo "0123456789abcdef"
 
+  Scenario: The build tells the maps service where every place is
+    Given a copy of the content
+    When I build it
+    Then it succeeds
+    And "/map-places.json" lists the place "maanteemuuseum" at 58.035, 27.042
+
   Scenario: A photo the storage service could not have made fails the build
     Given a copy of the content
     And the place "pesapuu" shows the stored photo "not-a-hash", by "Mari"
