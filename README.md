@@ -142,7 +142,8 @@ to the storage service in the same way, with the edit mode's token (or any
 other that may push to this repository).
 
 The editor (`src/assets/edit.js`, loaded only with `?edit`) talks to GitHub
-from the browser. The first time, it asks for a fine-grained token for
+from the browser through [pubpr](https://github.com/Sustenaut/pubpr), loaded
+from jsDelivr at a pinned tag and hash. The first time, it asks for a fine-grained token for
 this repository only, with Contents and Pull requests set to Read and
 write. The browser keeps the token, and any unsent changes, until you sign
 out. What each change does to the files is in

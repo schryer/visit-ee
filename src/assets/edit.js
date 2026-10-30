@@ -6,10 +6,15 @@
 // the editor makes once per device (contents and pull requests on the
 // repository only), kept in this browser's storage. Pending edits are kept
 // there too, so a reload loses nothing. The editor's own text is English.
+// pubpr (Sustenaut/pubpr) does the talking to GitHub; this file says what to
+// read and what to change.
 
 import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath } from "./edit-changes.js";
 
-const API = "https://api.github.com";
+// To move the pin: the tag, and the hash from
+// `openssl dgst -sha384 -binary lib/pubpr.js | base64 -w0` at that tag.
+const PUBPR = "https://cdn.jsdelivr.net/gh/Sustenaut/pubpr@v0.1.0/lib/pubpr.js";
+const PUBPR_SRI = "sha384-pMTpbevi8ervd/PqCoBEdloIf3l0L0EKCaRyUq6L22bojw/0ZC3YB8OpMs9OKigM";
 // The widths of the copies of a photo the editor makes for the storage
 // service (storage.sustenaut.eu, Sustenaut/storage), as JPEG and, where the
 // browser can, WebP.
@@ -49,23 +54,9 @@ export function start(ctx) {
 
   // --- GitHub ----------------------------------------------------------------
 
-  async function api(path, options = {}) {
-    const response = await fetch(API + path, {
-      ...options,
-      headers: {
-        Accept: options.raw ? "application/vnd.github.raw+json" : "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
-      },
-      body: options.body ? JSON.stringify(options.body) : undefined,
-    });
-    if (!response.ok) {
-      const detail = await response.json().catch(() => ({}));
-      throw new Error(`GitHub said ${response.status}${detail.message ? `: ${detail.message}` : ""}`);
-    }
-    return options.raw ? response.text() : response.json();
-  }
+  // Set once pubpr has loaded, at the end of this function.
+  let api = null;
+  let propose = null;
 
   // The newest commit on the default branch and the files the editor needs.
   async function fetchBase() {
@@ -101,7 +92,6 @@ export function start(ctx) {
     return {
       branch,
       commit,
-      treeSha: tree.sha,
       paths: new Set(paths),
       langs,
       sites,
@@ -133,30 +123,26 @@ export function start(ctx) {
       }),
     );
     const changed = applyEdits(files, list, { site });
-    if (!Object.keys(changed).length) throw new Error("Nothing to change: the repository already has these edits.");
-    const tree = await api(`/repos/${repository}/git/trees`, {
-      method: "POST",
-      body: {
-        base_tree: fresh.treeSha,
-        tree: Object.entries(changed).map(([path, content]) =>
-          content === null ? { path, mode: "100644", type: "blob", sha: null } : { path, mode: "100644", type: "blob", content },
-        ),
-      },
-    });
     const lines = list.map((e) => describe(e, fresh));
-    const commit = await api(`/repos/${repository}/git/commits`, {
-      method: "POST",
-      body: { message: `${title}\n\n${lines.map((l) => `- ${l}`).join("\n")}\n`, tree: tree.sha, parents: [fresh.commit] },
-    });
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
-    const head = `edit/${site}-places-${stamp}`;
-    await api(`/repos/${repository}/git/refs`, { method: "POST", body: { ref: `refs/heads/${head}`, sha: commit.sha } });
-    const body =
-      `Made with the map's edit mode on ${location.origin}${location.pathname}.\n\n` +
-      lines.map((l) => `- ${l}`).join("\n") +
-      "\n";
-    const pr = await api(`/repos/${repository}/pulls`, { method: "POST", body: { title, head, base: fresh.branch, body } });
-    return pr.html_url;
+    const result = await propose({
+      repo: repository,
+      base: fresh.branch,
+      // The commit the files were read from, so that someone else's change to
+      // one of them since shows as a conflict rather than being undone.
+      parent: fresh.commit,
+      branch: `edit/${site}-places-${stamp}`,
+      title,
+      message: `${title}\n\n${lines.map((l) => `- ${l}`).join("\n")}\n`,
+      body:
+        `Made with the map's edit mode on ${location.origin}${location.pathname}.\n\n` +
+        lines.map((l) => `- ${l}`).join("\n") +
+        "\n",
+      changes: changed,
+      token,
+    });
+    if (result.status !== "opened") throw new Error("Nothing to change: the repository already has these edits.");
+    return result.url;
   }
 
   // --- the map ---------------------------------------------------------------
@@ -584,14 +570,36 @@ export function start(ctx) {
     redraw();
   }
 
-  if (token) {
-    fetchBase()
-      .then((b) => ((base = b), ready()))
-      .catch((err) => signIn(err.message));
-  } else signIn();
+  loadPubpr().then(
+    (pubpr) => {
+      api = pubpr.github({ token: () => token });
+      propose = pubpr.propose;
+      if (token) {
+        fetchBase()
+          .then((b) => ((base = b), ready()))
+          .catch((err) => signIn(err.message));
+      } else signIn();
+    },
+    (err) => show(el("p", "edit-status", `${err.message} Unsent changes stay in this browser.`)),
+  );
 }
 
 // --- helpers -----------------------------------------------------------------
+
+// An import can't carry a hash, but a script tag can: the page loads the pinned
+// file once this way, checked, and import() then answers with that same module.
+function loadPubpr() {
+  return new Promise((resolve, reject) => {
+    const script = el("script");
+    script.type = "module";
+    script.src = PUBPR;
+    script.integrity = PUBPR_SRI;
+    script.crossOrigin = "anonymous";
+    script.addEventListener("load", () => resolve(import(PUBPR)));
+    script.addEventListener("error", () => reject(new Error("The editor's GitHub code (pubpr) didn't load.")));
+    document.head.append(script);
+  });
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
