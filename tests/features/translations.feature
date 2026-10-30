@@ -15,10 +15,10 @@ Feature: Incomplete translations
     And the English string "stay.family-house.body" of "oobikuoru" is removed
     When I build it
     Then it succeeds
-    And there is no page "/en/south-estonia/rouge/oobikuoru/"
-    And the page "/louna-eesti/rouge/oobikuoru/" is in "et"
-    And the page "/louna-eesti/rouge/oobikuoru/" has no version in "en"
-    And the page "/en/" does not link to "/en/south-estonia/rouge/oobikuoru/"
+    And there is no page "/en/voru-county/rouge/oobikuoru/"
+    And the page "/vorumaa/rouge/oobikuoru/" is in "et"
+    And the page "/vorumaa/rouge/oobikuoru/" has no version in "en"
+    And the page "/en/" does not link to "/en/voru-county/rouge/oobikuoru/"
 
   Scenario: A path part that is not a URL slug stops the build
     Given a copy of the content
