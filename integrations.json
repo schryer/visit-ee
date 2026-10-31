@@ -1,0 +1,37 @@
+{
+  "uses": [
+    {
+      "plugin": "bitwarden.secrets",
+      "paths": [
+        "with-secrets",
+        "with-secrets.json"
+      ]
+    },
+    {
+      "plugin": "cloudflare.pages",
+      "paths": [
+        ".github/workflows/deploy.yml"
+      ]
+    },
+    {
+      "plugin": "jsdelivr.purge",
+      "paths": [
+        "src/assets/edit.js"
+      ]
+    }
+  ],
+  "own_hosts": [
+    "schryer.eu",
+    "sustenaut.eu"
+  ],
+  "exclude": [
+    {
+      "path": "tests/**",
+      "reason": "Fakes and test data"
+    },
+    {
+      "path": "**/*.test.js",
+      "reason": "Fakes and test data"
+    }
+  ]
+}
