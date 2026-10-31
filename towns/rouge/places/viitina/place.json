@@ -2,8 +2,21 @@
   "name": "Viitina mõis",
   "category": "heritage",
   "geo": {
-    "lat": 57.7745,
-    "lng": 26.849
+    "lat": 57.68905,
+    "lng": 26.94413
   },
-  "position": "estimate"
+  "photo": {
+    "id": "a8e9eb5e2e86f09b",
+    "width": 1600,
+    "height": 1071,
+    "widths": [
+      480,
+      960,
+      1600
+    ],
+    "formats": [
+      "webp",
+      "jpg"
+    ]
+  }
 }
