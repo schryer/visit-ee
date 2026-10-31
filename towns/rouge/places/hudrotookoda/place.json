@@ -4,5 +4,18 @@
   "geo": {
     "lat": 57.728,
     "lng": 26.9302
+  },
+  "photo": {
+    "id": "dbd39014bf648632",
+    "width": 750,
+    "height": 430,
+    "widths": [
+      480,
+      750
+    ],
+    "formats": [
+      "webp",
+      "jpg"
+    ]
   }
 }
