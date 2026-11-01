@@ -443,6 +443,7 @@
     },
     {
       "place": "paganamaa",
+      "walk_m": 12000,
       "road_km": 20
     },
     {
