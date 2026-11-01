@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - run: "npm ci && bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu"
-      - uses: Sustenaut/pubkit/actions/deploy-static@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
+      - uses: Sustenaut/pubkit/actions/deploy-static@668dcef8be7b2b872c5e28d45cfafe08687d05f3 # v0.20.0
         with: {"dir": "_site", "check-only": "true"}
 
   # The one check a ruleset requires: it passes only when every job
