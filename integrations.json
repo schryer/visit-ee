@@ -21,6 +21,14 @@
         "src/assets/edit.js"
       ],
       "mode": "required"
+    },
+    {
+      "plugin": "sonarcloud.scan",
+      "paths": [
+        ".github/workflows/pr.yml",
+        ".github/workflows/main.yml"
+      ],
+      "mode": "advisory"
     }
   ],
   "own_hosts": [
