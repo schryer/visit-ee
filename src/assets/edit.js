@@ -2,11 +2,11 @@
 // remove places on the map, then send the lot as one pull request on the
 // content repository. map.js loads this only then, so visitors never do.
 //
-// It reaches GitHub through that service with a fine-grained token
+// It reaches GitHub through the integrations service with a fine-grained token
 // the editor makes once per device (contents and pull requests on the
 // repository only), kept in this browser's storage. Pending edits are kept
 // there too, so a reload loses nothing. The editor's own text is English.
-// The integrations service does the talking to GitHub; this file says what to
+// The service does the talking to GitHub; this file says what to
 // read and what to change.
 
 import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath } from "./edit-changes.js";
