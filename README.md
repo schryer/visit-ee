@@ -141,11 +141,14 @@ service deletes the others once they are 30 days old.
 to the storage service in the same way, with the edit mode's token (or any
 other that may push to this repository).
 
-The editor (`src/assets/edit.js`, loaded only with `?edit`) talks to GitHub
-from the browser through [pubpr](https://github.com/Sustenaut/pubpr), loaded
-from jsDelivr at a pinned tag and hash. The first time, it asks for a fine-grained token for
-this repository only, with Contents and Pull requests set to Read and
-write. The browser keeps the token, and any unsent changes, until you sign
+The editor (`src/assets/edit.js`, loaded only with `?edit`) reads from GitHub
+in the browser through [pubpr](https://github.com/Sustenaut/pubpr), and opens pull
+requests through the [integrations service](https://github.com/Sustenaut/integrations),
+with its client. Both load from jsDelivr at a pinned tag and hash. The first time,
+it asks for a fine-grained token for this repository only, with Contents and Pull
+requests set to Read and write. The pull request is yours: the token goes to the
+service with that one request, is used and forgotten, and is never stored or logged.
+The browser keeps the token, and any unsent changes, until you sign
 out. What each change does to the files is in
 `src/assets/edit-changes.js`, tested by `node --test tests/js/*.test.js`.
 
