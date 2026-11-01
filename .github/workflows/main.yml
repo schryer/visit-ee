@@ -9,25 +9,52 @@ permissions:
   contents: read
 
 jobs:
+  # Whether the merge queue already passed this commit: then the jobs
+  # it ran are skipped, and nothing here tests less than the queue did.
+  tested:
+    name: ci
+    uses: Sustenaut/pubkit/.github/workflows/job-tested.yml@2c986f9ce17ac43e22b951a9da209c592475bb05 # v0.25.0
+    with: {"workflow": ".github/workflows/pr.yml"}
+    permissions:
+      actions: read
+      contents: read
+
   checks:
     name: ci
-    uses: Sustenaut/pubkit/.github/workflows/job-service-checks.yml@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
+    needs: [tested]
+    if: ${{ needs.tested.outputs.tested != 'true' }}
+    uses: Sustenaut/pubkit/.github/workflows/job-service-checks.yml@2c986f9ce17ac43e22b951a9da209c592475bb05 # v0.25.0
     with: {"shellcheck": "with-secrets bin/visit-ee"}
 
   tests:
     name: ci
-    uses: Sustenaut/pubkit/.github/workflows/job-service-tests.yml@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
+    needs: [tested]
+    if: ${{ needs.tested.outputs.tested != 'true' }}
+    uses: Sustenaut/pubkit/.github/workflows/job-service-tests.yml@2c986f9ce17ac43e22b951a9da209c592475bb05 # v0.25.0
     with: {"setup": "make venv node", "test": "make functional"}
 
+  sonar:
+    name: ci
+    needs: [tested, tests]
+    if: ${{ !failure() && !cancelled() }}
+    uses: Sustenaut/pubkit/.github/workflows/job-sonar.yml@2c986f9ce17ac43e22b951a9da209c592475bb05 # v0.25.0
+    permissions:
+      actions: read
+      contents: read
+    with: {"reports": "sonar.python.coverage.reportPaths=*.xml sonar.javascript.lcov.reportPaths=lcov.info", "coverage-run": "${{ needs.tested.outputs.run-id }}"}
+    secrets: { SONAR_TOKEN: '${{ secrets.SONAR_TOKEN }}' }
+
   # The one check a ruleset requires: it passes only when every job
-  # above succeeded. None of them is ever skipped for not being asked for.
+  # above succeeded or, where the merge queue already passed the
+  # commit, was skipped for it. None is skipped for not being asked for.
   passed:
     name: ci / passed
     if: always()
-    needs: [checks, tests]
+    needs: [tested, checks, tests, sonar]
     runs-on: ubuntu-latest
     steps:
       - run: |
           echo "$RESULTS"
-          echo "$RESULTS" | jq -e 'all(.[]; .result == "success")' > /dev/null
-        env: { RESULTS: '${{ toJSON(needs) }}' }
+          echo "$RESULTS" | jq -e --arg tested "$TESTED" '.tested.result == "success"
+            and all(.[]; .result == "success" or (.result == "skipped" and $tested == "true"))' > /dev/null
+        env: { RESULTS: '${{ toJSON(needs) }}', TESTED: '${{ needs.tested.outputs.tested }}' }
