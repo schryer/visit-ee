@@ -11,7 +11,7 @@ permissions:
 jobs:
   checks:
     name: ci
-    uses: Sustenaut/pubkit/.github/workflows/job-service-checks.yml@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
+    uses: Sustenaut/pubkit/.github/workflows/job-service-checks.yml@668dcef8be7b2b872c5e28d45cfafe08687d05f3 # v0.20.0
     with: {"shellcheck": "with-secrets bin/visit-ee"}
 
   tests:
