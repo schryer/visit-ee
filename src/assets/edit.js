@@ -15,6 +15,13 @@ import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, t
 // `openssl dgst -sha384 -binary lib/pubpr.js | base64 -w0` at that tag.
 const PUBPR = "https://cdn.jsdelivr.net/gh/Sustenaut/pubpr@v0.1.0/lib/pubpr.js";
 const PUBPR_SRI = "sha384-pMTpbevi8ervd/PqCoBEdloIf3l0L0EKCaRyUq6L22bojw/0ZC3YB8OpMs9OKigM";
+// Pull requests go through the integrations service, as the person whose token
+// this is: it uses the token for that request and forgets it. pubpr still does the
+// reading. To move the pin: the tag, and the hash from
+// `openssl dgst -sha384 -binary clients/js/github-edit-pr.js | base64 -w0` at that tag.
+const SERVICE = "https://integrations.sustenaut.eu";
+const CLIENT = "https://cdn.jsdelivr.net/gh/Sustenaut/integrations@v0.6.0/clients/js/github-edit-pr.js";
+const CLIENT_SRI = "sha384-i3TZUGvsg9Qqv/jxQX0bVlGfud0oem+4Av3jfaU7FZ+txkwnlKcAi4jE5WlK3W6y";
 // The widths of the copies of a photo the editor makes for the storage
 // service (storage.sustenaut.eu, Sustenaut/storage), as JPEG and, where the
 // browser can, WebP.
@@ -570,10 +577,10 @@ export function start(ctx) {
     redraw();
   }
 
-  loadPubpr().then(
-    (pubpr) => {
+  Promise.all([loadPinned(PUBPR, PUBPR_SRI, "GitHub code (pubpr)"), loadPinned(CLIENT, CLIENT_SRI, "pull request code")]).then(
+    ([pubpr, client]) => {
       api = pubpr.github({ token: () => token });
-      propose = pubpr.propose;
+      propose = (fields) => client.propose({ baseUrl: SERVICE, ...fields });
       if (token) {
         fetchBase()
           .then((b) => ((base = b), ready()))
@@ -588,15 +595,15 @@ export function start(ctx) {
 
 // An import can't carry a hash, but a script tag can: the page loads the pinned
 // file once this way, checked, and import() then answers with that same module.
-function loadPubpr() {
+function loadPinned(src, integrity, name) {
   return new Promise((resolve, reject) => {
     const script = el("script");
     script.type = "module";
-    script.src = PUBPR;
-    script.integrity = PUBPR_SRI;
+    script.src = src;
+    script.integrity = integrity;
     script.crossOrigin = "anonymous";
-    script.addEventListener("load", () => resolve(import(PUBPR)));
-    script.addEventListener("error", () => reject(new Error("The editor's GitHub code (pubpr) didn't load.")));
+    script.addEventListener("load", () => resolve(import(src)));
+    script.addEventListener("error", () => reject(new Error(`The editor's ${name} didn't load.`)));
     document.head.append(script);
   });
 }
