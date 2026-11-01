@@ -2,26 +2,22 @@
 // remove places on the map, then send the lot as one pull request on the
 // content repository. map.js loads this only then, so visitors never do.
 //
-// It talks to GitHub straight from the browser with a fine-grained token
+// It reaches GitHub through that service with a fine-grained token
 // the editor makes once per device (contents and pull requests on the
 // repository only), kept in this browser's storage. Pending edits are kept
 // there too, so a reload loses nothing. The editor's own text is English.
-// pubpr (Sustenaut/pubpr) does the talking to GitHub; this file says what to
+// The integrations service does the talking to GitHub; this file says what to
 // read and what to change.
 
 import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath } from "./edit-changes.js";
 
-// To move the pin: the tag, and the hash from
-// `openssl dgst -sha384 -binary lib/pubpr.js | base64 -w0` at that tag.
-const PUBPR = "https://cdn.jsdelivr.net/gh/Sustenaut/pubpr@v0.1.0/lib/pubpr.js";
-const PUBPR_SRI = "sha384-pMTpbevi8ervd/PqCoBEdloIf3l0L0EKCaRyUq6L22bojw/0ZC3YB8OpMs9OKigM";
-// Pull requests go through the integrations service, as the person whose token
-// this is: it uses the token for that request and forgets it. pubpr still does the
-// reading. To move the pin: the tag, and the hash from
+// GitHub is reached through the integrations service, as the person whose token
+// this is: it uses the token for each request and forgets it. To move the pin: the
+// tag, and the hash from
 // `openssl dgst -sha384 -binary clients/js/github-edit-pr.js | base64 -w0` at that tag.
 const SERVICE = "https://integrations.sustenaut.eu";
-const CLIENT = "https://cdn.jsdelivr.net/gh/Sustenaut/integrations@v0.6.0/clients/js/github-edit-pr.js";
-const CLIENT_SRI = "sha384-i3TZUGvsg9Qqv/jxQX0bVlGfud0oem+4Av3jfaU7FZ+txkwnlKcAi4jE5WlK3W6y";
+const CLIENT = "https://cdn.jsdelivr.net/gh/Sustenaut/integrations@v0.7.0/clients/js/github-edit-pr.js";
+const CLIENT_SRI = "sha384-FtJyrDEZErUoVwIM3fmiab0cMVavXUqEaX0zNaVT6TciKGtvwLkt0o9ZWJRXLs0w";
 // The widths of the copies of a photo the editor makes for the storage
 // service (storage.sustenaut.eu, Sustenaut/storage), as JPEG and, where the
 // browser can, WebP.
@@ -61,19 +57,15 @@ export function start(ctx) {
 
   // --- GitHub ----------------------------------------------------------------
 
-  // Set once pubpr has loaded, at the end of this function.
-  let api = null;
-  let propose = null;
+  // Set once the client has loaded, at the end of this function.
+  let client = null;
+  const asThePerson = () => ({ baseUrl: SERVICE, token, repo: repository });
 
   // The newest commit on the default branch and the files the editor needs.
   async function fetchBase() {
-    const repo = await api(`/repos/${repository}`);
-    if (!repo.permissions?.push) throw new Error(`This token can't write to ${repository}.`);
-    const branch = repo.default_branch;
-    const ref = await api(`/repos/${repository}/git/ref/heads/${branch}`);
-    const commit = ref.object.sha;
-    const tree = await api(`/repos/${repository}/git/trees/${commit}?recursive=1`);
-    const paths = tree.tree.filter((t) => t.type === "blob").map((t) => t.path);
+    const { branch, commit, paths, can_push: canPush, truncated } = await client.snapshot(asThePerson());
+    if (!canPush) throw new Error(`This token can't write to ${repository}.`);
+    if (truncated) throw new Error(`${repository} is too large for the editor to read.`);
     const sites = paths.map((p) => p.match(/^sites\/([^/]+)\/site\.json$/)?.[1]).filter(Boolean);
     // Every place's folder (towns/<town>/places/<id> or
     // sites/<site>/places/<id>), by id, and the languages any has a
@@ -85,13 +77,12 @@ export function start(ctx) {
     // The owners a new place can go to: every town, and this site.
     const towns = [...new Set([town, ...paths.map((p) => p.match(/^towns\/([^/]+)\//)?.[1]).filter(Boolean)])].sort();
     const owners = [...towns.map((t) => `towns/${t}`), `sites/${site}`];
-    const read = (path) => api(`/repos/${repository}/contents/${encodeURI(path)}?ref=${commit}`, { raw: true });
-    const files = {};
-    await Promise.all(
-      [...found.map((p) => placePath(p.dir)), ...texts, `sites/${site}/site.json`].map(async (path) => {
-        files[path] = await read(path);
-      }),
-    );
+    const read = async (path) => (await client.readFiles({ ...asThePerson(), commit, paths: [path] })).files[path];
+    const { files } = await client.readFiles({
+      ...asThePerson(),
+      commit,
+      paths: [...found.map((p) => placePath(p.dir)), ...texts, `sites/${site}/site.json`],
+    });
     const description = (id, l) => {
       const text = files[textPath(dirs[id], l)];
       return text ? JSON.parse(text).description : undefined;
@@ -132,8 +123,8 @@ export function start(ctx) {
     const changed = applyEdits(files, list, { site });
     const lines = list.map((e) => describe(e, fresh));
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
-    const result = await propose({
-      repo: repository,
+    const result = await client.propose({
+      ...asThePerson(),
       base: fresh.branch,
       // The commit the files were read from, so that someone else's change to
       // one of them since shows as a conflict rather than being undone.
@@ -146,7 +137,6 @@ export function start(ctx) {
         lines.map((l) => `- ${l}`).join("\n") +
         "\n",
       changes: changed,
-      token,
     });
     if (result.status !== "opened") throw new Error("Nothing to change: the repository already has these edits.");
     return result.url;
@@ -577,10 +567,9 @@ export function start(ctx) {
     redraw();
   }
 
-  Promise.all([loadPinned(PUBPR, PUBPR_SRI, "GitHub code (pubpr)"), loadPinned(CLIENT, CLIENT_SRI, "pull request code")]).then(
-    ([pubpr, client]) => {
-      api = pubpr.github({ token: () => token });
-      propose = (fields) => client.propose({ baseUrl: SERVICE, ...fields });
+  loadClient().then(
+    (loaded) => {
+      client = loaded;
       if (token) {
         fetchBase()
           .then((b) => ((base = b), ready()))
@@ -595,15 +584,15 @@ export function start(ctx) {
 
 // An import can't carry a hash, but a script tag can: the page loads the pinned
 // file once this way, checked, and import() then answers with that same module.
-function loadPinned(src, integrity, name) {
+function loadClient() {
   return new Promise((resolve, reject) => {
     const script = el("script");
     script.type = "module";
-    script.src = src;
-    script.integrity = integrity;
+    script.src = CLIENT;
+    script.integrity = CLIENT_SRI;
     script.crossOrigin = "anonymous";
-    script.addEventListener("load", () => resolve(import(src)));
-    script.addEventListener("error", () => reject(new Error(`The editor's ${name} didn't load.`)));
+    script.addEventListener("load", () => resolve(import(CLIENT)));
+    script.addEventListener("error", () => reject(new Error("The editor's GitHub code didn't load.")));
     document.head.append(script);
   });
 }
