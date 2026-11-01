@@ -25,7 +25,7 @@ jobs:
     name: ci / site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: "npm ci && bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu"
       - uses: Sustenaut/pubkit/actions/deploy-static@724684ec5a40ffb62414d72915bc65b1b7476d9f # v0.18.0
         with: {"dir": "_site", "check-only": "true"}
