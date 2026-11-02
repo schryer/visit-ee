@@ -15,7 +15,7 @@ Feature: A page for each town
 
   Scenario: It lists the places in the town, nearest to its centre first
     Then the page "/en/voru-county/rouge/" lists "Rõuge Suurjärv" at "2 min walk"
-    And the page "/en/voru-county/rouge/" lists "Paganamaa õpperada" at "≈ 16 km as the crow flies"
+    And the page "/en/voru-county/rouge/" lists "Paganamaa õpperada" at "≈ 17 km as the crow flies"
     And the page "/en/voru-county/rouge/" describes "Suur Munamägi" as "Highest hill in the Baltics, with a tower"
     And the page "/en/voru-county/rouge/" has the place "suurjarv" at "#suurjarv"
     And the page "/en/voru-county/rouge/" describes a "TouristDestination"
