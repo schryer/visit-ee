@@ -298,6 +298,54 @@ def list_place(content: Path, site_id: str, place: str) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _edit_json(path: Path, change) -> None:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    change(data)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+@given(parsers.parse('the place "{place}" is at {lat:f}, {lng:f}'))
+def place_at(content: Path, place: str, lat: float, lng: float) -> None:
+    _edit_json(_place(content, place) / "place.json", lambda d: d.update(geo={"lat": lat, "lng": lng}))
+
+
+@given(parsers.parse('"{site_id}" is at {lat:f}, {lng:f}'))
+def site_at(content: Path, site_id: str, lat: float, lng: float) -> None:
+    _edit_json(content / "sites" / site_id / "site.json", lambda d: d.update(geo={"lat": lat, "lng": lng}))
+
+
+@given(parsers.parse('the town "{town}" has its centre at {lat:f}, {lng:f}'))
+def town_at(content: Path, town: str, lat: float, lng: float) -> None:
+    _edit_json(content / "towns" / town / "town.json", lambda d: d.update(geo={"lat": lat, "lng": lng}))
+
+
+def _set_nearby(content: Path, site_id: str, place: str, **distance) -> None:
+    """Replace the distance a site gives one of its nearby places."""
+
+    def change(data: dict) -> None:
+        (entry,) = [e for e in data["nearby"] if e["place"] == place]
+        entry.pop("walk_m", None)
+        entry.pop("road_km", None)
+        entry.update(distance)
+
+    _edit_json(content / "sites" / site_id / "site.json", change)
+
+
+@given(parsers.parse('"{site_id}" lists "{place}" at a {metres:d} m walk'))
+def nearby_walk(content: Path, site_id: str, place: str, metres: int) -> None:
+    _set_nearby(content, site_id, place, walk_m=metres)
+
+
+@given(parsers.parse('"{site_id}" lists "{place}" at {km:g} km by road'))
+def nearby_road(content: Path, site_id: str, place: str, km: float) -> None:
+    _set_nearby(content, site_id, place, road_km=km)
+
+
+@given(parsers.parse('"{site_id}" lists "{place}" with no distance'))
+def nearby_crow(content: Path, site_id: str, place: str) -> None:
+    _set_nearby(content, site_id, place)
+
+
 # --- when --------------------------------------------------------------------
 
 
