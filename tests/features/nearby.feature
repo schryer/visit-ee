@@ -7,10 +7,20 @@ Feature: Places nearby
   someone translates it.
 
   Scenario: Distances are walking time, road distance or the straight line
-    Given the sites are built
-    Then the page "/en/voru-county/rouge/oobikuoru/" lists "Rõuge Suurjärv" at "6 min walk"
+    The positions and distances are set here, so moving a real place in
+    the editor does not change what this checks.
+
+    Given a copy of the content
+    And "oobikuoru" is at 57.7, 26.9
+    And "oobikuoru" lists "suurjarv" at a 500 m walk
+    And "oobikuoru" lists "munamagi" at 9 km by road
+    And "oobikuoru" lists "hinni" with no distance
+    And the place "hinni" is at 57.77, 26.9
+    When I build it
+    Then it succeeds
+    And the page "/en/voru-county/rouge/oobikuoru/" lists "Rõuge Suurjärv" at "6 min walk"
     And the page "/en/voru-county/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km by road"
-    And the page "/en/voru-county/rouge/oobikuoru/" lists "Hinni kanjon" at "≈ 7.9 km as the crow flies"
+    And the page "/en/voru-county/rouge/oobikuoru/" lists "Hinni kanjon" at "≈ 7.8 km as the crow flies"
     And the page "/vorumaa/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km autoga"
 
   Scenario: The nearest places come first
