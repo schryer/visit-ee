@@ -16,8 +16,8 @@ import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, t
 // tag, and the hash from
 // `openssl dgst -sha384 -binary clients/js/github-edit-pr.js | base64 -w0` at that tag.
 const SERVICE = "https://integrations.sustenaut.eu";
-const CLIENT = "https://cdn.jsdelivr.net/gh/Sustenaut/integrations@v0.7.0/clients/js/github-edit-pr.js";
-const CLIENT_SRI = "sha384-FtJyrDEZErUoVwIM3fmiab0cMVavXUqEaX0zNaVT6TciKGtvwLkt0o9ZWJRXLs0w";
+const CLIENT = "https://cdn.jsdelivr.net/gh/Sustenaut/integrations@v0.11.0/clients/js/github-edit-pr.js";
+const CLIENT_SRI = "sha384-KS5pgqLiYJKjFEtDkNN5o6Y1dcdo1PZg6Sbd2Ckso2WQKhNDUhJUI8Sejkhnu6sS";
 // The widths of the copies of a photo the editor makes for the storage
 // service (storage.sustenaut.eu, Sustenaut/storage), as JPEG and, where the
 // browser can, WebP.
