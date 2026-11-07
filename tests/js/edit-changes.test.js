@@ -2,7 +2,7 @@
 // `node --test tests/js/*.test.js`.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyEdits, touchedPaths, describe, slug, parsePlacePath } from "../../src/assets/edit-changes.js";
+import { applyEdits, touchedPaths, describe, slug, parsePlacePath, refreshDistances } from "../../src/assets/edit-changes.js";
 
 const j = (value) => JSON.stringify(value, null, 2) + "\n";
 // A public place in Rõuge, a private one of the site's, and a free id.
@@ -19,7 +19,11 @@ const files = () => ({
   [`${S}/strings/en.json`]: j({ description: "Sauna" }),
   [`${S}/strings/fi.json`]: j({ description: "Sauna" }),
   [`${C}/place.json`]: null,
-  "sites/oobikuoru/site.json": j({ id: "x", nearby: [{ place: "saun", walk_m: 900 }, { place: "kirik", road_km: 1 }] }),
+  "sites/oobikuoru/site.json": j({ id: "x", geo: { lat: 57.729, lng: 26.929 }, nearby: [{ place: "saun" }, { place: "kirik", road_km: 1, why: "The short way is closed" }] }),
+  "sites/oobikuoru/distances.json": j({
+    from: { lat: 57.729, lng: 26.929 },
+    places: { saun: { at: { lat: 57.72, lng: 26.93 }, walk_m: 900, road_km: 1 }, kirik: { at: { lat: 57.73, lng: 26.92 }, walk_m: 700, road_km: 0.8 } },
+  }),
 });
 const opts = { site: "oobikuoru" };
 
@@ -30,11 +34,11 @@ test("moving a place sets its position and drops the estimate", () => {
 });
 
 test("a new place gets its file, descriptions and a place on the site's list", () => {
-  const edit = { id: "coop", dir: C, isNew: true, name: "Rõuge Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 }, text: { et: "Pood", en: "Shop" }, nearby: { on: true, walk_m: 800, road_km: null } };
+  const edit = { id: "coop", dir: C, isNew: true, name: "Rõuge Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 }, text: { et: "Pood", en: "Shop" }, nearby: { on: true } };
   const out = applyEdits(files(), [edit], opts);
   assert.equal(out[`${C}/place.json`], j({ name: "Rõuge Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 } }));
   assert.equal(JSON.parse(out[`${C}/strings/en.json`]).description, "Shop");
-  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby.at(-1), { place: "coop", walk_m: 800 });
+  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby.at(-1), { place: "coop" });
 });
 
 test("a new place cannot take an id that exists", () => {
@@ -44,12 +48,12 @@ test("a new place cannot take an id that exists", () => {
 test("taking a place off a site keeps the place", () => {
   const out = applyEdits(files(), [{ id: "saun", dir: S, nearby: { on: false } }], opts);
   assert.deepEqual(Object.keys(out), ["sites/oobikuoru/site.json"]);
-  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby, [{ place: "kirik", road_km: 1 }]);
+  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby, [{ place: "kirik", road_km: 1, why: "The short way is closed" }]);
 });
 
-test("a listed place keeps its spot and its distances unless they change", () => {
-  const out = applyEdits(files(), [{ id: "saun", dir: S, nearby: { on: true, road_km: 2 } }], opts);
-  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby[0], { place: "saun", walk_m: 900, road_km: 2 });
+test("a listed place keeps its spot, and a distance given by hand", () => {
+  const out = applyEdits(files(), [{ id: "kirik", dir: K, nearby: { on: true, walk_m: 5 } }], opts);
+  assert.equal("sites/oobikuoru/site.json" in out, false);
 });
 
 test("deleting a place removes its folder and takes it off every site", () => {
@@ -57,12 +61,54 @@ test("deleting a place removes its folder and takes it off every site", () => {
   assert.equal(out[`${S}/place.json`], null);
   for (const lang of ["et", "en", "fi"]) assert.equal(out[`${S}/strings/${lang}.json`], null);
   assert.equal(`${K}/strings/et.json` in out, false);
-  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby, [{ place: "kirik", road_km: 1 }]);
+  assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby, [{ place: "kirik", road_km: 1, why: "The short way is closed" }]);
 });
 
 test("touched paths cover the description languages and sites", () => {
   const paths = touchedPaths([{ id: "saun", dir: S, deleted: true }], { langs: ["et", "en", "fi"], sites: ["oobikuoru"] });
-  assert.deepEqual(paths.sort(), [`${S}/place.json`, `${S}/strings/en.json`, `${S}/strings/et.json`, `${S}/strings/fi.json`, "sites/oobikuoru/site.json"]);
+  assert.deepEqual(paths.sort(), [
+    "sites/oobikuoru/distances.json",
+    `${S}/place.json`, `${S}/strings/en.json`, `${S}/strings/et.json`, `${S}/strings/fi.json`,
+    "sites/oobikuoru/site.json",
+  ]);
+});
+
+test("moving a place reads every site's list and distances", () => {
+  const paths = touchedPaths([{ id: "kirik", dir: K, geo: { lat: 57.1, lng: 26.2 } }], { langs: ["et", "en"], sites: ["oobikuoru", "other"] });
+  assert.deepEqual(paths.sort(), [
+    "sites/oobikuoru/distances.json", "sites/oobikuoru/site.json", "sites/other/distances.json", "sites/other/site.json", `${K}/place.json`,
+  ]);
+});
+
+const dirs = { kirik: K, saun: S, coop: C };
+const measuring = (calls) => async (from, listed) => (calls.push([from, listed]), { from, places: { made: true } });
+
+test("moving a listed place works its site's distances out again", async () => {
+  const before = files();
+  const out = applyEdits(before, [{ id: "kirik", dir: K, geo: { lat: 57.74, lng: 26.91 } }], opts);
+  const calls = [];
+  const written = await refreshDistances(before, out, { sites: ["oobikuoru"], dirs, measure: measuring(calls) });
+  assert.deepEqual(written, ["oobikuoru"]);
+  assert.deepEqual(calls, [[{ lat: 57.729, lng: 26.929 }, { saun: { lat: 57.72, lng: 26.93 }, kirik: { lat: 57.74, lng: 26.91 } }]]);
+  assert.deepEqual(JSON.parse(out["sites/oobikuoru/distances.json"]).places, { made: true });
+});
+
+test("adding a place to a site's list works its distances out too", async () => {
+  const before = files();
+  const edit = { id: "coop", dir: C, isNew: true, name: "Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 }, text: { et: "Pood", en: "Shop" }, nearby: { on: true } };
+  const out = applyEdits(before, [edit], opts);
+  const calls = [];
+  await refreshDistances(before, out, { sites: ["oobikuoru"], dirs, measure: measuring(calls) });
+  assert.deepEqual(Object.keys(calls[0][1]).sort(), ["coop", "kirik", "saun"]);
+});
+
+test("an edit that moves nothing a site lists leaves its distances alone", async () => {
+  const before = files();
+  const out = applyEdits(before, [{ id: "kirik", dir: K, name: "Rõuge Maarja kirik" }], opts);
+  const calls = [];
+  assert.deepEqual(await refreshDistances(before, out, { sites: ["oobikuoru"], dirs, measure: measuring(calls) }), []);
+  assert.equal(calls.length, 0);
+  assert.equal("sites/oobikuoru/distances.json" in out, false);
 });
 
 test("an edit says what it does", () => {

@@ -1,0 +1,193 @@
+{
+  "comment": "Made by `make distances` (or the map's edit mode) from the maps service's road networks; do not edit. The build fails when a position here is not the site's or the place's.",
+  "from": {
+    "lat": 57.729039,
+    "lng": 26.929422
+  },
+  "places": {
+    "hinni": {
+      "at": {
+        "lat": 57.7695,
+        "lng": 26.8205
+      },
+      "walk_m": 10520,
+      "road_km": 13.2
+    },
+    "hudrotookoda": {
+      "at": {
+        "lat": 57.728,
+        "lng": 26.9302
+      },
+      "walk_m": 120,
+      "road_km": 0.1
+    },
+    "karula": {
+      "at": {
+        "lat": 57.702,
+        "lng": 26.487
+      },
+      "walk_m": 34600,
+      "road_km": 41.1
+    },
+    "kirik": {
+      "at": {
+        "lat": 57.7311,
+        "lng": 26.9286
+      },
+      "walk_m": 290,
+      "road_km": 0.3
+    },
+    "kohvik": {
+      "at": {
+        "lat": 57.72884,
+        "lng": 26.91697
+      },
+      "walk_m": 1100,
+      "road_km": 1.2
+    },
+    "kreutzwald": {
+      "at": {
+        "lat": 57.8445,
+        "lng": 27.0175
+      },
+      "walk_m": 15760,
+      "road_km": 16.1
+    },
+    "kulastuskeskus": {
+      "at": {
+        "lat": 57.72895,
+        "lng": 26.93762
+      },
+      "walk_m": 630,
+      "road_km": 1
+    },
+    "kultuurikoda": {
+      "at": {
+        "lat": 57.8335,
+        "lng": 26.993
+      },
+      "walk_m": 13900,
+      "road_km": 15.1
+    },
+    "kunstikuur": {
+      "at": {
+        "lat": 57.72874,
+        "lng": 26.91697
+      },
+      "walk_m": 1110,
+      "road_km": 1.2
+    },
+    "liinjarv": {
+      "at": {
+        "lat": 57.7261,
+        "lng": 26.9324
+      },
+      "walk_m": 390,
+      "road_km": 0.5
+    },
+    "linnamagi": {
+      "at": {
+        "lat": 57.72799,
+        "lng": 26.93167
+      },
+      "walk_m": 190,
+      "road_km": 0.2
+    },
+    "luhasoo": {
+      "at": {
+        "lat": 57.636,
+        "lng": 27.04
+      },
+      "walk_m": 15830,
+      "road_km": 16.6
+    },
+    "maanteemuuseum": {
+      "at": {
+        "lat": 58.035,
+        "lng": 27.042
+      },
+      "walk_m": 39580,
+      "road_km": 39.8
+    },
+    "meenikunno": {
+      "at": {
+        "lat": 57.975,
+        "lng": 27.17
+      },
+      "walk_m": 36980,
+      "road_km": 40
+    },
+    "munamagi": {
+      "at": {
+        "lat": 57.7144,
+        "lng": 27.0592
+      },
+      "walk_m": 8990,
+      "road_km": 9.5
+    },
+    "oobikuorg": {
+      "at": {
+        "lat": 57.72865,
+        "lng": 26.93214
+      },
+      "walk_m": 250,
+      "road_km": 0.2
+    },
+    "paganamaa": {
+      "at": {
+        "lat": 57.58507,
+        "lng": 26.83354
+      },
+      "walk_m": 19540,
+      "road_km": 19.9
+    },
+    "pesapuu": {
+      "at": {
+        "lat": 57.728,
+        "lng": 26.9377
+      },
+      "walk_m": 620,
+      "road_km": 1.1
+    },
+    "pokumaa": {
+      "at": {
+        "lat": 58.005,
+        "lng": 26.99
+      },
+      "walk_m": 37020,
+      "road_km": 37.2
+    },
+    "suurjarv": {
+      "at": {
+        "lat": 57.7278,
+        "lng": 26.9222
+      },
+      "walk_m": 750,
+      "road_km": 0.8
+    },
+    "taevaskoda": {
+      "at": {
+        "lat": 58.104,
+        "lng": 27.039
+      },
+      "walk_m": 47490,
+      "road_km": 48.9
+    },
+    "vesioinas": {
+      "at": {
+        "lat": 57.72616,
+        "lng": 26.93593
+      },
+      "walk_m": 600,
+      "road_km": 1
+    },
+    "viitina": {
+      "at": {
+        "lat": 57.68905,
+        "lng": 26.94413
+      },
+      "walk_m": 5600,
+      "road_km": 6.4
+    }
+  }
+}

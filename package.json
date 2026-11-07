@@ -5,8 +5,12 @@
   "license": "Apache-2.0",
   "type": "module",
   "private": true,
-  "bin": { "visit-ee": "bin/visit-ee" },
-  "engines": { "node": ">=20" },
+  "bin": {
+    "visit-ee": "bin/visit-ee"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "bin/visit-ee build",
     "serve": "bin/visit-ee serve"
@@ -16,6 +20,7 @@
     "@11ty/eleventy-img": "7.0.0",
     "@fontsource-variable/source-serif-4": "5.3.0",
     "@fontsource/barlow-condensed": "5.3.0",
-    "@fontsource/source-sans-3": "5.3.0"
+    "@fontsource/source-sans-3": "5.3.0",
+    "sustenaut-maps": "github:Sustenaut/maps#55615af60917dac811abbbcbc57e55792daf44a2"
   }
 }

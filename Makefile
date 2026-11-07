@@ -4,13 +4,19 @@
 PYTHON ?= python3
 VENV := .venv
 
-.PHONY: build serve node venv functional lock sync-check clean
+.PHONY: build serve distances node venv functional lock sync-check clean
 
 build: node
 	bin/visit-ee build
 
 serve: node
 	bin/visit-ee serve
+
+# Each site's walking and road distances (sites/<site>/distances.json), from
+# the maps service's road networks. Run it after moving a place or a site by
+# hand; the map's edit mode does it itself.
+distances: node
+	bin/visit-ee distances
 
 node: node_modules/.package-lock.json
 

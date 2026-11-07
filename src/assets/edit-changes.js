@@ -1,9 +1,11 @@
 // What the map's edit mode (edit.js) changes in the content files, kept apart
 // from the page so the tests can run it in Node.
+
+import { stale } from "./distances.js";
 //
 // An edit is everything pending for one place, by id:
 //   { id, dir, isNew, deleted, geo: { lat, lng }, name, category,
-//     text: { et, en }, nearby: { on, walk_m, road_km },
+//     text: { et, en }, nearby: { on },
 //     photo, photo_credit, url }
 // dir is the place's folder, which says who looks after it:
 // towns/<town>/places/<id> for a public place, sites/<site>/places/<id>
@@ -13,7 +15,9 @@
 // photo_credit, url). A moved place is no longer an estimate, so
 // "position" goes. A photo is the storage service's object for it
 // (edit.js uploads it first), or a file in the place's folder from before
-// the service, which goes from the repository when replaced.
+// the service, which goes from the repository when replaced. Nobody types a
+// distance: refreshDistances writes the distances.json of every site whose
+// places moved, or whose list changed, from the map's roads.
 
 // The files a set of edits reads and writes, given the description
 // languages and the sites that exist.
@@ -22,7 +26,9 @@ export function touchedPaths(edits, { langs, sites }) {
   for (const e of edits) {
     paths.add(placePath(e.dir));
     if (e.deleted || e.text) for (const lang of langs) paths.add(textPath(e.dir, lang));
-    if (e.deleted || e.nearby) for (const site of sites) paths.add(sitePath(site));
+    if (e.deleted || e.nearby || e.geo) {
+      for (const site of sites) paths.add(sitePath(site)), paths.add(distancesPath(site));
+    }
   }
   return [...paths];
 }
@@ -87,11 +93,8 @@ export function applyEdits(files, edits, { site }) {
       const list = (s.nearby || []).filter((n) => n.place !== e.id);
       const old = (s.nearby || []).find((n) => n.place === e.id);
       if (e.nearby.on) {
-        const entry = { place: e.id };
-        const walk = "walk_m" in e.nearby ? e.nearby.walk_m : old?.walk_m;
-        const road = "road_km" in e.nearby ? e.nearby.road_km : old?.road_km;
-        if (walk) entry.walk_m = walk;
-        if (road) entry.road_km = road;
+        // A distance given by hand (with its why) stays.
+        const entry = old || { place: e.id };
         // In place when it was listed already, so the diff stays small.
         const at = (s.nearby || []).findIndex((n) => n.place === e.id);
         if (at >= 0) list.splice(at, 0, entry);
@@ -108,6 +111,32 @@ export function applyEdits(files, edits, { site }) {
   }
   for (const path of removed) out[path] = null;
   return out;
+}
+
+// Adds to `changed` (what applyEdits returned for `files`) the
+// distances.json of every site that no longer fits where the site and its
+// places will be. `dirs` gives each place's folder (new places' too), and
+// `measure(site, places)` makes a site's distances.json (distances.js on the
+// maps service's roads). Returns the sites it wrote.
+export async function refreshDistances(files, changed, { sites, dirs, measure }) {
+  const now = (path) => (path in changed ? changed[path] : files[path]);
+  const written = [];
+  for (const site of sites) {
+    const text = now(sitePath(site));
+    if (!text) continue;
+    const data = JSON.parse(text);
+    const listed = {};
+    for (const { place } of data.nearby || []) {
+      const placeText = dirs[place] && now(placePath(dirs[place]));
+      if (!placeText) throw new Error(`${sitePath(site)} lists ${place}, which is not in the repository`);
+      listed[place] = JSON.parse(placeText).geo;
+    }
+    const old = files[distancesPath(site)] ? JSON.parse(files[distancesPath(site)]) : null;
+    if (!stale(old, data.geo, listed).length) continue;
+    changed[distancesPath(site)] = JSON.stringify(await measure(data.geo, listed), null, 2) + "\n";
+    written.push(site);
+  }
+  return written;
 }
 
 // One line per edit, for the pull request.
@@ -152,6 +181,7 @@ export const placeDir = (owner, id) => `${owner}/places/${id}`;
 export const placePath = (dir) => `${dir}/place.json`;
 export const textPath = (dir, lang) => `${dir}/strings/${lang}.json`;
 export const sitePath = (site) => `sites/${site}/site.json`;
+export const distancesPath = (site) => `sites/${site}/distances.json`;
 // The folder, owner and id of a place.json path, or null.
 export function parsePlacePath(path) {
   const m = path.match(/^((towns|sites)\/([a-z0-9-]+))\/places\/([a-z0-9-]+)\/place\.json$/);

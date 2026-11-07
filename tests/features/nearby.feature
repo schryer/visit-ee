@@ -8,7 +8,9 @@ Feature: Places nearby
 
   Scenario: Distances are walking time, road distance or the straight line
     The positions and distances are set here, so moving a real place in
-    the editor does not change what this checks.
+    the editor does not change what this checks. A site's distances are
+    worked out from the map's roads (`make distances`) into its
+    distances.json, which these steps write as it would.
 
     Given a copy of the content
     And "oobikuoru" is at 57.7, 26.9
@@ -22,6 +24,52 @@ Feature: Places nearby
     And the page "/en/voru-county/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km by road"
     And the page "/en/voru-county/rouge/oobikuoru/" lists "Hinni kanjon" at "≈ 7.8 km as the crow flies"
     And the page "/vorumaa/rouge/oobikuoru/" lists "Suur Munamägi" at "9 km autoga"
+
+  Scenario: Distances are worked out from where the places are, never typed in
+    Given a copy of the content
+    And the place "suurjarv" is moved without its distances
+    When I build it
+    Then it fails
+    And stderr mentions "sites/oobikuoru/distances.json is out of date (suurjarv has moved): run `make distances`"
+
+  Scenario: make distances works them out from the maps service's roads
+    Given a copy of the content
+    And a maps build with a road from "oobikuoru" to "suurjarv" of 1500 m, and a path of 900 m
+    And "oobikuoru" has no distances.json yet
+    When I work out the distances with that maps build
+    Then it succeeds
+    And it prints "wrote sites/oobikuoru/distances.json"
+    And "oobikuoru" is a 900 m walk and 1.5 km by road from "suurjarv"
+    And "oobikuoru" has no distance to "munamagi"
+    When I build it
+    Then it succeeds
+    And the page "/en/voru-county/rouge/oobikuoru/" lists "Rõuge Suurjärv" at "11 min walk"
+    When I work out the distances with that maps build
+    Then it prints "every distances.json is up to date"
+
+  Scenario: make distances stops where the maps service has no roads
+    Given a copy of the content
+    And a maps build with no road networks
+    And "oobikuoru" has no distances.json yet
+    When I work out the distances with that maps build
+    Then it fails
+    And stderr mentions "has no road network around it"
+
+  Scenario: A distance given by hand needs a reason
+    Given a copy of the content
+    And "oobikuoru" gives "munamagi" 12 km by road by hand
+    When I build it
+    Then it fails
+    And stderr mentions "say why"
+
+  Scenario: A distance given by hand, with a reason, wins
+    Given a copy of the content
+    And "oobikuoru" lists "munamagi" at 9 km by road
+    And "oobikuoru" gives "munamagi" 12 km by road by hand
+    And "oobikuoru" says why: "The short way is a forest road closed to cars"
+    When I build it
+    Then it succeeds
+    And the page "/en/voru-county/rouge/oobikuoru/" lists "Suur Munamägi" at "12 km by road"
 
   Scenario: The nearest places come first
     Given the sites are built

@@ -379,39 +379,31 @@
   ],
   "nearby": [
     {
-      "place": "hudrotookoda",
-      "walk_m": 50
+      "place": "hudrotookoda"
     },
     {
-      "place": "oobikuorg",
-      "walk_m": 100
+      "place": "oobikuorg"
     },
     {
-      "place": "liinjarv",
-      "walk_m": 100
+      "place": "liinjarv"
     },
     {
-      "place": "suurjarv",
-      "walk_m": 500
+      "place": "suurjarv"
     },
     {
-      "place": "vesioinas",
-      "walk_m": 600
+      "place": "vesioinas"
     },
     {
-      "place": "pesapuu",
-      "walk_m": 750
+      "place": "pesapuu"
     },
     {
-      "place": "kulastuskeskus",
-      "walk_m": 750
+      "place": "kulastuskeskus"
     },
     {
       "place": "kunstikuur"
     },
     {
-      "place": "kohvik",
-      "road_km": 1.2
+      "place": "kohvik"
     },
     {
       "place": "linnamagi"
@@ -420,8 +412,7 @@
       "place": "kirik"
     },
     {
-      "place": "munamagi",
-      "road_km": 9
+      "place": "munamagi"
     },
     {
       "place": "hinni"
@@ -430,41 +421,31 @@
       "place": "viitina"
     },
     {
-      "place": "luhasoo",
-      "road_km": 13
+      "place": "luhasoo"
     },
     {
-      "place": "kreutzwald",
-      "road_km": 15.2
+      "place": "kreutzwald"
     },
     {
-      "place": "kultuurikoda",
-      "road_km": 15
+      "place": "kultuurikoda"
     },
     {
-      "place": "paganamaa",
-      "walk_m": 12000,
-      "road_km": 20
+      "place": "paganamaa"
     },
     {
-      "place": "karula",
-      "road_km": 40
+      "place": "karula"
     },
     {
-      "place": "pokumaa",
-      "road_km": 40
+      "place": "pokumaa"
     },
     {
-      "place": "maanteemuuseum",
-      "road_km": 41
+      "place": "maanteemuuseum"
     },
     {
-      "place": "taevaskoda",
-      "road_km": 49
+      "place": "taevaskoda"
     },
     {
-      "place": "meenikunno",
-      "road_km": 49
+      "place": "meenikunno"
     }
   ],
   "redirects": {
