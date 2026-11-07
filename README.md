@@ -33,6 +33,7 @@ JPEG versions of every photo. Later builds reuse them.
 | Path | What it holds |
 |---|---|
 | `sites/<id>/site.json` | A site's facts that don't depend on language: address, prices, stays, photos, videos, nearby places, old addresses to redirect. |
+| `sites/<id>/distances.json` | The walk and the drive to each nearby place, written by `make distances` (or the map's edit mode); see [Distances](#distances). |
 | `sites/<id>/strings/<lang>.json` | A site's text in one language, as flat `key: text` pairs. The source language (Estonian) has every key. |
 | `towns/<town>/places/<id>/place.json` | A public place guests can visit, shared by every site, in the folder of the town (municipality) it is in: its name (never translated), category and position. `"position": "estimate"` marks one still to check. Optional: `photo` (in the storage service, as the edit mode writes it: `{id, width, height, widths, formats}`; a file in the place's folder still works until it is moved), `photo_credit`, `url` (its official website, one https address or one per language, `{"et": …, "en": …}`) and `site` (the id of its own visit.ee site, which the map links to instead). |
 | `sites/<site>/places/<id>/place.json` | A private place, looked after by the site: the same fields. |
@@ -90,8 +91,8 @@ Finnish, German and Ukrainian are set up but not enabled yet.
 ## The map
 
 Each site page lists the places in its `nearby` list (`site.json`), nearest
-first: walking time under 2 km, then the road distance the site gives
-(`road_km`), then the straight line. The list is plain HTML with
+first: walking time under 2 km, then the road distance, then the straight
+line where no road reaches. The list is plain HTML with
 schema.org data, so it works without JavaScript. `src/assets/map.js` draws
 the same places on a map of the area once it scrolls into view, with On
 foot and By car modes, category filters, layer switches and a link for
@@ -120,6 +121,23 @@ a local `maps` build. The build lists where every place is at
 municipality with a place in it, again whenever the places there change,
 so a place added anywhere in Estonia can be zoomed into once both have
 deployed.
+
+### Distances
+
+Nobody types a distance in. `make distances` works out the walk and the
+drive from each site to every place on its `nearby` list, on the road
+networks the maps service publishes beside its area packs (ETAK's roads and
+paths: `routes/` on maps.sustenaut.eu, Sustenaut/maps), and writes them to
+`sites/<id>/distances.json` with the positions they were worked out from. A
+walk is the shortest way; a drive is the quickest, and its distance is that
+way's length. The build fails when that file no longer fits where the site
+and its places are, so moving a place by hand means running `make
+distances` too; the map's edit mode does it itself before it sends. Where
+the roads get one wrong (a closed forest road, say), a `nearby` entry can
+give `walk_m` or `road_km` by hand, with a `"why"`. `--maps-url` takes a
+folder holding a local `maps build` as well.
+
+Town pages measure from the town's centre as the crow flies.
 
 ### Editing places on the map
 

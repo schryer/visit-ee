@@ -296,6 +296,7 @@ def list_place(content: Path, site_id: str, place: str) -> None:
     data = json.loads(path.read_text(encoding="utf-8"))
     data["nearby"].append({"place": place})
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    _resync(content)
 
 
 def _edit_json(path: Path, change) -> None:
@@ -304,14 +305,43 @@ def _edit_json(path: Path, change) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def _resync(content: Path) -> None:
+    """Make every site's distances.json fit where the site and its places
+    are now, keeping the distances it has (a place new to it gets none, so
+    shows the straight line), as `make distances` would without a road
+    network to hand."""
+    for site_file in (content / "sites").glob("*/site.json"):
+        site = json.loads(site_file.read_text(encoding="utf-8"))
+        path = site_file.with_name("distances.json")
+        old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"places": {}}
+        places = {}
+        for entry in site.get("nearby", []):
+            found = [*content.glob(f"towns/*/places/{entry['place']}/place.json"),
+                     *content.glob(f"sites/*/places/{entry['place']}/place.json")]
+            if not found:
+                continue
+            geo = json.loads(found[0].read_text(encoding="utf-8"))["geo"]
+            known = old["places"].get(entry["place"], {"walk_m": None, "road_km": None})
+            places[entry["place"]] = {**known, "at": geo}
+        path.write_text(json.dumps({**old, "from": site["geo"], "places": places}, ensure_ascii=False, indent=2) + "\n",
+                        encoding="utf-8")
+
+
 @given(parsers.parse('the place "{place}" is at {lat:f}, {lng:f}'))
 def place_at(content: Path, place: str, lat: float, lng: float) -> None:
     _edit_json(_place(content, place) / "place.json", lambda d: d.update(geo={"lat": lat, "lng": lng}))
+    _resync(content)
+
+
+@given(parsers.parse('the place "{place}" is moved without its distances'))
+def place_moved_alone(content: Path, place: str) -> None:
+    _edit_json(_place(content, place) / "place.json", lambda d: d["geo"].update(lat=d["geo"]["lat"] + 0.01))
 
 
 @given(parsers.parse('"{site_id}" is at {lat:f}, {lng:f}'))
 def site_at(content: Path, site_id: str, lat: float, lng: float) -> None:
     _edit_json(content / "sites" / site_id / "site.json", lambda d: d.update(geo={"lat": lat, "lng": lng}))
+    _resync(content)
 
 
 @given(parsers.parse('the town "{town}" has its centre at {lat:f}, {lng:f}'))
@@ -320,13 +350,27 @@ def town_at(content: Path, town: str, lat: float, lng: float) -> None:
 
 
 def _set_nearby(content: Path, site_id: str, place: str, **distance) -> None:
-    """Replace the distance a site gives one of its nearby places."""
+    """Replace the distances worked out to one of a site's places."""
+    _resync(content)
+    _edit_json(content / "sites" / site_id / "distances.json",
+               lambda d: d["places"][place].update({"walk_m": None, "road_km": None, **distance}))
 
+
+@given(parsers.parse('"{site_id}" gives "{place}" {km:g} km by road by hand'))
+def nearby_by_hand(content: Path, site_id: str, place: str, km: float) -> None:
     def change(data: dict) -> None:
         (entry,) = [e for e in data["nearby"] if e["place"] == place]
-        entry.pop("walk_m", None)
-        entry.pop("road_km", None)
-        entry.update(distance)
+        entry["road_km"] = km
+
+    _edit_json(content / "sites" / site_id / "site.json", change)
+
+
+@given(parsers.parse('"{site_id}" says why: "{why}"'))
+def nearby_why(content: Path, site_id: str, why: str) -> None:
+    def change(data: dict) -> None:
+        for entry in data["nearby"]:
+            if "road_km" in entry or "walk_m" in entry:
+                entry["why"] = why
 
     _edit_json(content / "sites" / site_id / "site.json", change)
 
@@ -344,6 +388,43 @@ def nearby_road(content: Path, site_id: str, place: str, km: float) -> None:
 @given(parsers.parse('"{site_id}" lists "{place}" with no distance'))
 def nearby_crow(content: Path, site_id: str, place: str) -> None:
     _set_nearby(content, site_id, place)
+
+
+@given(parsers.parse('"{site_id}" has no distances.json yet'))
+def no_distances(content: Path, site_id: str) -> None:
+    (content / "sites" / site_id / "distances.json").unlink()
+
+
+@given("a maps build with no road networks", target_fixture="maps")
+def maps_without_roads(tmp_path: Path) -> Path:
+    maps = tmp_path / "maps"
+    maps.mkdir()
+    (maps / "index.json").write_text(json.dumps({"version": 1, "areas": []}), encoding="utf-8")
+    return maps
+
+
+@given(parsers.parse('a maps build with a road from "{site_id}" to "{place}" of {road:d} m, and a path of {path:d} m'),
+       target_fixture="maps")
+def maps_build(tmp_path: Path, content: Path, site_id: str, place: str, road: int, path: int) -> Path:
+    """A maps service's index.json and one area's road network: a road and
+    a footpath, each from the site to the place, as mapbuild/routes.py
+    writes them (modes: 1 on foot, 2 and 4 by car, the road type above)."""
+    maps = tmp_path / "maps"
+    site = json.loads((content / "sites" / site_id / "site.json").read_text(encoding="utf-8"))["geo"]
+    there = json.loads((_place(content, place) / "place.json").read_text(encoding="utf-8"))["geo"]
+    micro = lambda g: [round(g["lng"] * 1e6), round(g["lat"] * 1e6)]
+    # The path's own ends, half a metre from the road's, so the two are
+    # separate ways.
+    near = lambda g: [round(g["lng"] * 1e6) + 3, round(g["lat"] * 1e6) + 3]
+    network = {"version": 1, "nodes": [*micro(site), *micro(there), *near(site), *near(there)],
+               "edges": [0, 1, road, 1 | 2 | 4 | 3 << 3, 2, 3, path, 1 | 7 << 3]}
+    (maps / "routes" / "test").mkdir(parents=True)
+    (maps / "routes" / "test" / "net.json").write_text(json.dumps(network), encoding="utf-8")
+    box = [min(site["lng"], there["lng"]) - 0.1, min(site["lat"], there["lat"]) - 0.1,
+           max(site["lng"], there["lng"]) + 0.1, max(site["lat"], there["lat"]) + 0.1]
+    index = {"version": 1, "areas": [{"path": "test", "bbox": box, "routes": {"file": "routes/test/net.json"}}]}
+    (maps / "index.json").write_text(json.dumps(index), encoding="utf-8")
+    return maps
 
 
 # --- when --------------------------------------------------------------------
@@ -367,6 +448,11 @@ def i_build_it_with_maps(run, binary, content: Path, out: Path, url: str):
 @when(parsers.parse('I build it with the photos at "{url}"'), target_fixture="result")
 def i_build_it_with_photos(run, binary, content: Path, out: Path, url: str):
     return build(run, binary, content, out, "--photos-url", url)
+
+
+@when("I work out the distances with that maps build", target_fixture="result")
+def work_out_distances(run, binary, content: Path, maps: Path):
+    return run(binary("visit-ee"), "distances", "--content", content, "--maps-url", maps, timeout=120)
 
 
 @pytest.fixture
@@ -434,6 +520,22 @@ def page_does_not_link(site: Build, url: str, target: str) -> None:
 def lists_place_at(site: Build, url: str, name: str, distance: str) -> None:
     meta = site.places(url).find(name)["meta"]
     assert meta.split("·")[0].strip() == distance, meta
+
+
+def _distance(content: Path, site_id: str, place: str) -> dict:
+    return json.loads((content / "sites" / site_id / "distances.json").read_text(encoding="utf-8"))["places"][place]
+
+
+@then(parsers.parse('"{site_id}" is a {walk:d} m walk and {road:g} km by road from "{place}"'))
+def distance_is(content: Path, site_id: str, walk: int, road: float, place: str) -> None:
+    got = _distance(content, site_id, place)
+    assert (got["walk_m"], got["road_km"]) == (walk, road), got
+
+
+@then(parsers.parse('"{site_id}" has no distance to "{place}"'))
+def no_distance(content: Path, site_id: str, place: str) -> None:
+    got = _distance(content, site_id, place)
+    assert (got["walk_m"], got["road_km"]) == (None, None), got
 
 
 @then(parsers.parse('the page "{url}" lists "{name}" first'))

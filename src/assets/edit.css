@@ -22,6 +22,7 @@
 .edit-panel p { margin: 0 0 .75rem; }
 .edit-panel a { color: var(--olive-dark); }
 .edit-where { font: 400 .8125rem ui-monospace, Menlo, monospace; color: var(--muted); }
+.edit-note { margin: 0; font-size: .8125rem; color: var(--muted); }
 .edit-field { display: grid; gap: .25rem; margin-bottom: .625rem; font-weight: 600; font-size: .8125rem; color: var(--ink-soft); }
 .edit-field input, .edit-field select {
   font: 400 1rem var(--ui); padding: .5rem .625rem; min-height: 2.5rem;

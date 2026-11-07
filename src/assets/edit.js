@@ -9,7 +9,8 @@
 // The service does the talking to GitHub; this file says what to
 // read and what to change.
 
-import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath } from "./edit-changes.js";
+import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath, refreshDistances } from "./edit-changes.js";
+import { distances, join, networksFor } from "./distances.js";
 
 // GitHub is reached through the integrations service, as the person whose token
 // this is: it uses the token for each request and forgets it. To move the pin: the
@@ -121,7 +122,23 @@ export function start(ctx) {
       }),
     );
     const changed = applyEdits(files, list, { site });
+    // The walking and road distances, worked out from the map's roads for
+    // every site whose places moved or whose list changed.
+    const fromMaps = async (file) => {
+      const response = await fetch(`${config.maps}/${file}`);
+      if (!response.ok) throw new Error(`${config.maps}/${file}: ${response.status}`);
+      return response.json();
+    };
+    const dirs = { ...fresh.dirs, ...Object.fromEntries(list.map((e) => [e.id, e.dir])) };
+    const measure = async (from, listed) => {
+      const networks = await networksFor(fromMaps, from, listed);
+      if (!networks.length) throw new Error(`${config.maps} has no road network here, so the distances can't be worked out.`);
+      return distances(join(networks), from, listed);
+    };
+    // Every place's file, as the sites' lists need them all.
+    const measured = await refreshDistances({ ...fresh.files, ...files }, changed, { sites: fresh.sites, dirs, measure });
     const lines = list.map((e) => describe(e, fresh));
+    for (const s of measured) lines.push(`Work out the walking and road distances of ${s} again`);
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
     const result = await client.propose({
       ...asThePerson(),
@@ -243,8 +260,7 @@ export function start(ctx) {
       }
       if (e.nearby) {
         const was = base.nearby.find((n) => n.place === id);
-        if (!!was === e.nearby.on && (!e.nearby.on || ((was.walk_m ?? null) === (e.nearby.walk_m ?? null) && (was.road_km ?? null) === (e.nearby.road_km ?? null))))
-          delete e.nearby;
+        if (!!was === e.nearby.on) delete e.nearby;
       }
     }
     if (Object.keys(e).filter((k) => k !== "id").length) edits[id] = e;
@@ -347,14 +363,6 @@ export function start(ctx) {
     const on = el("input");
     on.type = "checkbox";
     on.checked = c.listed;
-    const walk = input(edits[id]?.nearby && "walk_m" in edits[id].nearby ? edits[id].nearby.walk_m ?? "" : c.nearby.walk_m ?? "");
-    walk.type = "number";
-    walk.min = "0";
-    walk.placeholder = "straight line";
-    const road = input(edits[id]?.nearby && "road_km" in edits[id].nearby ? edits[id].nearby.road_km ?? "" : c.nearby.road_km ?? "");
-    road.type = "number";
-    road.min = "0";
-    road.step = "0.1";
     const where = c.geo ? `${round(c.geo.lat)}, ${round(c.geo.lng)}${c.estimate ? " (an estimate: drag the pin to fix it)" : ""}` : "";
     const status = el("p", "edit-status");
 
@@ -407,8 +415,7 @@ export function start(ctx) {
       label("Category", cat),
       ...Object.entries(texts).map(([l, i]) => label(`Description, ${l}${["et", "en"].includes(l) ? " (needed)" : ""}`, i)),
       checkbox(on, "Listed near this site"),
-      label("Walk to it, metres (optional)", walk),
-      label("By road, km (optional)", road),
+      el("p", "edit-note", "Walking and road distances are worked out from the map's roads when you send."),
       preview,
       label("Photo", file),
       drop,
@@ -433,14 +440,13 @@ export function start(ctx) {
       if (!name.value.trim()) return (status.textContent = "A place needs a name.");
       for (const l of ["et", "en"]) if (texts[l] && !texts[l].value.trim()) return (status.textContent = `A place needs a description in ${l}.`);
       const text = Object.fromEntries(Object.entries(texts).map(([l, i]) => [l, i.value.trim()]).filter(([l, v]) => v || c.text[l]));
-      const number = (i) => (i.value === "" ? null : Number(i.value));
       if (!site_url.disabled && site_url.value.trim() && !/^https:\/\/[^/]+\./.test(site_url.value.trim()))
         return (status.textContent = "The website must start with https://.");
       const fields = {
         name: name.value.trim(),
         category: cat.value,
         text,
-        nearby: { on: on.checked, walk_m: number(walk), road_km: number(road) },
+        nearby: { on: on.checked },
         photo_credit: credit.value.trim() || null,
       };
       if (!site_url.disabled) fields.url = site_url.value.trim() || null;
