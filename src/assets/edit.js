@@ -10,7 +10,7 @@
 // read and what to change.
 
 import { applyEdits, describe, slug, round, touchedPaths, placeDir, placePath, textPath, parsePlacePath, refreshDistances } from "./edit-changes.js";
-import { distances, join, networksFor } from "./distances.js";
+import { measure as measureSite } from "./distances.js";
 
 // GitHub is reached through the integrations service, as the person whose token
 // this is: it uses the token for each request and forgets it. To move the pin: the
@@ -124,16 +124,11 @@ export function start(ctx) {
     const changed = applyEdits(files, list, { site });
     // The walking and road distances, worked out from the map's roads for
     // every site whose places moved or whose list changed.
-    const fromMaps = async (file) => {
-      const response = await fetch(`${config.maps}/${file}`);
-      if (!response.ok) throw new Error(`${config.maps}/${file}: ${response.status}`);
-      return response.json();
-    };
+    // The routes package comes from the maps service, as the map does.
     const dirs = { ...fresh.dirs, ...Object.fromEntries(list.map((e) => [e.id, e.dir])) };
     const measure = async (from, listed) => {
-      const networks = await networksFor(fromMaps, from, listed);
-      if (!networks.length) throw new Error(`${config.maps} has no road network here, so the distances can't be worked out.`);
-      return distances(join(networks), from, listed);
+      const routes = await import(`${config.maps}/lib/v1/routes.js`);
+      return measureSite(routes, from, listed, { where: config.maps });
     };
     // Every place's file, as the sites' lists need them all.
     const measured = await refreshDistances({ ...fresh.files, ...files }, changed, { sites: fresh.sites, dirs, measure });

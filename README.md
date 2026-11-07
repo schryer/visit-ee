@@ -125,9 +125,10 @@ deployed.
 ### Distances
 
 Nobody types a distance in. `make distances` works out the walk and the
-drive from each site to every place on its `nearby` list, on the road
-networks the maps service publishes beside its area packs (ETAK's roads and
-paths: `routes/` on maps.sustenaut.eu, Sustenaut/maps), and writes them to
+drive from each site to every place on its `nearby` list with the maps
+service's routes package (`lib/v1/routes.js` in Sustenaut/maps, here the
+`sustenaut-maps` git dependency), on the road networks it publishes beside
+its area packs (ETAK's roads and paths), and writes them to
 `sites/<id>/distances.json` with the positions they were worked out from. A
 walk is the shortest way; a drive is the quickest, and its distance is that
 way's length. The build fails when that file no longer fits where the site
