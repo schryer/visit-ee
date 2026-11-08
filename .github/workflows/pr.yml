@@ -17,7 +17,7 @@ jobs:
 
   tests:
     name: ci
-    uses: Sustenaut/pubkit/.github/workflows/job-service-tests.yml@2c986f9ce17ac43e22b951a9da209c592475bb05 # v0.25.0
+    uses: Sustenaut/pubkit/.github/workflows/job-service-tests.yml@0e5477594d4ce20e411721c86d40a6547f026db9 # v0.29.0
     with: {"setup": "make venv node", "test": "make functional"}
 
   sonar:
