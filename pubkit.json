@@ -20,5 +20,10 @@
   "site": {
     "check_dir": "_site",
     "pr_build": "npm ci && bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu"
+  },
+  "mirror": {
+    "wheels": "https://storage.sustenaut.eu/wheels",
+    "terraform": "https://storage.sustenaut.eu/terraform",
+    "pypi": "https://storage.sustenaut.eu/pypi"
   }
 }
