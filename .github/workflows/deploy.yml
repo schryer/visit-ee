@@ -29,7 +29,7 @@ jobs:
       # temp.schryer.eu is a preview: it asks search engines to keep out
       # until the site moves to visit.ee and builds with --env production.
       - run: bin/visit-ee build --out _site --env preview --url https://temp.schryer.eu
-      - uses: Sustenaut/pubkit/actions/deploy-static@74ab84e90fc8b6f691ef4b3d717a9e838d49e4a8 # v0.34.0
+      - uses: Sustenaut/pubhost/actions/deploy-static@2196c741d3de6c92c6035c42435c6e517c8ba0ce # v0.1.0
         with:
           dir: _site
           # A token that may deploy Cloudflare Pages and nothing else.
