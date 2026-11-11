@@ -79,7 +79,7 @@ async function imageMetadata(site, src, widths) {
 // A photo as a link-preview card: 1200×630 (LinkedIn's large card is
 // 1.91:1), cropped to keep the part sharp finds most interesting, so a
 // portrait photo still makes a good card. Always full size, --quick or not:
-// `pubkit site check` reads these.
+// `pubhost site check` reads these.
 const CARD = { width: 1200, height: 630 };
 // How far a photo may be enlarged to fill the card before it looks soft.
 const CARD_STRETCH = 1.1;
