@@ -39,21 +39,21 @@ Then("distances.json rounds a walk to 10 m and a drive to 0.1 km, and has none w
   assert.deepEqual(file.from, at(A));
   assert.deepEqual(file.places.b, { at: at(B), walk_m: 1230, road_km: 1.2 });
   assert.deepEqual(file.places.c, { at: at(C), walk_m: 5560, road_km: null });
-})(scenarioContext);
+})();
 });
 
 Then("measure reads the networks around the site and its places", function () {
   return (async () => {
   const file = await measure(routes, at(A), { b: at(B) }, { read });
   assert.deepEqual(file.places.b, { at: at(B), walk_m: 1230, road_km: 1.2 });
-})(scenarioContext);
+})();
 });
 
 Then("measure stops where the maps service has no roads", function () {
   return (async () => {
   const empty = async (file) => (file === "index.json" ? { version: 1, areas: [] } : null);
   await assert.rejects(measure(routes, at(A), { b: at(B) }, { read: empty, where: "here" }), /here has no road network around it/);
-})(scenarioContext);
+})();
 });
 
 Then("distances.json is stale when the site or a place moves, or the list changes", function () {
@@ -65,5 +65,5 @@ Then("distances.json is stale when the site or a place moves, or the list change
   assert.deepEqual(stale(file, at(A), { b: at(C) }), ["b has moved"]);
   assert.deepEqual(stale(file, at(A), { b: at(B), c: at(C) }), ["c is not in it"]);
   assert.deepEqual(stale(file, at(A), {}), ["b is no longer listed"]);
-})(scenarioContext);
+})();
 });
