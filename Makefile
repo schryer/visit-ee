@@ -33,7 +33,7 @@ $(VENV)/.done: tests/requirements.lock
 # The Gherkin suite, run against bin/visit-ee, and the browser scripts'
 # own tests (tests/js).
 functional: venv node
-	node --test tests/js/*.test.js
+	npx --no-install cucumber-js
 	cd tests && VISIT_EE_BIN_DIR=$(CURDIR)/bin ../$(VENV)/bin/pytest -n auto
 
 lock: venv
