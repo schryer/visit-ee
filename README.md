@@ -168,7 +168,7 @@ requests set to Read and write. The pull request is yours: the token goes to the
 service with each request, is used and forgotten, and is never stored or logged.
 The browser keeps the token, and any unsent changes, until you sign
 out. What each change does to the files is in
-`src/assets/edit-changes.js`, tested by `node --test tests/js/*.test.js`.
+`src/assets/edit-changes.js`, tested by the scenarios in `tests/js/features/` (cucumber-js).
 
 ## Changing the content
 

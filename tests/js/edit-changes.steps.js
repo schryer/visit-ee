@@ -1,8 +1,19 @@
 // The edit mode's file changes (src/assets/edit-changes.js), run with
 // `node --test tests/js/*.test.js`.
-import { test } from "node:test";
+import { After, Then } from "@cucumber/cucumber";
+import { mock as nodeMock } from "node:test";
 import assert from "node:assert/strict";
 import { applyEdits, touchedPaths, describe, slug, parsePlacePath, refreshDistances } from "../../src/assets/edit-changes.js";
+
+// What node:test gave each test as `t`: its mocks, restored when the
+// scenario ends, and the cleanups it registers with t.after().
+const cleanups = [];
+const scenarioContext = { mock: nodeMock, after: (fn) => cleanups.push(fn) };
+After("@edit-changes", async function () {
+  while (cleanups.length) await cleanups.pop()();
+  nodeMock.restoreAll();
+});
+
 
 const j = (value) => JSON.stringify(value, null, 2) + "\n";
 // A public place in Rõuge, a private one of the site's, and a free id.
@@ -27,63 +38,80 @@ const files = () => ({
 });
 const opts = { site: "oobikuoru" };
 
-test("moving a place sets its position and drops the estimate", () => {
+Then("moving a place sets its position and drops the estimate", function () {
+  return (() => {
   const out = applyEdits(files(), [{ id: "kirik", dir: K, geo: { lat: 57.7312345, lng: 26.9254321 } }], opts);
   assert.deepEqual(Object.keys(out), [`${K}/place.json`]);
   assert.equal(out[`${K}/place.json`], j({ name: "Rõuge kirik", category: "heritage", geo: { lat: 57.73123, lng: 26.92543 } }));
+})(scenarioContext);
 });
 
-test("a new place gets its file, descriptions and a place on the site's list", () => {
+Then("a new place gets its file, descriptions and a place on the site's list", function () {
+  return (() => {
   const edit = { id: "coop", dir: C, isNew: true, name: "Rõuge Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 }, text: { et: "Pood", en: "Shop" }, nearby: { on: true } };
   const out = applyEdits(files(), [edit], opts);
   assert.equal(out[`${C}/place.json`], j({ name: "Rõuge Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 } }));
   assert.equal(JSON.parse(out[`${C}/strings/en.json`]).description, "Shop");
   assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby.at(-1), { place: "coop" });
+})(scenarioContext);
 });
 
-test("a new place cannot take an id that exists", () => {
+Then("a new place cannot take an id that exists", function () {
+  return (() => {
   assert.throws(() => applyEdits(files(), [{ id: "kirik", dir: K, isNew: true, name: "X", category: "shop", geo: { lat: 1, lng: 1 } }], opts), /already exists/);
+})(scenarioContext);
 });
 
-test("taking a place off a site keeps the place", () => {
+Then("taking a place off a site keeps the place", function () {
+  return (() => {
   const out = applyEdits(files(), [{ id: "saun", dir: S, nearby: { on: false } }], opts);
   assert.deepEqual(Object.keys(out), ["sites/oobikuoru/site.json"]);
   assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby, [{ place: "kirik", road_km: 1, why: "The short way is closed" }]);
+})(scenarioContext);
 });
 
-test("a listed place keeps its spot, and a distance given by hand", () => {
+Then("a listed place keeps its spot, and a distance given by hand", function () {
+  return (() => {
   const out = applyEdits(files(), [{ id: "kirik", dir: K, nearby: { on: true, walk_m: 5 } }], opts);
   assert.equal("sites/oobikuoru/site.json" in out, false);
+})(scenarioContext);
 });
 
-test("deleting a place removes its folder and takes it off every site", () => {
+Then("deleting a place removes its folder and takes it off every site", function () {
+  return (() => {
   const out = applyEdits(files(), [{ id: "saun", dir: S, deleted: true }], opts);
   assert.equal(out[`${S}/place.json`], null);
   for (const lang of ["et", "en", "fi"]) assert.equal(out[`${S}/strings/${lang}.json`], null);
   assert.equal(`${K}/strings/et.json` in out, false);
   assert.deepEqual(JSON.parse(out["sites/oobikuoru/site.json"]).nearby, [{ place: "kirik", road_km: 1, why: "The short way is closed" }]);
+})(scenarioContext);
 });
 
-test("touched paths cover the description languages and sites", () => {
+Then("touched paths cover the description languages and sites", function () {
+  return (() => {
   const paths = touchedPaths([{ id: "saun", dir: S, deleted: true }], { langs: ["et", "en", "fi"], sites: ["oobikuoru"] });
   assert.deepEqual(paths.sort(), [
     "sites/oobikuoru/distances.json",
     `${S}/place.json`, `${S}/strings/en.json`, `${S}/strings/et.json`, `${S}/strings/fi.json`,
     "sites/oobikuoru/site.json",
   ]);
+})(scenarioContext);
 });
 
-test("moving a place reads every site's list and distances", () => {
+Then("moving a place reads every site's list and distances", function () {
+  return (() => {
   const paths = touchedPaths([{ id: "kirik", dir: K, geo: { lat: 57.1, lng: 26.2 } }], { langs: ["et", "en"], sites: ["oobikuoru", "other"] });
   assert.deepEqual(paths.sort(), [
     "sites/oobikuoru/distances.json", "sites/oobikuoru/site.json", "sites/other/distances.json", "sites/other/site.json", `${K}/place.json`,
   ]);
+})(scenarioContext);
 });
 
 const dirs = { kirik: K, saun: S, coop: C };
 const measuring = (calls) => async (from, listed) => (calls.push([from, listed]), { from, places: { made: true } });
 
-test("moving a listed place works its site's distances out again", async () => {
+Then("moving a listed place works its site's distances out again", function () {
+  return (async () => {
   const before = files();
   const out = applyEdits(before, [{ id: "kirik", dir: K, geo: { lat: 57.74, lng: 26.91 } }], opts);
   const calls = [];
@@ -91,46 +119,58 @@ test("moving a listed place works its site's distances out again", async () => {
   assert.deepEqual(written, ["oobikuoru"]);
   assert.deepEqual(calls, [[{ lat: 57.729, lng: 26.929 }, { saun: { lat: 57.72, lng: 26.93 }, kirik: { lat: 57.74, lng: 26.91 } }]]);
   assert.deepEqual(JSON.parse(out["sites/oobikuoru/distances.json"]).places, { made: true });
+})(scenarioContext);
 });
 
-test("adding a place to a site's list works its distances out too", async () => {
+Then("adding a place to a site's list works its distances out too", function () {
+  return (async () => {
   const before = files();
   const edit = { id: "coop", dir: C, isNew: true, name: "Coop", category: "shop", geo: { lat: 57.7, lng: 26.9 }, text: { et: "Pood", en: "Shop" }, nearby: { on: true } };
   const out = applyEdits(before, [edit], opts);
   const calls = [];
   await refreshDistances(before, out, { sites: ["oobikuoru"], dirs, measure: measuring(calls) });
   assert.deepEqual(Object.keys(calls[0][1]).sort(), ["coop", "kirik", "saun"]);
+})(scenarioContext);
 });
 
-test("an edit that moves nothing a site lists leaves its distances alone", async () => {
+Then("an edit that moves nothing a site lists leaves its distances alone", function () {
+  return (async () => {
   const before = files();
   const out = applyEdits(before, [{ id: "kirik", dir: K, name: "Rõuge Maarja kirik" }], opts);
   const calls = [];
   assert.deepEqual(await refreshDistances(before, out, { sites: ["oobikuoru"], dirs, measure: measuring(calls) }), []);
   assert.equal(calls.length, 0);
   assert.equal("sites/oobikuoru/distances.json" in out, false);
+})(scenarioContext);
 });
 
-test("an edit says what it does", () => {
+Then("an edit says what it does", function () {
+  return (() => {
   const base = { places: { kirik: { name: "Rõuge kirik" } } };
   assert.equal(describe({ id: "kirik", dir: K, geo: { lat: 57.1, lng: 26.2 } }, base), "Move Rõuge kirik to 57.1, 26.2");
+})(scenarioContext);
 });
 
-test("ids come from names", () => {
+Then("ids come from names", function () {
+  return (() => {
   assert.equal(slug("Rõuge Suurjärv"), "rouge-suurjarv");
   assert.equal(slug("Käsitöö- ja kohvikukoda"), "kasitoo-ja-kohvikukoda");
+})(scenarioContext);
 });
 
-test("a photo, its credit and a website go into the place's file", () => {
+Then("a photo, its credit and a website go into the place's file", function () {
+  return (() => {
   const out = applyEdits(files(), [{ id: "kirik", dir: K, photo: "media/kirik.jpg", photo_credit: "David", url: "https://eelk.ee/rouge" }], opts);
   const place = JSON.parse(out[`${K}/place.json`]);
   assert.equal(place.photo, "media/kirik.jpg");
   assert.equal(place.photo_credit, "David");
   assert.equal(place.url, "https://eelk.ee/rouge");
   assert.deepEqual(Object.keys(place), ["name", "category", "geo", "position", "photo", "photo_credit", "url"]);
+})(scenarioContext);
 });
 
-test("a removed or replaced photo's file goes, and so does a deleted place's", () => {
+Then("a removed or replaced photo's file goes, and so does a deleted place's", function () {
+  return (() => {
   const f = { ...files(), [`${S}/place.json`]: j({ name: "Saun", category: "heritage", geo: { lat: 1, lng: 2 }, photo: "media/old.webp", url: "https://x.ee" }) };
   let out = applyEdits(f, [{ id: "saun", dir: S, photo: null, url: null }], opts);
   assert.equal(out[`${S}/media/old.webp`], null);
@@ -142,9 +182,11 @@ test("a removed or replaced photo's file goes, and so does a deleted place's", (
   assert.equal(out[`${S}/media/old.webp`], null);
   out = applyEdits(f, [{ id: "saun", dir: S, photo: "media/old.webp" }], opts);
   assert.equal(`${S}/media/old.webp` in out, false);
+})(scenarioContext);
 });
 
-test("a photo from the photo service replaces a file in the repository", () => {
+Then("a photo from the photo service replaces a file in the repository", function () {
+  return (() => {
   const f = { ...files(), [`${S}/place.json`]: j({ name: "Saun", category: "heritage", geo: { lat: 1, lng: 2 }, photo: "media/old.jpg" }) };
   const photo = { id: "0123456789abcdef", width: 1600, height: 1200, widths: [480, 960, 1600], formats: ["webp", "jpg"] };
   const out = applyEdits(f, [{ id: "saun", dir: S, photo }], opts);
@@ -153,20 +195,25 @@ test("a photo from the photo service replaces a file in the repository", () => {
   // Replacing a service photo leaves the service to clean up.
   const again = applyEdits({ ...f, [`${S}/place.json`]: out[`${S}/place.json`] }, [{ id: "saun", dir: S, photo: null }], opts);
   assert.deepEqual(Object.keys(again), [`${S}/place.json`]);
+})(scenarioContext);
 });
 
-test("a description goes into the place's own strings, and an emptied one goes", () => {
+Then("a description goes into the place's own strings, and an emptied one goes", function () {
+  return (() => {
   let out = applyEdits(files(), [{ id: "kirik", dir: K, text: { fi: "Kirkko", en: "St Mary's church" } }], opts);
   assert.equal(out[`${K}/strings/fi.json`], j({ description: "Kirkko" }));
   assert.equal(out[`${K}/strings/en.json`], j({ description: "St Mary's church" }));
   assert.deepEqual(Object.keys(out).sort(), [`${K}/strings/en.json`, `${K}/strings/fi.json`]);
   out = applyEdits(files(), [{ id: "saun", dir: S, text: { fi: "" } }], opts);
   assert.deepEqual(out, { [`${S}/strings/fi.json`]: null });
+})(scenarioContext);
 });
 
-test("a place's folder says who owns it", () => {
+Then("a place's folder says who owns it", function () {
+  return (() => {
   assert.deepEqual(parsePlacePath(`${K}/place.json`), { dir: K, owner: "towns/rouge", id: "kirik" });
   assert.deepEqual(parsePlacePath(`${S}/place.json`), { dir: S, owner: "sites/oobikuoru", id: "saun" });
   assert.equal(parsePlacePath(`${K}/strings/et.json`), null);
   assert.equal(parsePlacePath("sites/oobikuoru/site.json"), null);
+})(scenarioContext);
 });
